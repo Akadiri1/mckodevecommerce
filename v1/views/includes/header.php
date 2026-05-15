@@ -228,8 +228,8 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
         <span class="cart-subtotal-value" id="cartSubtotal"><?= htmlspecialchars($shop_symbol, ENT_QUOTES, "UTF-8") ?>0.00</span>
       </div>
       <p class="cart-subtotal-note">Shipping &amp; taxes calculated at checkout</p>
-      <a href="/checkout" class="cart-checkout-btn" style="text-decoration:none;">Continue to Checkout</a>
-      <button class="cart-continue-btn" id="cartContinueShopping">Continue Shopping</button>
+      <a href="<?= $baseUrl ?>/checkout" class="cart-checkout-btn" style="text-decoration:none;">Continue to Checkout</a>
+      <a href="<?= $baseUrl ?>/cart" class="cart-continue-btn" style="text-decoration:none;text-align:center;display:block;">View Cart</a>
     </div>
   </div>
 

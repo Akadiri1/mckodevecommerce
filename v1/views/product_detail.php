@@ -549,11 +549,14 @@ document.querySelectorAll(".product-gallery-thumb").forEach(function(thumb) {
   });
 });
 
-// Review form toggle
-document.getElementById("showReviewForm").addEventListener("click", function() {
-  var form = document.getElementById("reviewFormCard");
-  form.style.display = form.style.display === "none" ? "block" : "none";
-});
+// Review form toggle — guard null (button only exists when logged in)
+var showReviewFormBtn = document.getElementById("showReviewForm");
+if (showReviewFormBtn) {
+  showReviewFormBtn.addEventListener("click", function() {
+    var form = document.getElementById("reviewFormCard");
+    if (form) form.style.display = form.style.display === "none" ? "block" : "none";
+  });
+}
 
 // Sticky cart scroll
 var addToCartSection = document.getElementById("addToCartSection");

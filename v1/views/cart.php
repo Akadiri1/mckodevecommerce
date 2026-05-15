@@ -30,7 +30,8 @@ include APP_PATH . "/views/includes/header.php";
 
 <?php/*##cbcode_60001o##*?>
 <div data-cbcodesection="cbcode_60001">
-<section style="padding:60px 0 100px;background:#f6f6f6;min-height:60vh;">
+<div style="height:100px;background:#f6f6f6;"></div>
+<div style="padding:0 0 100px;background:#f6f6f6;min-height:60vh;">
   <div class="container">
     <h1 class="heading-02" style="margin-bottom:40px;">Your Cart</h1>
 
@@ -132,7 +133,7 @@ include APP_PATH . "/views/includes/header.php";
       </div>
     <?php endif; ?>
   </div>
-</section>
+</div>
 </div>
 <?php/*##cbcode_60001c##*/>
 

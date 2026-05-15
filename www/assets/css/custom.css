@@ -1,4 +1,4 @@
-/* =============================================================
+﻿/* =============================================================
    Venora E-Commerce — Custom CSS
    Extends venora.css with: quick-view modal, cart drawer,
    toast notifications, filters sidebar, badges, wishlist,
@@ -209,13 +209,15 @@
   color: var(--v-gray); min-width: 60px;
 }
 .qty-control {
-  display: flex; align-items: center;
+  display: inline-flex; align-items: center;
   border: 1.5px solid var(--v-border);
   border-radius: var(--v-radius);
   overflow: hidden;
+  width: fit-content;
 }
 .qty-btn {
   width: 36px; height: 40px;
+  min-width: 36px; flex-shrink: 0;
   background: none; border: none;
   font-size: 18px; cursor: pointer;
   color: var(--v-gray);
@@ -1660,7 +1662,7 @@ section.products.hero-section {
   .quick-view-modal-inner { grid-template-columns: 1fr; }
   .modal-main-img { aspect-ratio: 4/3; }
 }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .cart-drawer { width: 100vw; }
   .quick-view-modal { border-radius: 16px 16px 0 0; }
   .quick-view-modal-inner { padding: 24px 20px 40px; gap: 24px; }
@@ -1768,7 +1770,7 @@ section.home-hero {
 }
 
 /* ── Mobile navbar fixes ────────────────────────────────────── */
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* Hide Book a Call button — too wide for mobile navbar */
   .nav-btn { display: none !important; }
 
@@ -1823,7 +1825,7 @@ section.home-hero {
 }
 
 /* ── Mobile icons → right side ──────────────────────────────── */
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .navbar-wrapper {
     justify-content: space-between !important;
   }
@@ -2088,7 +2090,7 @@ a.product-tab-link-02.w--current {
   margin-bottom: 16px; margin-top: -12px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .products-toolbar-row {
     flex-direction: column;
     align-items: stretch;
@@ -2240,7 +2242,7 @@ body.page-light-navbar section.gallery {
   font-size: 14px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .venora-contact-grid {
     grid-template-columns: 1fr;
     gap: 32px;
@@ -2299,7 +2301,7 @@ body.page-light-navbar .section-120-120 {
 }
 
 /* ── Product detail page — mobile layout fix ─────────────────── */
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .product-details {
     flex-direction: column !important;
     gap: 24px !important;
@@ -2483,12 +2485,12 @@ body.page-light-navbar .section-120-120 {
 }
 
 /* Desktop: hide hamburger + sidebar */
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   .menu-button-2 { display: none !important; }
   .mobile-nav-sidebar, .mobile-nav-overlay { display: none !important; }
 }
 /* Mobile: force hamburger visible, hide desktop nav */
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .menu-button-2,
   .menu-button-2.w-nav-button {
     display: flex !important;
@@ -2517,4 +2519,52 @@ body.page-light-navbar .section-120-120 {
 }
 body.page-light-navbar .hamburger-line {
   background: var(--dark-green-colour, #072708);
+}
+
+/* Ensure desktop nav hides at tablet widths too (768–991px) */
+@media (max-width: 991px) {
+  .nav-menu-wrapper { display: none !important; }
+  .menu-button-2, .menu-button-2.w-nav-button { display: flex !important; }
+}
+
+/* ── Product detail tabs — horizontal on tablet/mobile ───────── */
+@media (max-width: 991px) {
+  /* Switch from side-column layout to horizontal tab bar */
+  .product-tabs {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+  .product-tab-menu {
+    position: static !important;  /* remove sticky — prevents overlap */
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    max-width: 100% !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    border-bottom: 2px solid #ececec;
+    gap: 0 !important;
+  }
+  .product-tab-link {
+    flex: 0 0 auto;
+    border-radius: 0 !important;
+    padding: 12px 20px !important;
+    font-size: 14px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+  }
+  .product-tab-link.w--current {
+    border-bottom-color: var(--dark-green-colour, #072708) !important;
+    background: transparent !important;
+    font-weight: 700;
+  }
+  .product-tab-content {
+    width: 100% !important;
+    padding-top: 24px;
+  }
+  /* Trust badges — ensure full width row, no overlap */
+  .product-info-box + div,
+  .product-details-right > div:last-child {
+    width: 100%;
+    clear: both;
+  }
 }
