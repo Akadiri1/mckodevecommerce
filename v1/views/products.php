@@ -94,16 +94,26 @@ include APP_PATH . "/views/includes/header.php";
     <!-- Results count -->
     <div class="products-results-count" id="resultsCount" style="display:none;"></div>
 
-    <!-- Category tabs -->
+    <!-- Category tabs with scroll arrows -->
     <div class="product-tabs-02 w-tabs venora-product-tabs" data-current="<?= htmlspecialchars($activeTab, ENT_QUOTES, 'UTF-8') ?>">
 
-      <div class="product-tab-menu-02 w-tab-menu">
-        <?php foreach ($tabList as $i => $tab): ?>
-          <a class="product-tab-link-02 w-inline-block w-tab-link venora-ptab-trigger<?= $activeTab === $tab['key'] ? ' w--current' : ($i === 0 && $activeTab === '' ? ' w--current' : '') ?>"
-             data-tab="<?= htmlspecialchars($tab['key'], ENT_QUOTES, 'UTF-8') ?>">
-            <div class="p-02-medium"><?= htmlspecialchars($tab['label'], ENT_QUOTES, 'UTF-8') ?></div>
-          </a>
-        <?php endforeach; ?>
+      <div class="cat-tabs-scroller">
+        <button class="cat-scroll-btn cat-scroll-left" id="catScrollLeft" aria-label="Scroll left">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+
+        <div class="product-tab-menu-02 w-tab-menu" id="catTabMenu">
+          <?php foreach ($tabList as $i => $tab): ?>
+            <a class="product-tab-link-02 w-inline-block w-tab-link venora-ptab-trigger<?= $activeTab === $tab['key'] ? ' w--current' : ($i === 0 && $activeTab === '' ? ' w--current' : '') ?>"
+               data-tab="<?= htmlspecialchars($tab['key'], ENT_QUOTES, 'UTF-8') ?>">
+              <div class="p-02-medium"><?= htmlspecialchars($tab['label'], ENT_QUOTES, 'UTF-8') ?></div>
+            </a>
+          <?php endforeach; ?>
+        </div>
+
+        <button class="cat-scroll-btn cat-scroll-right" id="catScrollRight" aria-label="Scroll right">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
       </div>
 
       <div class="w-tab-content">
@@ -210,6 +220,36 @@ include APP_PATH . "/views/includes/header.php";
 (function() {
   var PAGE_SIZE = 6;
   var activeFilters = { search: '', priceMin: 0, priceMax: Infinity, sort: '' };
+
+  // ── Category tab scroll arrows ───────────────────────────────
+  (function() {
+    var menu  = document.getElementById('catTabMenu');
+    var btnL  = document.getElementById('catScrollLeft');
+    var btnR  = document.getElementById('catScrollRight');
+    var STEP  = 160;
+
+    function updateArrows() {
+      if (!menu) return;
+      btnL.style.opacity = menu.scrollLeft > 4 ? '1' : '0';
+      btnL.style.pointerEvents = menu.scrollLeft > 4 ? 'auto' : 'none';
+      var maxScroll = menu.scrollWidth - menu.clientWidth;
+      btnR.style.opacity = menu.scrollLeft < maxScroll - 4 ? '1' : '0';
+      btnR.style.pointerEvents = menu.scrollLeft < maxScroll - 4 ? 'auto' : 'none';
+    }
+
+    if (btnL) btnL.addEventListener('click', function() {
+      menu.scrollBy({ left: -STEP, behavior: 'smooth' });
+    });
+    if (btnR) btnR.addEventListener('click', function() {
+      menu.scrollBy({ left: STEP, behavior: 'smooth' });
+    });
+    if (menu) {
+      menu.addEventListener('scroll', updateArrows);
+      updateArrows();
+      // Re-check after layout settles
+      setTimeout(updateArrows, 200);
+    }
+  })();
 
   // ── Category tabs ────────────────────────────────────────────
   document.querySelectorAll('.venora-ptab-trigger').forEach(function(tab) {

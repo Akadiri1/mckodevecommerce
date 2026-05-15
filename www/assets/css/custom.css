@@ -1611,12 +1611,19 @@ section.products.hero-section {
 .home-hero-inner {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end; /* push content toward bottom */
   flex: 1;
   min-height: inherit;
+  padding-top: 160px;   /* clear navbar */
+  padding-bottom: 60px; /* breathing room above bottom edge */
+  gap: 48px;            /* space between content and trust badges */
+}
+/* Remove the empty spacer div from layout */
+.home-hero-inner > div:first-child:empty {
+  display: none;
 }
 .hero-bottom {
-  padding-bottom: 40px;
+  padding-bottom: 0;
 }
 .client-review {
   display: flex;
@@ -1932,9 +1939,15 @@ body.page-light-navbar .nav-logo-icon {
   filter: brightness(0) saturate(100%) invert(14%) sepia(50%) saturate(700%) hue-rotate(95deg) brightness(50%) !important;
 }
 body.page-light-navbar [data-open-search] svg,
+body.page-light-navbar [data-open-search] svg path,
+body.page-light-navbar [data-open-search] svg circle,
 body.page-light-navbar .wishlist-btn-wrap svg,
-body.page-light-navbar .nav-icon-btn svg {
+body.page-light-navbar .wishlist-btn-wrap svg path,
+body.page-light-navbar .nav-icon-btn svg,
+body.page-light-navbar .nav-icon-btn svg path,
+body.page-light-navbar .nav-icon-btn svg circle {
   stroke: var(--dark-green-colour, #072708) !important;
+  color: var(--dark-green-colour, #072708) !important;
 }
 body.page-light-navbar .cart-icon {
   filter: invert(14%) sepia(36%) saturate(600%) hue-rotate(92deg) brightness(40%) !important;
@@ -2568,3 +2581,64 @@ body.page-light-navbar .hamburger-line {
     clear: both;
   }
 }
+
+/* ── Hero inner layout — mobile ─────────────────────────────── */
+@media (max-width: 991px) {
+  .home-hero-inner {
+    justify-content: flex-start !important;
+    padding-top: calc(38vh - 35px) !important;
+    padding-bottom: 40px !important;
+    gap: 0 !important; /* control spacing per-element below */
+  }
+  .home-hero-top .heading-01 {
+    font-size: clamp(1.9rem, 7.5vw, 3rem) !important;
+    margin-bottom: 24px !important;
+  }
+  .home-hero-btns {
+    margin-bottom: 32px !important;
+    gap: 12px !important;
+  }
+  .hero-bottom {
+    margin-bottom: 20px !important;
+  }
+  .hero-bottom .client-review {
+    margin-bottom: 16px !important;
+  }
+  .home-hero-top .heading-01 {
+    font-size: clamp(1.9rem, 7.5vw, 3rem) !important;
+  }
+}
+
+/* ── Category tabs scroll arrows ────────────────────────────── */
+.cat-tabs-scroller {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  width: 100%;
+}
+.cat-scroll-btn {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(7,39,8,0.2);
+  background: #fff;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dark-green-colour, #072708);
+  transition: opacity 0.2s, background 0.2s, border-color 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+.cat-scroll-btn:hover {
+  background: var(--dark-green-colour, #072708);
+  border-color: var(--dark-green-colour, #072708);
+  color: #fff;
+}
+
+/* On desktop with plenty of space, hide arrows */
+@media (min-width: 992px) {
+  .cat-scroll-btn { display: none; }
+  .cat-tabs-scroller { gap: 0; }
+}
+
