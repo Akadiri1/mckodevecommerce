@@ -49,11 +49,11 @@ include APP_PATH . "/views/includes/header.php";
       </div>
 
     <?php else: ?>
-      <div style="display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start;">
+      <div class="cart-layout">
 
         <!-- Cart items table -->
         <div style="background:white;border-radius:8px;overflow:hidden;">
-          <div style="padding:20px 24px;border-bottom:1px solid #dedede;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#5c5f6a;display:grid;grid-template-columns:1fr 120px 100px;gap:20px;">
+          <div class="cart-table-header">
             <span>Product</span><span style="text-align:center;">Qty</span><span style="text-align:right;">Total</span>
           </div>
           <?php foreach ($cartRows as $row):
@@ -62,8 +62,7 @@ include APP_PATH . "/views/includes/header.php";
             $rowId     = htmlspecialchars($row["hash_id"], ENT_QUOTES, "UTF-8");
             $lineTotal = (float)$p["input_price"] * (int)$row["input_quantity"];
           ?>
-            <div style="padding:20px 24px;border-bottom:1px solid #f0f0f0;display:grid;grid-template-columns:1fr 120px 100px;gap:20px;align-items:center;"
-                 id="cart-row-<?= $rowId ?>">
+            <div class="cart-item-row" id="cart-row-<?= $rowId ?>">
               <a href="/products/<?= $p["hash_id"] ?>/<?= cleans($p["input_title"]) ?>"
                  style="text-decoration:none;display:flex;gap:16px;align-items:flex-start;">
                 <img src="<?= htmlspecialchars($p["image_1"] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>"

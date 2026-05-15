@@ -979,7 +979,7 @@
 .order-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
 .order-row-label { font-size: 14px; color: var(--v-gray); }
 .order-row-value { font-size: 14px; color: var(--v-green); }
-.order-total-row { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--v-border); }
+.order-total-row { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 16px; margin-bottom: 24px; border-top: 1px solid var(--v-border); }
 .order-total-label { font-size: 16px; font-weight: 700; color: var(--v-green); }
 .order-total-value { font-size: 20px; font-weight: 700; color: var(--v-green); }
 .place-order-btn {
@@ -2642,3 +2642,56 @@ body.page-light-navbar .hamburger-line {
   .cat-tabs-scroller { gap: 0; }
 }
 
+
+/* ── Light navbar pages — white body bg, no dark strip ───────── */
+body.page-light-navbar {
+  background-color: #f9f9f7 !important;
+}
+/* Remove scrolled border/shadow on light pages */
+body.page-light-navbar .navbar.scrolled {
+  border-bottom: none !important;
+  box-shadow: 0 1px 12px rgba(0,0,0,0.06) !important;
+  background: rgba(255,255,255,0.98) !important;
+}
+
+/* ── Cart page responsive layout ────────────────────────────── */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 32px;
+  align-items: start;
+}
+.cart-table-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid #dedede;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #5c5f6a;
+  display: grid;
+  grid-template-columns: 1fr 120px 80px;
+  gap: 16px;
+}
+.cart-item-row {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  display: grid;
+  grid-template-columns: 1fr 120px 80px;
+  gap: 16px;
+  align-items: center;
+}
+@media (max-width: 767px) {
+  .cart-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .cart-table-header { display: none; }
+  .cart-item-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .cart-item-row > a { grid-column: 1; }
+  .cart-item-row .qty-control { justify-self: flex-start !important; }
+  .cart-item-row > div:last-child { text-align: left !important; }
+  .order-summary-card { position: static !important; }
+}
