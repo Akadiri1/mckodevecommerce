@@ -1,6 +1,9 @@
 <?php
-// ── Fetch nav + categories for the header ────────────────────
+// ── Fetch nav from panel_pages (ADMC compliant — DB-driven) ──
+$navPages = selectContentAsc($conn, "panel_pages", ["visibility" => "show"], "input_order", 15);
 $navCategories = selectContentAsc($conn, "selection_product_category", ["visibility" => "show"], "input_name", 10);
+$currentPath = '/' . ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
 ?>
 <html lang="en">
 <head>
@@ -56,33 +59,26 @@ $navCategories = selectContentAsc($conn, "selection_product_category", ["visibil
             </a>
           </div>
 
-          <!-- Nav links -->
-          <nav class="nav-menu-wrapper w-nav-menu" role="navigation">
+          <!-- Nav links — DB-driven from panel_pages (ADMC compliant) -->
+          <nav class="nav-menu-wrapper w-nav-menu" role="navigation"
+               data-admc-tb="panel_pages">
             <ul class="nav-menu-two w-list-unstyled" role="list">
-              <li class="nav-list-item">
-                <a class="navbar-link w-inline-block <?= ($uri[1] ?? '') === '' || ($uri[1] ?? '') === 'home' ? 'w--current' : '' ?>" href="<?= $baseUrl ?>/">
-                  <div class="btn-text _01"><div class="p-01">Home</div></div>
-                  <div class="btn-text _02"><div class="p-01">Home</div></div>
-                </a>
-              </li>
-              <li class="nav-list-item">
-                <a class="navbar-link w-inline-block <?= ($uri[1] ?? '') === 'about' ? 'w--current' : '' ?>" href="<?= $baseUrl ?>/about">
-                  <div class="btn-text _01"><div class="p-01">About</div></div>
-                  <div class="btn-text _02"><div class="p-01">About</div></div>
-                </a>
-              </li>
-              <li class="nav-list-item">
-                <a class="navbar-link w-inline-block <?= ($uri[1] ?? '') === 'products' ? 'w--current' : '' ?>" href="<?= $baseUrl ?>/products">
-                  <div class="btn-text _01"><div class="p-01">Products</div></div>
-                  <div class="btn-text _02"><div class="p-01">Products</div></div>
-                </a>
-              </li>
-              <li class="nav-list-item">
-                <a class="navbar-link w-inline-block <?= ($uri[1] ?? '') === 'contact' ? 'w--current' : '' ?>" href="<?= $baseUrl ?>/contact">
-                  <div class="btn-text _01"><div class="p-01">Contact</div></div>
-                  <div class="btn-text _02"><div class="p-01">Contact</div></div>
-                </a>
-              </li>
+              <?php foreach ($navPages as $navPage):
+                $navLink   = $baseUrl . rtrim($navPage['input_link'], '/');
+                $navName   = htmlspecialchars($navPage['input_name'], ENT_QUOTES, 'UTF-8');
+                $linkPath  = rtrim($navPage['input_link'], '/') ?: '/';
+                $isActive  = ($currentPath === $linkPath) || ($linkPath === '/' && $currentPath === '');
+              ?>
+                <li class="nav-list-item">
+                  <a class="navbar-link w-inline-block <?= $isActive ? 'w--current' : '' ?>"
+                     href="<?= $navLink ?>"
+                     data-admc-manage="panel_pages"
+                     data-admc-id="<?= $navPage['id'] ?>">
+                    <div class="btn-text _01"><div class="p-01"><?= $navName ?></div></div>
+                    <div class="btn-text _02"><div class="p-01"><?= $navName ?></div></div>
+                  </a>
+                </li>
+              <?php endforeach; ?>
             </ul>
           </nav>
 
@@ -97,6 +93,20 @@ $navCategories = selectContentAsc($conn, "selection_product_category", ["visibil
                   <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                 </svg>
               </button>
+
+              <!-- Account -->
+              <a href="<?= $isCustomerLoggedIn ? $baseUrl . '/customer-dashboard' : $baseUrl . '/customer-login' ?>"
+                 class="nav-icon-btn w-inline-block"
+                 aria-label="<?= $isCustomerLoggedIn ? 'My Account' : 'Sign In' ?>"
+                 style="position:relative;display:flex;align-items:center;justify-content:center;padding:8px;color:inherit;text-decoration:none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <?php if ($isCustomerLoggedIn): ?>
+                  <span style="position:absolute;top:4px;right:4px;width:7px;height:7px;background:#16a34a;border-radius:50%;border:1.5px solid #fff;"></span>
+                <?php endif; ?>
+              </a>
 
               <!-- Wishlist -->
               <div class="wishlist-btn-wrap">

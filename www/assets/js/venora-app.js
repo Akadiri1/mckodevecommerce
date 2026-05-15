@@ -494,6 +494,14 @@
     })
     .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
     .then(function(data) {
+      // Not logged in — redirect to login
+      if (data.auth === false) {
+        showToast('Sign in to save items to your wishlist', 'info');
+        setTimeout(function() {
+          window.location.href = (window.VENORA_BASE_URL || '') + '/customer-login';
+        }, 1200);
+        return data;
+      }
       var isAdded = data.added;
       showToast(isAdded ? 'Added to wishlist!' : 'Removed from wishlist');
       updateWishlistBadge(data.count);

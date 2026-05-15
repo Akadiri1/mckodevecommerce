@@ -11,12 +11,17 @@ $activeTab = isset($_GET["tab"]) ? htmlspecialchars($_GET["tab"], ENT_QUOTES, "U
 // ── Fetch all products ────────────────────────────────────────
 $allProducts = selectContentDesc($conn, "panel_products", ["visibility" => "show"], "id", 100);
 
-// ── Group products by category ────────────────────────────────
-$productsByCategory = ["" => []]; // "" = all
-foreach ($allProducts as &$p) {
-    $vars = selectContent($conn, "addition_product_variants", ["tb_link" => $p['hash_id'], "visibility" => "show"], 1);
-    $p['has_variants'] = !empty($vars) ? "true" : "false";
+// Pre-index all variants once (ADMC: no queries inside loops)
+$allVariantsRaw   = selectContent($conn, "addition_product_variants", ["visibility" => "show"]);
+$variantsIndexed  = [];
+foreach ($allVariantsRaw as $av) {
+    $variantsIndexed[$av['tb_link']] = true;
+}
 
+// Group products by category
+$productsByCategory = ["" => []];
+foreach ($allProducts as &$p) {
+    $p['has_variants'] = isset($variantsIndexed[$p['hash_id']]) ? "true" : "false";
     $productsByCategory[""][] = $p;
     $cat = $p["select_category"] ?? "";
     if (!isset($productsByCategory[$cat])) $productsByCategory[$cat] = [];

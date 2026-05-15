@@ -14,9 +14,15 @@ $heroArr = safeHomeFetch($conn, "settings_shop_hero", ["visibility" => "show"]);
 $hero    = !empty($heroArr) ? $heroArr[0] : [];
 
 $featuredProducts = selectContent($conn, "panel_products", ["visibility" => "show"], 3);
+
+// Pre-index variants (ADMC pattern: no queries inside loops)
+$allFeaturedVariants = selectContent($conn, "addition_product_variants", ["visibility" => "show"]);
+$variantsByProduct   = [];
+foreach ($allFeaturedVariants as $fv) {
+    $variantsByProduct[$fv['tb_link']] = true;
+}
 foreach ($featuredProducts as &$fp) {
-    $vars = selectContent($conn, "addition_product_variants", ["tb_link" => $fp['hash_id'], "visibility" => "show"], 1);
-    $fp['has_variants'] = !empty($vars) ? "true" : "false";
+    $fp['has_variants'] = isset($variantsByProduct[$fp['hash_id']]) ? "true" : "false";
 }
 unset($fp);
 

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $page_title = "Verify Email";
 $bodyClass  = "page-light-navbar";
 
@@ -15,25 +15,33 @@ if (empty($token)) {
     if (empty($verifyRows)) {
         $error = 'This verification link is invalid or has already been used.';
     } else {
-        $verifyRow = $verifyRows[0];
-        $userHash  = $verifyRow['tb_link'];
+        $verifyRow  = $verifyRows[0];
+        $userEmail  = $verifyRow['input_email'];
 
-        // Look up the user
-        $users = selectContent($conn, 'read_users', ['hash_id' => $userHash, 'visibility' => 'show']);
-
-        if (empty($users)) {
-            $error = 'User account not found.';
+        // Check token not expired
+        if (!empty($verifyRow['token_expiry']) && strtotime($verifyRow['token_expiry']) < time()) {
+            $error = 'This verification link has expired. Please register again.';
         } else {
-            // Mark user as verified
-            updateContent($conn, 'read_users',
-                ['input_verify' => '1'],
-                ['hash_id' => $userHash]
-            );
+            // Look up the user by email
+            $users = selectContent($conn, 'read_users', ['input_email' => $userEmail, 'visibility' => 'show']);
 
-            // Delete the verify row
-            deleteContent($conn, 'verify', ['hash_id' => $verifyRow['hash_id']]);
+            if (empty($users)) {
+                $error = 'User account not found.';
+            } else {
+                // Mark user as verified
+                updateContent($conn, 'read_users',
+                    ['input_verify' => '1'],
+                    ['input_email' => $userEmail]
+                );
 
-            $success = true;
+                // Delete the verify row
+                updateContent($conn, 'verify',
+                    ['visibility' => 'hide'],
+                    ['hash_id' => $verifyRow['hash_id']]
+                );
+
+                $success = true;
+            }
         }
     }
 }
@@ -41,7 +49,8 @@ if (empty($token)) {
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<section style="min-height:80vh;background:#f9f9f7;padding-top:120px;padding-bottom:80px;display:flex;align-items:center;">
+<div style="height:100px;background:#f9f9f7;"></div>
+<div style="min-height:calc(80vh - 100px);background:#f9f9f7;padding-bottom:80px;display:flex;align-items:center;">
   <div class="container" style="max-width:480px;margin:0 auto;padding:0 20px;text-align:center;">
 
     <?php if ($success): ?>
@@ -84,6 +93,6 @@ include APP_PATH . "/views/includes/header.php";
     <?php endif; ?>
 
   </div>
-</section>
+</div>
 
 <?php include APP_PATH . "/views/includes/footer.php"; ?>

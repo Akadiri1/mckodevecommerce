@@ -54,6 +54,12 @@ $cartCount = (int)array_sum(array_column($cartItems, "input_quantity"));
 $wishlistCount = isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0;
 $wishlistIds   = $_SESSION['wishlist'] ?? [];
 
+// Customer session
+$customerId         = $_SESSION['customer_id']   ?? null;
+$customerHash       = $_SESSION['customer_hash'] ?? null;
+$customerName       = $_SESSION['customer_name'] ?? null;
+$isCustomerLoggedIn = !empty($customerId);
+
 include APP_PATH . "/routes/router.php";
 include APP_PATH . "/ajax/ajax_router/router.php";
 include APP_PATH . "/auth/auth_router/router.php";

@@ -1,11 +1,12 @@
-<?php
+﻿<?php
 $page_title = "Forgot Password";
 $bodyClass  = "page-light-navbar";
 
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<section style="min-height:80vh;background:#f9f9f7;padding-top:120px;padding-bottom:80px;display:flex;align-items:center;">
+<div style="height:100px;background:#f9f9f7;"></div>
+<div style="min-height:calc(80vh - 100px);background:#f9f9f7;padding-bottom:80px;display:flex;align-items:center;">
   <div class="container" style="max-width:480px;margin:0 auto;padding:0 20px;">
 
     <div style="text-align:center;margin-bottom:36px;">
@@ -47,7 +48,7 @@ include APP_PATH . "/views/includes/header.php";
 
     </div>
   </div>
-</section>
+</div>
 
 <script>
 (function () {

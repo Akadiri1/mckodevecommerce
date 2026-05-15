@@ -69,16 +69,16 @@ insertContent($conn, 'read_users', [
 // Generate 6-char OTP token
 $verifyToken = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
 
-// Insert into verify table
+// Insert into verify table (matches patch SQL columns)
 insertContent($conn, 'verify', [
     'hash_id'      => uniqid('vrf_', true),
-    'tb'           => 'read_users',
-    'tb_link'      => $hashId,
+    'input_email'  => $email,
     'verify_token' => $verifyToken,
+    'token_type'   => 'email_verify',
+    'token_expiry' => date('Y-m-d H:i:s', strtotime('+24 hours')),
     'visibility'   => 'show',
     'date_created' => date('Y-m-d'),
     'time_created' => date('H:i:s'),
-    'created_by'   => $email,
 ]);
 
 // Send verification email

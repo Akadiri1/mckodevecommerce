@@ -327,42 +327,72 @@ include APP_PATH . "/views/includes/header.php";
                 </div>
               </div>
 
-              <!-- Write review button -->
-              <button class="btn-02-link w-inline-block" id="showReviewForm"
-                      style="background:none;border:1.5px solid #072708;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:600;color:#072708;border-radius:4px;">
-                Write a Review
-              </button>
+              <!-- Write review button — only if logged in -->
+              <?php if ($isCustomerLoggedIn): ?>
+                <button class="btn-02-link w-inline-block" id="showReviewForm"
+                        style="background:none;border:1.5px solid #072708;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:600;color:#072708;border-radius:4px;">
+                  Write a Review
+                </button>
+              <?php else: ?>
+                <a href="<?= $baseUrl ?>/customer-login"
+                   style="display:inline-block;border:1.5px solid #072708;padding:10px 20px;font-size:13px;font-weight:600;color:#072708;border-radius:4px;text-decoration:none;">
+                  Sign in to write a review
+                </a>
+              <?php endif; ?>
             </div>
 
-            <!-- Review form -->
+            <!-- Review form — only shown to logged-in customers -->
+            <?php if ($isCustomerLoggedIn): ?>
             <div class="review-form-card" id="reviewFormCard" style="display:none;">
               <div class="review-form-title">Share your experience</div>
+              <div id="reviewFormError"
+                   style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:14px;">
+              </div>
               <form id="reviewForm" onsubmit="submitReview(event)">
                 <input type="hidden" name="product_id" value="<?= $product["hash_id"] ?>">
-                <div class="star-rating-input" style="flex-direction:row-reverse;justify-content:flex-end;">
-                  <?php for ($s = 5; $s >= 1; $s--): ?>
-                    <input type="radio" id="star<?= $s ?>" name="rating" value="<?= $s ?>" <?= $s === 5 ? "required" : "" ?>>
-                    <label for="star<?= $s ?>">★</label>
-                  <?php endfor; ?>
-                </div>
+                <!-- Star rating -->
                 <div style="margin-bottom:14px;">
-                  <input type="text" name="name" placeholder="Your name" required
-                         style="width:100%;padding:10px 12px;border:1.5px solid #dedede;border-radius:4px;font-size:14px;margin-bottom:10px;outline:none;">
+                  <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Rating *</label>
+                  <div class="star-rating-input" style="flex-direction:row-reverse;justify-content:flex-end;">
+                    <?php for ($s = 5; $s >= 1; $s--): ?>
+                      <input type="radio" id="star<?= $s ?>" name="rating" value="<?= $s ?>">
+                      <label for="star<?= $s ?>">★</label>
+                    <?php endfor; ?>
+                  </div>
                 </div>
+                <!-- Name -->
                 <div style="margin-bottom:14px;">
-                  <textarea name="review" placeholder="Share your experience with this product..." required
+                  <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Your name *</label>
+                  <input type="text" name="name" id="reviewName"
+                         placeholder="<?= htmlspecialchars($customerName ?? 'Your name', ENT_QUOTES, 'UTF-8') ?>"
+                         value="<?= htmlspecialchars($customerName ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                         style="width:100%;padding:10px 12px;border:1.5px solid #dedede;border-radius:4px;font-size:14px;outline:none;box-sizing:border-box;">
+                </div>
+                <!-- Review title -->
+                <div style="margin-bottom:14px;">
+                  <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Review title</label>
+                  <input type="text" name="title" id="reviewTitle"
+                         placeholder="Summarise your experience"
+                         style="width:100%;padding:10px 12px;border:1.5px solid #dedede;border-radius:4px;font-size:14px;outline:none;box-sizing:border-box;">
+                </div>
+                <!-- Review body -->
+                <div style="margin-bottom:14px;">
+                  <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Review * <span id="reviewCharCount" style="font-weight:400;color:#aaa;">(min 10 characters)</span></label>
+                  <textarea name="review" id="reviewBody"
+                            placeholder="Tell others what you think about this product…"
                             rows="4"
-                            style="width:100%;padding:10px 12px;border:1.5px solid #dedede;border-radius:4px;font-size:14px;resize:vertical;outline:none;font-family:inherit;"></textarea>
+                            style="width:100%;padding:10px 12px;border:1.5px solid #dedede;border-radius:4px;font-size:14px;resize:vertical;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
                 </div>
-                <button type="submit"
+                <button type="submit" id="reviewSubmitBtn"
                         style="padding:11px 28px;background:#072708;color:white;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;">
                   Submit Review
                 </button>
               </form>
               <div id="reviewSuccess" style="display:none;padding:16px;background:#f0faf0;border-radius:4px;color:#072708;font-size:14px;font-weight:500;margin-top:12px;">
-                ✓ Thank you for your review!
+                ✓ Thank you for your review! It will appear shortly.
               </div>
             </div>
+            <?php endif; ?>
 
             <!-- Review list -->
             <?php if (!empty($reviews)): ?>
@@ -623,22 +653,75 @@ document.querySelector(".sticky-cart-btn") && document.querySelector(".sticky-ca
   window.Venora.cartAddItem(productId, variantId, qty, function() { btn.textContent = "Added!"; setTimeout(function() { btn.textContent = "Add to Cart"; }, 2000); });
 });
 
-// Review submit
+// Review submit — with client-side validation
 function submitReview(e) {
   e.preventDefault();
+  var errBox  = document.getElementById("reviewFormError");
+  var btn     = document.getElementById("reviewSubmitBtn");
+  errBox && (errBox.style.display = "none");
+
+  // Client-side validation
+  var rating = document.querySelector('input[name="rating"]:checked');
+  var name   = (document.getElementById("reviewName") || {}).value || "";
+  var body   = (document.getElementById("reviewBody") || {}).value || "";
+
+  if (!rating) {
+    if (errBox) { errBox.textContent = "Please select a star rating."; errBox.style.display = "block"; }
+    return;
+  }
+  if (name.trim().length < 2) {
+    if (errBox) { errBox.textContent = "Please enter your name (min 2 characters)."; errBox.style.display = "block"; }
+    return;
+  }
+  if (body.trim().length < 10) {
+    if (errBox) { errBox.textContent = "Review must be at least 10 characters."; errBox.style.display = "block"; }
+    return;
+  }
+  if (body.trim().length > 2000) {
+    if (errBox) { errBox.textContent = "Review is too long (max 2000 characters)."; errBox.style.display = "block"; }
+    return;
+  }
+
+  if (btn) { btn.textContent = "Submitting…"; btn.disabled = true; }
+
   var data = {};
   new FormData(e.target).forEach(function(v, k) { data[k] = v; });
+
   fetch(window.VENORA_BASE_URL + "/review-submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
-  }).then(function(r) { return r.json(); })
-    .then(function(res) {
-      if (res.success) {
-        document.getElementById("reviewForm").style.display = "none";
-        document.getElementById("reviewSuccess").style.display = "block";
-      }
-    });
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    if (res.auth === false) {
+      // Not logged in — redirect to login
+      window.location.href = window.VENORA_BASE_URL + "/customer-login";
+      return;
+    }
+    if (res.success) {
+      document.getElementById("reviewForm").style.display = "none";
+      document.getElementById("reviewSuccess").style.display = "block";
+    } else {
+      if (errBox) { errBox.textContent = res.message || "Submission failed. Please try again."; errBox.style.display = "block"; }
+      if (btn) { btn.textContent = "Submit Review"; btn.disabled = false; }
+    }
+  })
+  .catch(function() {
+    if (errBox) { errBox.textContent = "Something went wrong. Please try again."; errBox.style.display = "block"; }
+    if (btn) { btn.textContent = "Submit Review"; btn.disabled = false; }
+  });
+}
+
+// Live character count for review body
+var reviewBody = document.getElementById("reviewBody");
+var charCount  = document.getElementById("reviewCharCount");
+if (reviewBody && charCount) {
+  reviewBody.addEventListener("input", function() {
+    var len = reviewBody.value.length;
+    charCount.textContent = len < 10 ? "(" + (10 - len) + " more characters needed)" : "(" + len + " / 2000)";
+    charCount.style.color = len < 10 ? "#dc2626" : len > 1800 ? "#f59e0b" : "#aaa";
+  });
 }
 </script>
 

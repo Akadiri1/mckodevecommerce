@@ -11,7 +11,8 @@ if (!empty($_SESSION['customer_id'])) {
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<section style="min-height:100vh;background:#f9f9f7;padding-top:120px;padding-bottom:80px;">
+<div style="height:100px;background:#f9f9f7;"></div>
+<div style="min-height:calc(100vh - 100px);background:#f9f9f7;padding-bottom:80px;">
   <div class="container" style="max-width:520px;margin:0 auto;padding:0 20px;">
 
     <!-- Heading -->
@@ -114,9 +115,6 @@ include APP_PATH . "/views/includes/header.php";
         <div id="registerError"
              style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:12px 14px;border-radius:7px;margin-bottom:18px;font-size:14px;">
         </div>
-        <div id="registerSuccess"
-             style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:12px 14px;border-radius:7px;margin-bottom:18px;font-size:14px;">
-        </div>
 
         <button type="submit" id="registerBtn"
                 style="width:100%;padding:14px;background:#072708;color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
@@ -124,10 +122,21 @@ include APP_PATH . "/views/includes/header.php";
         </button>
 
       </form>
+
+      <!-- Success box is OUTSIDE the form so it stays visible when form is hidden -->
+      <div id="registerSuccess"
+           style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:20px 24px;border-radius:12px;margin-top:16px;font-size:15px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:10px;">✉️</div>
+        <div id="registerSuccessText">Please check your email to verify your account.</div>
+        <a href="<?= $baseUrl ?>/customer-login"
+           style="display:inline-block;margin-top:16px;color:#072708;font-weight:600;font-size:14px;text-decoration:underline;">
+          Back to Sign In
+        </a>
+      </div>
     </div>
 
   </div>
-</section>
+</div>
 
 <script>
 (function () {
@@ -228,7 +237,7 @@ include APP_PATH . "/views/includes/header.php";
     .then(function (res) {
       if (res.success) {
         document.getElementById('registerForm').style.display = 'none';
-        succBox.textContent   = res.message || 'Please check your email to verify your account.';
+        document.getElementById('registerSuccessText').textContent = res.message || 'Please check your email to verify your account.';
         succBox.style.display = 'block';
       } else {
         errBox.textContent   = res.message || 'Registration failed. Please try again.';

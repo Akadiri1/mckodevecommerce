@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $page_title = "My Account";
 $bodyClass  = "page-light-navbar";
 
@@ -53,7 +53,8 @@ function statusBadge($status) {
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<section style="min-height:100vh;background:#f9f9f7;padding-top:120px;padding-bottom:80px;">
+<div style="height:100px;background:#f9f9f7;"></div>
+<div style="min-height:calc(100vh - 100px);background:#f9f9f7;padding-bottom:80px;">
   <div class="container" style="max-width:1000px;margin:0 auto;padding:0 20px;">
 
     <!-- Header row -->
@@ -194,7 +195,7 @@ include APP_PATH . "/views/includes/header.php";
 
     </div>
   </div>
-</section>
+</div>
 
 <script>
 (function () {

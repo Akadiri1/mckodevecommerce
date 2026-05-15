@@ -80,5 +80,29 @@ switch ($s1) {
         include APP_PATH . "/views/wishlist_backend.php"; $is404 = false; die;
     case "review-submit":
         include APP_PATH . "/views/review_submit_backend.php"; $is404 = false; die;
+
+    // ── Customer auth & account ───────────────────────────────────
+    case "customer-login":
+        include APP_PATH . "/views/customer_login.php"; $is404 = false; die;
+    case "customer-logout":
+        include APP_PATH . "/views/customer_logout.php"; $is404 = false; die;
+    case "customer-dashboard":
+        include APP_PATH . "/views/customer_dashboard.php"; $is404 = false; die;
+    case "customer-verify":
+        include APP_PATH . "/views/customer_verify.php"; $is404 = false; die;
+    case "customer-forgot-password":
+        include APP_PATH . "/views/customer_forgot.php"; $is404 = false; die;
+    case "customer-reset-password":
+        include APP_PATH . "/views/customer_reset.php"; $is404 = false; die;
+    case "customer-login-submit":
+        include APP_PATH . "/views/customer_login_backend.php"; $is404 = false; die;
+    case "customer-register-submit":
+        include APP_PATH . "/views/customer_register_backend.php"; $is404 = false; die;
+    case "customer-update-profile":
+        include APP_PATH . "/views/customer_update_backend.php"; $is404 = false; die;
+    case "customer-forgot-submit":
+        include APP_PATH . "/views/customer_forgot_backend.php"; $is404 = false; die;
+    case "customer-reset-submit":
+        include APP_PATH . "/views/customer_reset_backend.php"; $is404 = false; die;
 }
 ?>
