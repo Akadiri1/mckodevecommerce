@@ -1,0 +1,215 @@
+<?php
+// ── Footer data ──────────────────────────────────────────────
+$footerConfig = selectContent($conn, "settings_shop_footer", ["visibility" => "show"]);
+$footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
+?>
+
+  <!-- ── Footer ──────────────────────────────────────────────── -->
+  <style>
+    .footer-section { background-color: #ffffff !important; }
+    .footer-section .cta {
+      background-image: none !important;
+      background-color: #ffffff !important;
+      color: var(--dark-green-colour, #072708) !important;
+    }
+  </style>
+  <section class="footer-section">
+
+    <!-- CTA Banner — editable via ADMC -->
+    <div class="cta">
+      <div class="cta-inner">
+        <h1 class="heading-01"
+            data-admc-manage="settings_shop_footer"
+            data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
+          <?= htmlspecialchars($footerConfig['input_cta_heading'] ?? 'Ready for Your Best Skin Yet?', ENT_QUOTES, 'UTF-8') ?>
+        </h1>
+        <div class="btn-wrap">
+          <a class="btn-02-link w-inline-block" href="/contact"
+             data-admc-manage="settings_shop_footer"
+             data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
+            <div class="btn-inner">
+              <div class="btn-text-wrap">
+                <div class="btn-text-3 _01"><div class="cta-text">
+                  <?= htmlspecialchars($footerConfig['input_cta_btn'] ?? 'Book a Consultation', ENT_QUOTES, 'UTF-8') ?>
+                </div></div>
+                <div class="btn-text-3 _02"><div class="cta-text">
+                  <?= htmlspecialchars($footerConfig['input_cta_btn'] ?? 'Book a Consultation', ENT_QUOTES, 'UTF-8') ?>
+                </div></div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main footer -->
+    <div class="footer">
+      <div class="footer-inner">
+        <div class="footer-top">
+
+          <!-- Left: newsletter -->
+          <div class="footer-left reveal">
+            <div class="heading-03"
+                 data-admc-manage="settings_shop_footer"
+                 data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
+              <?= htmlspecialchars($footerConfig['input_newsletter_heading'] ?? 'Stay updated with the latest from ' . $shop_name . '!', ENT_QUOTES, 'UTF-8') ?>
+            </div>
+            <div class="newsletter-wrap">
+              <form class="newsletter-form-02" id="footerNewsletterForm" onsubmit="handleFooterNewsletter(event)">
+                <input class="newsletter-field-02 w-input"
+                       type="email" name="email"
+                       placeholder="Email address..." required>
+                <input class="submit-button-02 w-button"
+                       type="submit" value="Subscribe">
+              </form>
+              <div id="footerNewsletterSuccess" style="display:none;" class="p-02">
+                Thank you! You have been subscribed.
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: nav links -->
+          <div class="footer-right reveal">
+            <div class="footer-link-wrap">
+              <a class="nav-link-2 w-inline-block" href="<?= $baseUrl ?>/about">
+                <div class="nav-link-text"><p class="p-02 _02">About</p><p class="p-02">About</p></div>
+                <div class="footer-underline"></div>
+              </a>
+              <img alt="" class="slash-icon" src="<?= $baseUrl ?>/assets/img/icons/slash.svg">
+              <a class="nav-link-2 w-inline-block" href="<?= $baseUrl ?>/products">
+                <div class="nav-link-text"><p class="p-02 _02">Products</p><p class="p-02">Products</p></div>
+                <div class="footer-underline"></div>
+              </a>
+              <img alt="" class="slash-icon" src="<?= $baseUrl ?>/assets/img/icons/slash.svg">
+              <a class="nav-link-2 w-inline-block" href="<?= $baseUrl ?>/contact">
+                <div class="nav-link-text"><p class="p-02 _02">Contact</p><p class="p-02">Contact</p></div>
+                <div class="footer-underline"></div>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer bottom bar -->
+        <div class="footer-center">
+          <div class="footer-center-inner left">
+            <div class="p-02"
+                 data-admc-manage="settings_shop_footer"
+                 data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
+              <?= htmlspecialchars($footerConfig['input_powered_by'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+            </div>
+          </div>
+          <div class="footer-center-inner center">
+            <a href="<?= $baseUrl ?>/privacy-policy" class="p-02" style="color: #ffffff; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Privacy policy</a>
+          </div>
+          <div class="footer-center-inner right">
+            <div class="p-02"
+                 data-admc-manage="settings_shop_footer"
+                 data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
+              &copy; <?= date('Y') ?> <?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>. All Rights Reserved.
+            </div>
+          </div>
+        </div>
+
+        <!-- Logo -->
+        <a class="footer-logo w-inline-block" href="<?= $baseUrl ?>/">
+          <div data-admc-image="settings_shop_config"
+               data-admc-id="<?= $shopConfig[0]['id'] ?? 1 ?>">
+            <img alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>"
+                 class="footer-logo-img"
+                 src="<?= $baseUrl ?>/assets/img/brand/venora-dark.svg">
+          </div>
+        </a>
+
+        <!-- Social icons -->
+        <div class="footer-bottom">
+          <div class="social-block">
+            <img src="<?= $baseUrl ?>/assets/img/icons/stripe.svg" alt="Stripe" style="height:24px;opacity:0.6;">
+          </div>
+          <div class="social-block">
+            <a class="footer-social-link-02 w-inline-block"
+               href="<?= htmlspecialchars($footerConfig['input_instagram'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
+               target="_blank" rel="noopener"
+               data-admc-manage="settings_shop_footer"
+               data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
+              <div class="icon-16"><img alt="Instagram" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/instagram.svg"></div>
+            </a>
+            <a class="footer-social-link-02 w-inline-block"
+               href="<?= htmlspecialchars($footerConfig['input_facebook'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
+               target="_blank" rel="noopener">
+              <div class="icon-16"><img alt="Facebook" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/facebook.svg"></div>
+            </a>
+            <a class="footer-social-link-02 w-inline-block"
+               href="<?= htmlspecialchars($footerConfig['input_linkedin'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
+               target="_blank" rel="noopener">
+              <div class="icon-16"><img alt="LinkedIn" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/linkedin.svg"></div>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── Newsletter Popup ────────────────────────────────────── -->
+  <div class="newsletter-popup" id="newsletterPopup">
+    <button class="newsletter-popup-close" id="nlPopupClose">✕</button>
+    <h4>Get 10% off your first order</h4>
+    <p>Subscribe for exclusive offers, skincare tips, and early access to new products.</p>
+    <form class="newsletter-popup-form" id="nlPopupForm">
+      <input class="newsletter-popup-input" type="email" placeholder="Your email address" required>
+      <button class="newsletter-popup-btn" type="submit">Subscribe</button>
+    </form>
+    <button class="newsletter-popup-dismiss" id="nlPopupDismiss">No thanks</button>
+  </div>
+
+  <!-- jQuery (for Webflow CSS class compatibility) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Venora App JS -->
+  <script src="<?= $baseUrl ?>/assets/js/venora-app.js?v=<?= time() ?>"></script>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+      var menu = document.querySelector('.nav-menu-wrapper');
+      if (menu) menu.classList.toggle('open');
+    });
+
+    // Cart drawer close button
+    document.getElementById('cartDrawerClose').addEventListener('click', function() {
+      document.querySelector('.cart-drawer').classList.remove('active');
+      document.querySelector('.v-overlay') && document.querySelector('.v-overlay').classList.remove('active');
+      document.body.style.overflow = '';
+    });
+
+    // Continue shopping
+    document.getElementById('cartContinueShopping').addEventListener('click', function() {
+      document.querySelector('.cart-drawer').classList.remove('active');
+      document.querySelector('.v-overlay') && document.querySelector('.v-overlay').classList.remove('active');
+      document.body.style.overflow = '';
+    });
+
+    // Footer newsletter
+    function handleFooterNewsletter(e) {
+      e.preventDefault();
+      var email = e.target.querySelector('input[type=email]').value;
+      fetch('/newsletter-subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'email=' + encodeURIComponent(email)
+      }).finally(function() {
+        document.getElementById('footerNewsletterForm').style.display = 'none';
+        document.getElementById('footerNewsletterSuccess').style.display = 'block';
+      });
+    }
+  </script>
+
+  <?php if (isset($_SESSION['admin_id'])): ?>
+    <script src="https://admc.dev/admc.min.js" charset="utf-8"></script>
+  <?php endif; ?>
+
+</div><!-- /page-wrapper -->
+</body>
+</html>

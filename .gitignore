@@ -1,0 +1,9 @@
+Vagrantfile
+.vagrant/
+.env/
+ngrok.exe
+www/phpmyadmin
+israelkodak.box
+v1/payment/
+www/da/
+www/mkp-images/
