@@ -2361,3 +2361,160 @@ body.page-light-navbar .section-120-120 {
 
 /* Thumbnails visible on all screen sizes */
 .product-img-box:not(:first-child) { display: block !important; }
+
+/* ── Mobile nav sidebar ──────────────────────────────────────── */
+/* ── Hamburger — force visible on mobile (venora sets display:none by default) */
+.menu-button-2.w-nav-button {
+  display: none; /* hidden on desktop by default */
+  color: rgba(255,255,255,0.9);
+  cursor: pointer;
+}
+
+.mobile-nav-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1100;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.mobile-nav-overlay.active { display: block; opacity: 1; }
+
+/* Sidebar — dark to match navbar theme */
+.mobile-nav-sidebar {
+  position: fixed;
+  top: 0; right: -100%; bottom: 0;
+  width: min(300px, 85vw);
+  background: var(--bg-colour, #202c22);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -8px 0 48px rgba(0,0,0,0.35);
+}
+.mobile-nav-sidebar.open { right: 0; }
+
+.mobile-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.mobile-nav-close {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50%;
+  width: 34px; height: 34px;
+  font-size: 16px; cursor: pointer;
+  color: rgba(255,255,255,0.8);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.mobile-nav-close:hover { background: rgba(255,255,255,0.18); }
+
+.mobile-nav-links {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+.mobile-nav-link {
+  display: block;
+  padding: 16px 28px;
+  font-size: 17px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  letter-spacing: 0.01em;
+  transition: color 0.15s, padding-left 0.2s;
+}
+.mobile-nav-link:hover { color: #ffffff; padding-left: 36px; }
+.mobile-nav-link.active {
+  color: #ffffff;
+  font-weight: 700;
+  padding-left: 36px;
+}
+
+.mobile-nav-footer {
+  padding: 20px 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mobile-nav-account-btn {
+  display: block;
+  padding: 13px 20px;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  border-radius: 100px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.mobile-nav-account-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.6);
+}
+.mobile-nav-cta {
+  display: block;
+  padding: 13px 20px;
+  background: #ffffff;
+  border-radius: 100px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark-green-colour, #072708);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.mobile-nav-cta:hover { opacity: 0.88; }
+.mobile-nav-logout {
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Desktop: hide hamburger + sidebar */
+@media (min-width: 768px) {
+  .menu-button-2 { display: none !important; }
+  .mobile-nav-sidebar, .mobile-nav-overlay { display: none !important; }
+}
+/* Mobile: force hamburger visible, hide desktop nav */
+@media (max-width: 767px) {
+  .menu-button-2,
+  .menu-button-2.w-nav-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: rgba(255,255,255,0.9) !important;
+  }
+  /* Light-navbar pages: hamburger lines dark */
+  body.page-light-navbar .menu-button-2,
+  body.page-light-navbar .menu-button-2.w-nav-button {
+    color: var(--dark-green-colour, #072708) !important;
+  }
+  body.page-light-navbar .menu-button-2 span {
+    background: var(--dark-green-colour, #072708) !important;
+  }
+  .nav-menu-wrapper { display: none !important; }
+}
+
+/* Hamburger lines — white on dark hero pages, dark on light pages */
+.hamburger-line {
+  width: 22px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+  display: block;
+}
+body.page-light-navbar .hamburger-line {
+  background: var(--dark-green-colour, #072708);
+}

@@ -12,8 +12,13 @@ $script_dir  = rtrim(str_replace('\\', '/', dirname($script_name)), '/');
 $parent_dir  = rtrim(str_replace('\\', '/', dirname(dirname($script_name))), '/');
 
 // Use the parent dir if we are being rewritten from it (common for /www/ folders)
+// Guard against empty $script_dir when site runs at domain root (avoids strpos empty needle warning)
 $request_uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-$baseUrl = (strpos($request_uri, $script_dir) === 0) ? $script_dir : $parent_dir;
+if ($script_dir === '') {
+    $baseUrl = '';
+} else {
+    $baseUrl = (strpos($request_uri, $script_dir) === 0) ? $script_dir : $parent_dir;
+}
 
 include D_PATH . "/.env/config.php";
 require APP_PATH . "/models/model.php";

@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $page_title = "Your Cart";
-$bodyClass  = "";
+$bodyClass  = "page-light-navbar";
 
 $sessionId = session_id();
 $cartRows  = selectContent($conn, "read_cart", ["input_session_id" => $sessionId, "visibility" => "show"]);

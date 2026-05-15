@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $page_title = "Page Not Found";
-$bodyClass  = "";
+$bodyClass  = "page-light-navbar";
 ?>
 <!DOCTYPE html>
 <html lang="en">

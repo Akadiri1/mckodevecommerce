@@ -64,9 +64,10 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
                data-admc-tb="panel_pages">
             <ul class="nav-menu-two w-list-unstyled" role="list">
               <?php foreach ($navPages as $navPage):
-                $navLink   = $baseUrl . rtrim($navPage['input_link'], '/');
+                $rawLink2  = $navPage['input_link'];
+                $navLink   = $baseUrl . ($rawLink2 === '/' ? '/' : rtrim($rawLink2, '/'));
                 $navName   = htmlspecialchars($navPage['input_name'], ENT_QUOTES, 'UTF-8');
-                $linkPath  = rtrim($navPage['input_link'], '/') ?: '/';
+                $linkPath  = rtrim($rawLink2, '/') ?: '/';
                 $isActive  = ($currentPath === $linkPath) || ($linkPath === '/' && $currentPath === '');
               ?>
                 <li class="nav-list-item">
@@ -151,15 +152,57 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
           <!-- Mobile hamburger -->
           <div class="menu-button-2 w-nav-button" id="mobileMenuToggle">
             <div class="menu-icon-lines" style="display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:8px;">
-              <span style="width:22px;height:2px;background:currentColor;border-radius:2px;display:block;"></span>
-              <span style="width:22px;height:2px;background:currentColor;border-radius:2px;display:block;"></span>
-              <span style="width:22px;height:2px;background:currentColor;border-radius:2px;display:block;"></span>
+              <span class="hamburger-line"></span>
+              <span class="hamburger-line"></span>
+              <span class="hamburger-line"></span>
             </div>
           </div>
 
         </div>
       </div>
     </nav>
+  </div>
+
+  <!-- ── Mobile Nav Sidebar ────────────────────────────────────── -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+  <div class="mobile-nav-sidebar" id="mobileNavSidebar">
+    <div class="mobile-nav-header">
+      <a href="<?= $baseUrl ?>/" class="mobile-nav-logo">
+        <img src="https://cdn.prod.website-files.com/69142cc410c97b6153a00e32/6914577f7eba7d2c03a6c183_Group 2087333717.svg"
+             alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>"
+             style="height:32px;width:auto;filter:brightness(0) invert(1);">
+      </a>
+      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">✕</button>
+    </div>
+
+    <nav class="mobile-nav-links">
+      <?php foreach ($navPages as $navPage):
+        $rawLink  = $navPage['input_link'];
+        // Preserve root '/' — don't strip it to empty string
+        $navLink  = $baseUrl . ($rawLink === '/' ? '/' : rtrim($rawLink, '/'));
+        $navName  = htmlspecialchars($navPage['input_name'], ENT_QUOTES, 'UTF-8');
+        $linkPath = rtrim($rawLink, '/') ?: '/';
+        $isActive = ($currentPath === $linkPath);
+      ?>
+        <a href="<?= $navLink ?>" class="mobile-nav-link <?= $isActive ? 'active' : '' ?>">
+          <?= $navName ?>
+        </a>
+      <?php endforeach; ?>
+    </nav>
+
+    <div class="mobile-nav-footer">
+      <?php if ($isCustomerLoggedIn): ?>
+        <a href="<?= $baseUrl ?>/customer-dashboard" class="mobile-nav-account-btn">
+          My Account
+        </a>
+        <a href="<?= $baseUrl ?>/customer-logout" class="mobile-nav-logout">Sign out</a>
+      <?php else: ?>
+        <a href="<?= $baseUrl ?>/customer-login" class="mobile-nav-account-btn">
+          Sign In / Create Account
+        </a>
+      <?php endif; ?>
+      <a href="<?= $baseUrl ?>/contact" class="mobile-nav-cta">Book a Call</a>
+    </div>
   </div>
 
   <!-- ── Cart Drawer ──────────────────────────────────────────── -->

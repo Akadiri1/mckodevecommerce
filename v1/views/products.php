@@ -46,13 +46,13 @@ include APP_PATH . "/views/includes/header.php";
   <div class="container">
 
     <div class="header">
-      <div class="header-left">
+      <div class="header-left" style="margin-bottom:8px;">
         <h2 class="heading-02">Explore products</h2>
       </div>
     </div>
 
     <!-- Search + Filter toolbar -->
-    <div class="products-toolbar-row">
+    <div class="products-toolbar-row" style="margin-top:32px;">
 
       <!-- Search -->
       <div class="products-search-wrap">

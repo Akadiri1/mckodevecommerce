@@ -171,11 +171,34 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
   <script src="<?= $baseUrl ?>/assets/js/venora-app.js?v=<?= time() ?>"></script>
 
   <script>
-    // Mobile menu toggle
-    document.getElementById('mobileMenuToggle').addEventListener('click', function() {
-      var menu = document.querySelector('.nav-menu-wrapper');
-      if (menu) menu.classList.toggle('open');
-    });
+    // Mobile nav sidebar
+    (function() {
+      var toggle  = document.getElementById('mobileMenuToggle');
+      var sidebar = document.getElementById('mobileNavSidebar');
+      var overlay = document.getElementById('mobileNavOverlay');
+      var closeBtn = document.getElementById('mobileNavClose');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      if (toggle)  toggle.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+
+      // Close on nav link tap
+      sidebar && sidebar.querySelectorAll('.mobile-nav-link').forEach(function(a) {
+        a.addEventListener('click', closeSidebar);
+      });
+    })();
+
 
     // Cart drawer close button
     document.getElementById('cartDrawerClose').addEventListener('click', function() {
