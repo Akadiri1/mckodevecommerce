@@ -40,7 +40,7 @@ include APP_PATH . "/views/includes/header.php";
         <div style="font-size:64px;margin-bottom:20px;">🛍</div>
         <h2 class="heading-03" style="margin-bottom:12px;">Your cart is empty</h2>
         <p class="p-01 color-gray" style="margin-bottom:28px;">Add some products you love to get started.</p>
-        <a class="btn-02-link w-inline-block" href="/products" style="display:inline-flex;">
+        <a class="btn-02-link w-inline-block" href="<?= $baseUrl ?>/products" style="display:inline-flex;">
           <div class="btn-inner"><div class="btn-text-wrap">
             <div class="btn-text-3 _01"><div class="cta-text">Shop Now</div></div>
             <div class="btn-text-3 _02"><div class="cta-text">Shop Now</div></div>
@@ -60,16 +60,22 @@ include APP_PATH . "/views/includes/header.php";
             $p = $cartProducts[$row["input_product_id"]] ?? null;
             if (!$p) continue;
             $rowId     = htmlspecialchars($row["hash_id"], ENT_QUOTES, "UTF-8");
+            $prodId    = (int)($p["id"] ?? 0);
             $lineTotal = (float)$p["input_price"] * (int)$row["input_quantity"];
+            $prodLink  = $baseUrl . '/products/' . htmlspecialchars($p["hash_id"], ENT_QUOTES, "UTF-8") . '/' . cleans($p["input_title"]);
           ?>
             <div class="cart-item-row" id="cart-row-<?= $rowId ?>">
-              <a href="/products/<?= $p["hash_id"] ?>/<?= cleans($p["input_title"]) ?>"
+              <a href="<?= $prodLink ?>"
                  style="text-decoration:none;display:flex;gap:16px;align-items:flex-start;">
-                <img src="<?= htmlspecialchars($p["image_1"] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>"
-                     style="width:72px;height:88px;object-fit:cover;border-radius:4px;flex-shrink:0;"
-                     alt="<?= htmlspecialchars($p["input_title"], ENT_QUOTES, "UTF-8") ?>">
+                <div data-admc-image="panel_products" data-admc-id="<?= $prodId ?>"
+                     style="flex-shrink:0;">
+                  <img src="<?= htmlspecialchars($p["image_1"] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>"
+                       style="width:72px;height:88px;object-fit:cover;border-radius:4px;"
+                       alt="<?= htmlspecialchars($p["input_title"], ENT_QUOTES, "UTF-8") ?>">
+                </div>
                 <div>
-                  <div style="font-size:15px;font-weight:600;color:#072708;margin-bottom:4px;line-height:1.3;">
+                  <div style="font-size:15px;font-weight:600;color:#072708;margin-bottom:4px;line-height:1.3;"
+                       data-admc-manage="panel_products" data-admc-id="<?= $prodId ?>">
                     <?= htmlspecialchars($p["input_title"], ENT_QUOTES, "UTF-8") ?>
                   </div>
                   <?php if (!empty($row["input_variant"])): ?>
@@ -121,10 +127,10 @@ include APP_PATH . "/views/includes/header.php";
             <span class="order-total-label">Total</span>
             <span class="order-total-value"><?= $sym ?><?= number_format($total, 2) ?></span>
           </div>
-          <a href="/checkout" class="place-order-btn" style="text-decoration:none;display:block;text-align:center;margin-top:0;">
+          <a href="<?= $baseUrl ?>/checkout" class="place-order-btn" style="text-decoration:none;display:block;text-align:center;margin-top:0;">
             Proceed to Checkout
           </a>
-          <a href="/products" style="display:block;text-align:center;margin-top:12px;font-size:13px;color:#5c5f6a;text-decoration:underline;">
+          <a href="<?= $baseUrl ?>/products" style="display:block;text-align:center;margin-top:12px;font-size:13px;color:#5c5f6a;text-decoration:underline;">
             Continue Shopping
           </a>
         </div>
@@ -140,15 +146,16 @@ include APP_PATH . "/views/includes/header.php";
 </div>
 
 <script>
+var _cartBase = (typeof window.MCK_BASE_URL !== 'undefined' ? window.MCK_BASE_URL : '') || '';
 function doCartUpdate(cartId, qty) {
-  fetch('/cart-update', {
+  fetch(_cartBase + '/cart-update', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({cart_id: cartId, quantity: parseInt(qty)})
   }).then(function(r){ return r.json(); }).then(function(){ location.reload(); });
 }
 function doCartRemove(cartId) {
-  fetch('/cart-remove', {
+  fetch(_cartBase + '/cart-remove', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({cart_id: cartId})

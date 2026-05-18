@@ -68,6 +68,8 @@ switch ($s1) {
         include APP_PATH . "/views/quick_view_backend.php"; $is404 = false; die;
     case "checkout-process":
         include APP_PATH . "/views/checkout_process_backend.php"; $is404 = false; die;
+    case "fetch-state-backend":
+        include APP_PATH . "/views/fetch_state_backend.php"; $is404 = false; die;
     case "contact-submit":
         include APP_PATH . "/views/contact_backend.php"; $is404 = false; die;
     case "newsletter-subscribe":

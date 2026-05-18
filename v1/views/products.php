@@ -41,7 +41,11 @@ $addToCartIcon = "https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<!-- PRODUCTS HERO -->
+<!-- [cbcode_30001o] -->
+
+<!-- PRODUCTS PAGE -->
+<div data-cbsection="cb1">
+<!-- [cbcode_30001Productsо] -->
 <section class="products hero-section">
   <div class="container">
 
@@ -429,5 +433,9 @@ include APP_PATH . "/views/includes/header.php";
   });
 })();
 </script>
+
+<!-- [cbcode_30001Productsc] -->
+</div>
+<!-- [cbcode_30001c] -->
 
 <?php include APP_PATH . "/views/includes/footer.php"; ?>

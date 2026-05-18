@@ -1,6 +1,6 @@
 <?php
 // /products/{hash_id} or /products/{hash_id}/{slug}
-$hash = $uri[2] ?? "";
+$hash = $s2 ?? $uri[2] ?? '';
 $productArr = selectContent($conn, "panel_products", ["hash_id" => $hash, "visibility" => "show"]);
 if (empty($productArr)) { include APP_PATH . "/views/404.php"; die; }
 $product = $productArr[0];

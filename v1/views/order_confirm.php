@@ -1,5 +1,5 @@
 ﻿<?php
-$hash = $uri[2] ?? '';
+$hash = $s2 ?? $uri[2] ?? '';
 $orderArr = selectContent($conn, "read_orders", ["hash_id" => $hash]);
 if (empty($orderArr)) { include APP_PATH . "/views/404.php"; die; }
 $order = $orderArr[0];

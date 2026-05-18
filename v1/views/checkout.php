@@ -5,7 +5,27 @@ $bodyClass  = "page-light-navbar";
 $sessionId = session_id();
 $cartRows  = selectContent($conn, "read_cart", ["input_session_id" => $sessionId, "visibility" => "show"]);
 
-if (empty($cartRows)) { header("Location: /cart"); exit; }
+if (empty($cartRows)) { header("Location: " . ($baseUrl ?? '') . "/cart"); exit; }
+
+// ── Checkout labels (ADMC-editable via settings_shop_checkout_labels) ──────────
+try {
+    $checkoutSett = selectContent($conn, "settings_shop_checkout_labels", ["visibility" => "show"]);
+    $checkoutSett = !empty($checkoutSett) ? $checkoutSett[0] : [];
+} catch (Exception $e) { $checkoutSett = []; }
+$csId           = $checkoutSett['id'] ?? '';
+$csPageTitle    = htmlspecialchars($checkoutSett['input_page_heading']         ?? 'Checkout',             ENT_QUOTES, 'UTF-8');
+$csContact      = htmlspecialchars($checkoutSett['input_contact_block_heading']?? 'Billing Details',      ENT_QUOTES, 'UTF-8');
+$csShipAddr     = htmlspecialchars($checkoutSett['input_address_block_heading']?? 'Shipping Address',     ENT_QUOTES, 'UTF-8');
+$csShipMethod   = htmlspecialchars($checkoutSett['input_shipping_block_heading']?? 'Shipping Method',     ENT_QUOTES, 'UTF-8');
+$csPayment      = htmlspecialchars($checkoutSett['input_payment_block_heading']?? 'Payment Information',  ENT_QUOTES, 'UTF-8');
+$csPlaceOrder   = htmlspecialchars($checkoutSett['input_place_order_btn']      ?? 'Place Order',          ENT_QUOTES, 'UTF-8');
+$csSummaryTitle = htmlspecialchars($checkoutSett['input_summary_title']        ?? 'Order Summary',        ENT_QUOTES, 'UTF-8');
+// Shipping option labels & prices from DB
+$csStdName      = htmlspecialchars($checkoutSett['input_standard_name'] ?? 'Standard Shipping', ENT_QUOTES, 'UTF-8');
+$csStdTime      = htmlspecialchars($checkoutSett['input_standard_time'] ?? '5–7 business days', ENT_QUOTES, 'UTF-8');
+$csExpName      = htmlspecialchars($checkoutSett['input_express_name']  ?? 'Express Shipping',  ENT_QUOTES, 'UTF-8');
+$csExpTime      = htmlspecialchars($checkoutSett['input_express_time']  ?? '2–3 business days', ENT_QUOTES, 'UTF-8');
+$csExpPrice     = (float)($checkoutSett['input_express_price'] ?? 12.99);
 
 $productIds   = array_unique(array_column($cartRows, "input_product_id"));
 $cartProducts = [];
@@ -32,150 +52,181 @@ include APP_PATH . "/views/includes/header.php";
 
 <?php/*##cbcode_70001o##*?>
 <div data-cbcodesection="cbcode_70001">
-<section style="padding:60px 0 100px;background:#f6f6f6;min-height:70vh;">
+<div style="height:100px;background:#f6f6f6;"></div>
+<section style="padding:0 0 100px;background:#f6f6f6;min-height:70vh;">
   <div class="container">
-    <h1 class="heading-02" style="margin-bottom:40px;">Checkout</h1>
+    <h1 class="heading-02" style="margin-bottom:40px;"
+        data-admc-manage="settings_checkout" data-admc-id="<?= $csId ?>"><?= $csPageTitle ?></h1>
     <div class="checkout-layout">
 
-      <!-- ── Checkout form ──────────────────────────────────── -->
+      <!-- ── Checkout form (demo16 structure) ─────────────────── -->
       <div>
-        <form id="checkoutForm" onsubmit="submitCheckout(event)">
+        <?php
+        // Prefill from session/localStorage fallback
+        $val_firstname = $_SESSION['customer_first_name'] ?? '';
+        $val_lastname  = $_SESSION['customer_last_name']  ?? '';
+        $val_email     = $_SESSION['customer_email']      ?? '';
+        $val_phone     = '';
+        ?>
+        <form id="checkoutForm">
 
-          <!-- Contact info -->
+          <!-- Billing Details -->
           <div class="checkout-block">
             <div class="checkout-block-header">
-              <div class="checkout-block-title">Contact Information</div>
+              <div class="checkout-block-title"
+                   data-admc-manage="settings_checkout" data-admc-id="<?= $csId ?>">Billing Details</div>
+              <p style="font-size:12px;color:#888;margin:4px 0 0;">This address will be used for delivery</p>
             </div>
             <div class="checkout-block-body">
+
               <div class="checkout-row">
                 <div class="checkout-field">
                   <label class="checkout-label">First Name *</label>
-                  <input class="checkout-input" type="text" name="first_name" placeholder="Jane" required>
+                  <input class="checkout-input required-field" type="text" name="first_name" id="firstname"
+                         value="<?= htmlspecialchars($val_firstname) ?>" placeholder="Jane" required>
                 </div>
                 <div class="checkout-field">
                   <label class="checkout-label">Last Name *</label>
-                  <input class="checkout-input" type="text" name="last_name" placeholder="Smith" required>
+                  <input class="checkout-input required-field" type="text" name="last_name" id="lastname"
+                         value="<?= htmlspecialchars($val_lastname) ?>" placeholder="Smith" required>
                 </div>
               </div>
+
               <div class="checkout-field">
                 <label class="checkout-label">Email Address *</label>
-                <input class="checkout-input" type="email" name="email" placeholder="jane@example.com" required>
+                <input class="checkout-input required-field" type="email" name="email" id="emailInput"
+                       value="<?= htmlspecialchars($val_email) ?>" placeholder="jane@example.com" required>
+                <span id="emailMsg" style="font-size:12px;margin-top:4px;display:block;min-height:16px;"></span>
               </div>
-              <div class="checkout-field">
-                <label class="checkout-label">Phone Number</label>
-                <input class="checkout-input" type="tel" name="phone" placeholder="+1 (555) 000-0000">
-              </div>
-            </div>
-          </div>
 
-          <!-- Shipping address -->
-          <div class="checkout-block">
-            <div class="checkout-block-header">
-              <div class="checkout-block-title">Shipping Address</div>
-            </div>
-            <div class="checkout-block-body">
               <div class="checkout-field">
-                <label class="checkout-label">Address Line 1 *</label>
-                <input class="checkout-input" type="text" name="address_1" placeholder="123 Main Street" required>
+                <label class="checkout-label">Country *</label>
+                <select class="checkout-select required-field" name="country" id="countrySelect"
+                        onchange="fetchStatesFunc(this)" required>
+                  <option value="" selected disabled>Select Country…</option>
+                  <?php
+                  $countries_list = [
+                    'NG'=>'Nigeria','US'=>'United States','GB'=>'United Kingdom',
+                    'CA'=>'Canada','AU'=>'Australia','DE'=>'Germany','FR'=>'France',
+                    'ZA'=>'South Africa','GH'=>'Ghana','KE'=>'Kenya','IN'=>'India',
+                  ];
+                  foreach ($countries_list as $code => $name): ?>
+                    <option value="<?= $code ?>"><?= strtoupper($name) ?></option>
+                  <?php endforeach; ?>
+                </select>
               </div>
-              <div class="checkout-field">
-                <label class="checkout-label">Address Line 2</label>
-                <input class="checkout-input" type="text" name="address_2" placeholder="Apartment, suite, etc.">
-              </div>
+
               <div class="checkout-row">
                 <div class="checkout-field">
-                  <label class="checkout-label">City *</label>
-                  <input class="checkout-input" type="text" name="city" required>
-                </div>
-                <div class="checkout-field">
-                  <label class="checkout-label">Postal Code *</label>
-                  <input class="checkout-input" type="text" name="postal_code" required>
-                </div>
-              </div>
-              <div class="checkout-row">
-                <div class="checkout-field">
-                  <label class="checkout-label">State / Province</label>
-                  <input class="checkout-input" type="text" name="state">
-                </div>
-                <div class="checkout-field">
-                  <label class="checkout-label">Country *</label>
-                  <select class="checkout-select" name="country" required>
-                    <option value="">Select country…</option>
-                    <option value="US" selected>United States</option>
-                    <option value="CA">Canada</option>
-                    <option value="GB">United Kingdom</option>
-                    <option value="NG">Nigeria</option>
-                    <option value="AU">Australia</option>
-                    <option value="DE">Germany</option>
-                    <option value="FR">France</option>
+                  <label class="checkout-label">State / Province *</label>
+                  <select class="checkout-select required-field" name="state" id="stateSelect" required>
+                    <option value="" selected disabled>Select State</option>
                   </select>
                 </div>
+                <div class="checkout-field">
+                  <label class="checkout-label">Town / City *</label>
+                  <input class="checkout-input required-field" type="text" name="city" id="city"
+                         placeholder="Lagos" required>
+                </div>
               </div>
+
               <div class="checkout-field">
-                <label class="checkout-label">Order Notes (optional)</label>
-                <textarea class="checkout-input" name="notes" rows="2"
-                          placeholder="Any special instructions for your order..."
-                          style="height:auto;min-height:70px;resize:vertical;"></textarea>
+                <label class="checkout-label">Street Address *</label>
+                <input class="checkout-input required-field" type="text" name="address_1" id="street-address-1"
+                       placeholder="House number and street name" required>
               </div>
+
+              <div class="checkout-row">
+                <div class="checkout-field">
+                  <label class="checkout-label">Phone Number *</label>
+                  <input class="checkout-input" type="tel" name="phone" id="phoneInput"
+                         value="<?= htmlspecialchars($val_phone) ?>" required>
+                  <span id="phoneMsg" style="font-size:12px;margin-top:4px;display:block;min-height:16px;"></span>
+                  <input type="hidden" id="fullPhoneNumber" name="phone_full">
+                </div>
+                <div class="checkout-field">
+                  <label class="checkout-label">Zip Code</label>
+                  <input class="checkout-input" type="text" name="postal_code" id="zip_code" placeholder="100001">
+                </div>
+              </div>
+
+              <div class="checkout-field">
+                <label class="checkout-label">Additional Notes (optional)</label>
+                <textarea class="checkout-input" name="notes" rows="3"
+                          placeholder="Any special instructions for your order..."
+                          style="height:auto;min-height:80px;resize:vertical;"></textarea>
+              </div>
+
             </div>
           </div>
 
-          <!-- Shipping method -->
+          <!-- Shipping Method -->
           <div class="checkout-block">
             <div class="checkout-block-header">
-              <div class="checkout-block-title">Shipping Method</div>
+              <div class="checkout-block-title"
+                   data-admc-manage="settings_checkout" data-admc-id="<?= $csId ?>"><?= $csShipMethod ?></div>
             </div>
             <div class="checkout-block-body">
-              <label class="shipping-option active">
-                <input type="radio" name="shipping_method" value="standard" checked>
+              <label class="shipping-option active" id="shippingOptStandard">
+                <input type="radio" name="shipping_method" value="standard" checked
+                       onchange="updateShippingTotal('standard')">
                 <div class="shipping-option-label">
-                  <div class="shipping-option-name">Standard Shipping</div>
-                  <div class="shipping-option-time">5–7 business days</div>
+                  <div class="shipping-option-name"
+                       data-admc-manage="settings_shop_checkout_labels" data-admc-id="<?= $csId ?>"><?= $csStdName ?></div>
+                  <div class="shipping-option-time"
+                       data-admc-manage="settings_shop_checkout_labels" data-admc-id="<?= $csId ?>"><?= $csStdTime ?></div>
                 </div>
                 <span class="shipping-option-price">
                   <?= $shipping === 0 ? "Free" : $sym . number_format($shop_ship_rate, 2) ?>
                 </span>
               </label>
-              <label class="shipping-option">
-                <input type="radio" name="shipping_method" value="express">
+              <?php if ($csExpPrice > 0): ?>
+              <label class="shipping-option" id="shippingOptExpress">
+                <input type="radio" name="shipping_method" value="express"
+                       onchange="updateShippingTotal('express')">
                 <div class="shipping-option-label">
-                  <div class="shipping-option-name">Express Shipping</div>
-                  <div class="shipping-option-time">2–3 business days</div>
+                  <div class="shipping-option-name"
+                       data-admc-manage="settings_shop_checkout_labels" data-admc-id="<?= $csId ?>"><?= $csExpName ?></div>
+                  <div class="shipping-option-time"
+                       data-admc-manage="settings_shop_checkout_labels" data-admc-id="<?= $csId ?>"><?= $csExpTime ?></div>
                 </div>
-                <span class="shipping-option-price"><?= $sym ?>12.99</span>
+                <span class="shipping-option-price"><?= $sym ?><?= number_format($csExpPrice, 2) ?></span>
+              </label>
+              <?php endif; ?>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="checkout-block">
+            <div class="checkout-block-header">
+              <div class="checkout-block-title"
+                   data-admc-manage="settings_checkout" data-admc-id="<?= $csId ?>"><?= $csPayment ?></div>
+            </div>
+            <div class="checkout-block-body">
+              <label class="shipping-option active">
+                <input type="radio" name="payment_method" value="Bank Transfer" checked
+                       class="required-field">
+                <div class="shipping-option-label">
+                  <div class="shipping-option-name">Direct Bank Transfer</div>
+                  <div class="shipping-option-time">Pay directly via bank transfer</div>
+                </div>
+              </label>
+              <label class="shipping-option">
+                <input type="radio" name="payment_method" value="Card"
+                       class="required-field">
+                <div class="shipping-option-label">
+                  <div class="shipping-option-name">Pay with Card</div>
+                  <div class="shipping-option-time">Secure online payment</div>
+                </div>
               </label>
             </div>
           </div>
 
-          <!-- Payment info -->
-          <div class="checkout-block">
-            <div class="checkout-block-header">
-              <div class="checkout-block-title">Payment Information</div>
-            </div>
-            <div class="checkout-block-body">
-              <div style="padding:16px;background:#f6f6f6;border-radius:4px;font-size:13px;color:#5c5f6a;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
-                <img src="/assets/img/icons/stripe.svg" alt="Stripe" style="height:20px;">
-                <span>Secure payment powered by Stripe</span>
-              </div>
-              <div class="checkout-field">
-                <label class="checkout-label">Card Number</label>
-                <input class="checkout-input" type="text" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19">
-              </div>
-              <div class="checkout-row">
-                <div class="checkout-field">
-                  <label class="checkout-label">Expiry Date</label>
-                  <input class="checkout-input" type="text" name="card_expiry" placeholder="MM / YY" maxlength="7">
-                </div>
-                <div class="checkout-field">
-                  <label class="checkout-label">CVC</label>
-                  <input class="checkout-input" type="text" name="card_cvc" placeholder="123" maxlength="4">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button type="submit" class="place-order-btn" id="placeOrderBtn">
-            Place Order — <?= $sym ?><?= number_format($total, 2) ?>
+          <button type="button" class="place-order-btn" id="placeOrderBtn"
+                  onclick="submitCheckout()"
+                  disabled
+                  data-admc-manage="settings_checkout" data-admc-id="<?= $csId ?>">
+            Complete Form to Continue
           </button>
           <p style="font-size:12px;color:#b5b5b5;text-align:center;margin-top:10px;">
             Your payment info is encrypted and secure.
@@ -185,13 +236,16 @@ include APP_PATH . "/views/includes/header.php";
 
       <!-- ── Order summary sidebar ──────────────────────────── -->
       <div class="order-summary-card" style="position:sticky;top:100px;">
-        <div class="order-summary-title">Order Summary</div>
+        <div class="order-summary-title"
+             data-admc-manage="settings_checkout" data-admc-id="<?= $csId ?>"><?= $csSummaryTitle ?></div>
         <?php foreach ($cartRows as $row):
           $p = $cartProducts[$row["input_product_id"]] ?? null;
           if (!$p) continue;
+          $summaryProdId = (int)($p['id'] ?? 0);
         ?>
           <div class="order-item">
-            <div style="position:relative;">
+            <div style="position:relative;"
+                 data-admc-image="panel_products" data-admc-id="<?= $summaryProdId ?>">
               <img src="<?= htmlspecialchars($p["image_1"] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>"
                    class="order-item-img"
                    alt="<?= htmlspecialchars($p["input_title"], ENT_QUOTES, "UTF-8") ?>">
@@ -200,7 +254,8 @@ include APP_PATH . "/views/includes/header.php";
               </span>
             </div>
             <div class="order-item-info">
-              <div class="order-item-name"><?= htmlspecialchars($p["input_title"], ENT_QUOTES, "UTF-8") ?></div>
+              <div class="order-item-name"
+                 data-admc-manage="panel_products" data-admc-id="<?= $summaryProdId ?>"><?= htmlspecialchars($p["input_title"], ENT_QUOTES, "UTF-8") ?></div>
               <?php if (!empty($row["input_variant"])): ?>
                 <div class="order-item-variant"><?= htmlspecialchars($row["input_variant"], ENT_QUOTES, "UTF-8") ?></div>
               <?php endif; ?>
@@ -217,7 +272,7 @@ include APP_PATH . "/views/includes/header.php";
         </div>
         <div class="order-row">
           <span class="order-row-label">Shipping</span>
-          <span class="order-row-value"><?= $shipping === 0 ? "Free" : $sym . number_format($shipping, 2) ?></span>
+          <span class="order-row-value" id="summaryShipping"><?= $shipping === 0 ? "Free" : $sym . number_format($shipping, 2) ?></span>
         </div>
         <?php if ($shop_tax_rate > 0): ?>
           <div class="order-row">
@@ -227,7 +282,7 @@ include APP_PATH . "/views/includes/header.php";
         <?php endif; ?>
         <div class="order-total-row">
           <span class="order-total-label">Total</span>
-          <span class="order-total-value"><?= $sym ?><?= number_format($total, 2) ?></span>
+          <span class="order-total-value" id="summaryTotal"><?= $sym ?><?= number_format($total, 2) ?></span>
         </div>
       </div>
 
@@ -240,45 +295,234 @@ include APP_PATH . "/views/includes/header.php";
 <?php/*##cb1c##*/>
 </div>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
 <script>
-// Shipping option toggle
+var _baseUrl = (typeof window.VENORA_BASE_URL !== 'undefined' ? window.VENORA_BASE_URL : '') || '';
+var _sym     = '<?= $sym ?>';
+var _stdShip = <?= (float)$shop_ship_rate ?>;
+var _expShip = <?= (float)$csExpPrice ?>;
+var _subtotal= <?= (float)$subtotal ?>;
+var _tax     = <?= (float)$tax ?>;
+var _currentShipping = <?= (float)$shipping ?>;
+
+/* ── Shipping option toggle ─────────────────────────────── */
 document.querySelectorAll('.shipping-option').forEach(function(opt) {
-  opt.addEventListener('click', function() {
+  opt.querySelector('input[type=radio]').addEventListener('change', function() {
     document.querySelectorAll('.shipping-option').forEach(function(o) { o.classList.remove('active'); });
     opt.classList.add('active');
   });
 });
 
-function submitCheckout(e) {
-  e.preventDefault();
+function updateShippingTotal(method) {
+  _currentShipping = (method === 'express') ? _expShip : (<?= $shop_free_ship > 0 && $subtotal >= $shop_free_ship ? 0 : (float)$shop_ship_rate ?>);
+  var total = _subtotal + _currentShipping + _tax;
+
+  /* Update Order Summary sidebar */
+  var shipEl  = document.getElementById('summaryShipping');
+  var totalEl = document.getElementById('summaryTotal');
+  if (shipEl)  shipEl.textContent  = _currentShipping === 0 ? 'Free' : _sym + _currentShipping.toFixed(2);
+  if (totalEl) totalEl.textContent = _sym + total.toFixed(2);
+
+  /* Update Place Order button if form is valid */
   var btn = document.getElementById('placeOrderBtn');
-  btn.textContent = 'Processing...';
-  btn.disabled = true;
+  if (btn && !btn.disabled) {
+    btn.textContent = '<?= $csPlaceOrder ?> — ' + _sym + total.toFixed(2);
+  }
+}
+
+/* ── intl-tel-input (phone) ─────────────────────────────── */
+var phoneInput = document.querySelector('#phoneInput');
+var phoneMsg   = document.querySelector('#phoneMsg');
+var iti = window.intlTelInput(phoneInput, {
+  utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js',
+  separateDialCode: true,
+  initialCountry: 'ng',
+  geoIpLookup: function(cb) {
+    fetch('https://ipapi.co/json').then(function(r){ return r.json(); }).then(function(d){ cb(d.country_code); }).catch(function(){ cb('ng'); });
+  }
+});
+
+function validatePhone() {
+  if (phoneInput.value.trim()) {
+    if (iti.isValidNumber()) {
+      phoneInput.style.borderColor = '#198754';
+      phoneMsg.style.color = '#198754';
+      phoneMsg.textContent = 'Valid number';
+    } else {
+      phoneInput.style.borderColor = '#dc3545';
+      phoneMsg.style.color = '#dc3545';
+      phoneMsg.textContent = 'Invalid number format';
+    }
+  }
+  checkFormValidity();
+}
+phoneInput.addEventListener('blur', validatePhone);
+phoneInput.addEventListener('keyup', validatePhone);
+phoneInput.addEventListener('countrychange', validatePhone);
+
+/* ── Email validation ───────────────────────────────────── */
+var emailInput = document.querySelector('#emailInput');
+var emailMsg   = document.querySelector('#emailMsg');
+function validateEmail() {
+  var regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (emailInput.value.trim() && regex.test(emailInput.value)) {
+    emailInput.style.borderColor = '#198754';
+    emailMsg.textContent = '';
+  } else if (emailInput.value.trim()) {
+    emailInput.style.borderColor = '#dc3545';
+    emailMsg.style.color = '#dc3545';
+    emailMsg.textContent = 'Invalid email';
+  }
+  checkFormValidity();
+}
+emailInput.addEventListener('input', validateEmail);
+emailInput.addEventListener('blur', validateEmail);
+
+/* ── State fetch (AJAX) ─────────────────────────────────── */
+function fetchStatesFunc(el) {
+  var stateSelect = document.getElementById('stateSelect');
+  stateSelect.innerHTML = '<option>Loading…</option>';
+  stateSelect.disabled = true;
+  fetch(_baseUrl + '/fetch-state-backend', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'countryVal=' + encodeURIComponent(el.value)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res) {
+    stateSelect.disabled = false;
+    stateSelect.innerHTML = '<option value="" disabled selected>Select State</option>';
+    var states = res.success || res.states || [];
+    states.forEach(function(s) {
+      var name = typeof s === 'string' ? s : (s.state || s.name || s);
+      stateSelect.innerHTML += '<option value="' + name + '">' + name + '</option>';
+    });
+    checkFormValidity();
+  })
+  .catch(function() {
+    stateSelect.disabled = false;
+    stateSelect.innerHTML = '<option value="">Type your state below</option>';
+    /* Fallback: convert to text input */
+    var txt = document.createElement('input');
+    txt.type = 'text'; txt.name = 'state'; txt.className = 'checkout-input required-field';
+    txt.placeholder = 'Enter your state'; txt.required = true;
+    txt.addEventListener('input', checkFormValidity);
+    stateSelect.parentNode.replaceChild(txt, stateSelect);
+  });
+}
+
+/* ── Form validity check (enables/disables Place Order) ─── */
+var submitBtn = document.getElementById('placeOrderBtn');
+var requiredFields = document.querySelectorAll('.required-field');
+
+function checkFormValidity() {
+  var valid = true;
+  requiredFields.forEach(function(f) {
+    if (f.type === 'radio') return; /* at least one radio checked = OK */
+    if (!f.value.trim()) valid = false;
+  });
+  if (emailInput.style.borderColor === 'rgb(220, 53, 69)') valid = false;
+  if (phoneInput.value.trim() && !iti.isValidNumber()) valid = false;
+  if (!phoneInput.value.trim()) valid = false;
+
+  submitBtn.disabled = !valid;
+  var liveTotal = _subtotal + _currentShipping + _tax;
+  submitBtn.textContent = valid
+    ? '<?= $csPlaceOrder ?> — ' + _sym + liveTotal.toFixed(2)
+    : 'Complete Form to Continue';
+}
+
+requiredFields.forEach(function(f) {
+  f.addEventListener('input', checkFormValidity);
+  f.addEventListener('change', checkFormValidity);
+});
+
+/* ── Auto-fill from localStorage ───────────────────────── */
+window.addEventListener('DOMContentLoaded', function() {
+  var stored;
+  try { stored = JSON.parse(localStorage.getItem('mckCheckoutData')); } catch(e) {}
+  if (stored) {
+    ['firstname','lastname','city','street-address-1','zip_code'].forEach(function(id) {
+      var el = document.getElementById(id); var key = id.replace('-','_');
+      if (el && !el.value && stored[key]) { el.value = stored[key]; }
+    });
+    if (stored.email && !emailInput.value) emailInput.value = stored.email;
+    if (stored.phone) {
+      var wait = setInterval(function() {
+        if (typeof intlTelInputUtils !== 'undefined') {
+          clearInterval(wait);
+          iti.setNumber(stored.phone.startsWith('+') ? stored.phone : '+' + stored.phone);
+          setTimeout(function(){ validatePhone(); checkFormValidity(); }, 100);
+        }
+      }, 200);
+    }
+    if (stored.country) {
+      var cs = document.getElementById('countrySelect');
+      if (cs) { cs.value = stored.country; fetchStatesFunc(cs); }
+    }
+  }
+  setTimeout(checkFormValidity, 800);
+});
+
+/* ── Submit ─────────────────────────────────────────────── */
+function submitCheckout() {
+  if (submitBtn.disabled) return;
+  if (!iti.isValidNumber()) {
+    phoneInput.style.borderColor = '#dc3545';
+    phoneMsg.style.color = '#dc3545';
+    phoneMsg.textContent = 'Please enter a valid phone number';
+    phoneInput.focus(); return;
+  }
+  document.getElementById('fullPhoneNumber').value = iti.getNumber();
+
+  /* Save to localStorage */
+  try {
+    localStorage.setItem('mckCheckoutData', JSON.stringify({
+      firstname: document.getElementById('firstname').value,
+      lastname:  document.getElementById('lastname').value,
+      email:     emailInput.value,
+      phone:     iti.getNumber(),
+      city:      document.getElementById('city').value,
+      street_address_1: document.getElementById('street-address-1').value,
+      zip_code:  document.getElementById('zip_code').value,
+      country:   document.getElementById('countrySelect').value,
+      state:     (document.getElementById('stateSelect') || {}).value || ''
+    }));
+  } catch(e) {}
+
+  submitBtn.textContent = 'Processing…';
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = '0.7';
+
   var data = {};
-  new FormData(e.target).forEach(function(v, k) { data[k] = v; });
-  fetch('/checkout-process', {
+  new FormData(document.getElementById('checkoutForm')).forEach(function(v,k){ data[k]=v; });
+
+  fetch(_baseUrl + '/checkout-process', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
   })
-  .then(function(r) { return r.json(); })
+  .then(function(r){ return r.json(); })
   .then(function(res) {
     if (res.success) {
-      window.location.href = '/orders/' + res.order_id;
+      window.location.href = _baseUrl + '/orders/' + res.order_id;
     } else {
-      btn.textContent = '✗ ' + (res.error || 'Payment failed. Please try again.');
-      btn.style.background = '#c1121f';
-      btn.disabled = false;
+      submitBtn.textContent = '✗ ' + (res.error || 'Payment failed. Try again.');
+      submitBtn.style.background = '#c1121f';
+      submitBtn.style.opacity = '1';
+      submitBtn.disabled = false;
       setTimeout(function() {
-        btn.textContent = 'Place Order — <?= $sym ?><?= number_format($total, 2) ?>';
-        btn.style.background = '';
+        var total = _subtotal + _currentShipping + _tax;
+        submitBtn.textContent = '<?= $csPlaceOrder ?> — ' + _sym + total.toFixed(2);
+        submitBtn.style.background = ''; submitBtn.style.opacity = '1';
       }, 4000);
     }
   })
   .catch(function() {
-    btn.textContent = 'Network error — please try again.';
-    btn.style.background = '#c1121f';
-    btn.disabled = false;
+    submitBtn.textContent = 'Network error — please try again.';
+    submitBtn.style.background = '#c1121f';
+    submitBtn.disabled = false; submitBtn.style.opacity = '1';
   });
 }
 </script>

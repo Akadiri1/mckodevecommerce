@@ -25,7 +25,11 @@ $galleryImgs = [
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<!-- CONTACT SECTION -->
+<!-- [cbcode_50001o] -->
+
+<!-- CONTACT PAGE -->
+<div data-cbsection="cb1">
+<!-- [cbcode_50001Contacto] -->
 <section class="contact section-0-120">
   <div class="container">
     <div class="venora-contact-grid">
@@ -227,5 +231,9 @@ include APP_PATH . "/views/includes/header.php";
 </script>
 </section>
 
+
+<!-- [cbcode_50001Contactc] -->
+</div>
+<!-- [cbcode_50001c] -->
 
 <?php include APP_PATH . "/views/includes/footer.php"; ?>

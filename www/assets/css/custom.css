@@ -1040,13 +1040,8 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Webflow animation override — any element with data-w-id that
-   had inline opacity:0 set by Webflow's ix2 system */
-[data-w-id] {
-  opacity: 1 !important;
-  -webkit-transform: none !important;
-  transform: none !important;
-}
+/* Webflow IX2 replacement — JS controls inline style transitions directly.
+   No CSS class needed — venora-app.js sets style.opacity/transform via JS. */
 
 /* ────────────────────────────────────────────────────────────
    20. ADMC LIVE EDIT
@@ -1351,32 +1346,7 @@ div.home-hero,
    animate in smoothly on page load / scroll entry.
    ──────────────────────────────────────────────────────────── */
 
-/* Fade-up for elements that had Webflow IX animations */
-.home-hero-top,
-.home-hero-btns,
-.hero-bottom .client-review,
-.hero-bottom .partner,
-.hero-bottom .scroll-text-wrap,
-.header-left,
-.header-right,
-.content-text,
-.testimonial-top,
-.author-name,
-.happy-client-card,
-.content-card,
-.content-top,
-.content-bottom {
-  animation: wf-fade-up 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-/* Stagger siblings */
-.hero-bottom .partner         { animation-delay: 0.15s; }
-.hero-bottom .scroll-text-wrap{ animation-delay: 0.25s; }
-.header-right                 { animation-delay: 0.1s; }
-.content-card:nth-child(2)    { animation-delay: 0.1s; }
-.content-card:nth-child(3)    { animation-delay: 0.18s; }
-.author-name                  { animation-delay: 0.15s; }
-.happy-client-card            { animation-delay: 0.08s; }
+/* Hero elements are handled entirely by venora-app.js — no CSS animation needed */
 
 @keyframes wf-fade-up {
   from { opacity: 0; transform: translate3d(0, 40px, 0); }

@@ -167,6 +167,10 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
   <!-- jQuery (for Webflow CSS class compatibility) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+  <!-- GSAP + ScrollTrigger — same engine Webflow IX2 uses internally -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
   <!-- Venora App JS -->
   <script src="<?= $baseUrl ?>/assets/js/venora-app.js?v=<?= time() ?>"></script>
 

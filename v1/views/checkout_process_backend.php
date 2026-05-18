@@ -118,10 +118,12 @@ if (!empty($site_email_from) && !empty($site_email_password)) {
         $mail->addAddress($email, "$firstName $lastName");
         $mail->isHTML(true);
         $mail->Subject = "Order Confirmed — #$orderHash | " . $shop_name;
+        $protocol  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $siteBase  = $protocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($baseUrl ?? '');
         $mail->Body = "<div style='font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;'>"
             . "<h2 style='color:#072708;'>Order Confirmed!</h2>"
-            . "<p>Hi $firstName, your order <strong>#$orderHash</strong> has been placed. Total: <strong>\$$total</strong></p>"
-            . "<a href='" . ($_SERVER['HTTP_HOST'] ?? '') . "/orders/$orderHash' style='display:inline-block;padding:12px 28px;background:#072708;color:white;text-decoration:none;border-radius:4px;font-weight:600;'>View Order</a>"
+            . "<p>Hi $firstName, your order <strong>#$orderHash</strong> has been placed. Total: <strong>" . htmlspecialchars($shop_symbol, ENT_QUOTES, 'UTF-8') . number_format($total, 2) . "</strong></p>"
+            . "<a href='$siteBase/orders/$orderHash' style='display:inline-block;padding:12px 28px;background:#072708;color:white;text-decoration:none;border-radius:4px;font-weight:600;'>View Order</a>"
             . "</div>";
         $mail->send();
     } catch (Exception $e) { /* silent */ }

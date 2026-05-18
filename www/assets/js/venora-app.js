@@ -561,34 +561,158 @@
   var nlPopup = $('.newsletter-popup');
   if (nlPopup && !sessionStorage.getItem('nl_dismissed')) {
     setTimeout(function() { nlPopup.classList.add('show'); }, 8000);
-    on($('.newsletter-popup-close', nlPopup), 'click', function() {
-      nlPopup.classList.remove('show'); sessionStorage.setItem('nl_dismissed', '1');
+
+    function dismissNlPopup() {
+      nlPopup.classList.remove('show');
+      sessionStorage.setItem('nl_dismissed', '1');
+    }
+
+    /* Close (✕) and "No thanks" both dismiss */
+    on($('.newsletter-popup-close', nlPopup), 'click', dismissNlPopup);
+    on($('.newsletter-popup-dismiss', nlPopup), 'click', dismissNlPopup);
+
+    /* Click outside popup closes it */
+    on(document, 'click', function(e) {
+      if (nlPopup.classList.contains('show') && !nlPopup.contains(e.target)) {
+        dismissNlPopup();
+      }
     });
+
     var nlForm = $('.newsletter-popup-form', nlPopup);
     if (nlForm) {
       on(nlForm, 'submit', function(e) {
         e.preventDefault();
-        var email = nlForm.querySelector('input[type=email]').value;
+        var emailVal = nlForm.querySelector('input[type=email]').value.trim();
+        if (!emailVal) return;
+        var btn = nlForm.querySelector('button[type=submit]');
+        if (btn) { btn.disabled = true; btn.textContent = '...'; }
         fetch(baseUrl + '/newsletter-subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'email=' + encodeURIComponent(email)
-        }).finally(function() {
-          nlPopup.querySelector('p').textContent = 'Thank you for subscribing!';
+          body: 'email=' + encodeURIComponent(emailVal)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          var msg = nlPopup.querySelector('p');
+          if (msg) msg.textContent = res.success
+            ? 'Thank you for subscribing!'
+            : 'Something went wrong. Please try again.';
           nlForm.style.display = 'none';
-          setTimeout(function() { nlPopup.classList.remove('show'); sessionStorage.setItem('nl_dismissed', '1'); }, 2500);
+          if (res.success) setTimeout(dismissNlPopup, 2500);
+          else if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
+        })
+        .catch(function() {
+          if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
         });
       });
     }
   }
 
-  // ── Scroll reveal ────────────────────────────────────────────
+  // ── Scroll reveal (.reveal class — legacy) ───────────────────
   var revealObs = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObs.unobserve(entry.target); }
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
   $$('.reveal').forEach(function(el) { revealObs.observe(el); });
+
+  // ── GSAP + ScrollTrigger — Webflow IX2 replacement ───────────
+  // Replicates the exact venora template animations using GSAP,
+  // the same engine Webflow IX2 uses internally.
+  if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Collect all elements with Webflow initial opacity:0 inline style
+    var wfEls = [];
+    document.querySelectorAll('[data-w-id]').forEach(function(el) {
+      var s = el.getAttribute('style') || '';
+      if (s.indexOf('opacity:0') !== -1 || s.indexOf('opacity: 0') !== -1) {
+        // Clear verbose Webflow multi-vendor inline transforms
+        el.style.removeProperty('-webkit-transform');
+        el.style.removeProperty('-moz-transform');
+        el.style.removeProperty('-ms-transform');
+        gsap.set(el, { opacity: 0, y: 36, clearProps: 'none' });
+        wfEls.push(el);
+      }
+    });
+
+    // Hero elements — animate immediately with stagger (no scroll trigger)
+    var heroEls = [];
+    document.querySelectorAll('.home-hero [data-w-id], .about-hero [data-w-id]').forEach(function(el) {
+      if (wfEls.indexOf(el) !== -1) heroEls.push(el);
+    });
+    if (heroEls.length) {
+      gsap.to(heroEls, {
+        opacity: 1, y: 0,
+        duration: 0.85,
+        ease: 'power2.out',
+        stagger: 0.14,
+        delay: 0.1
+      });
+    }
+
+    // Scroll-triggered fade-up for all other animated elements
+    wfEls.forEach(function(el) {
+      if (el.closest('.home-hero') || el.closest('.about-hero')) return;
+      gsap.to(el, {
+        opacity: 1, y: 0,
+        duration: 0.75,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 88%',
+          once: true
+        }
+      });
+    });
+
+    // Images with .speed class — subtle parallax (like the template)
+    document.querySelectorAll('.images.speed').forEach(function(img) {
+      gsap.to(img, {
+        yPercent: -8,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: img.closest('.content-img-box') || img.parentElement,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1.5
+        }
+      });
+    });
+
+    // Images with .zoom class — scale reveal
+    document.querySelectorAll('.all-img.zoom').forEach(function(img) {
+      gsap.fromTo(img,
+        { scale: 1.08 },
+        {
+          scale: 1,
+          duration: 0.9,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: img.closest('.product-img-box, .features-card, .content-img-box') || img.parentElement,
+            start: 'top 85%',
+            once: true
+          }
+        }
+      );
+    });
+
+  } else {
+    // GSAP not loaded — fallback to simple IntersectionObserver
+    document.querySelectorAll('[data-w-id]').forEach(function(el) {
+      var s = el.getAttribute('style') || '';
+      if (s.indexOf('opacity:0') === -1 && s.indexOf('opacity: 0') === -1) return;
+      el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(32px)';
+      new IntersectionObserver(function(entries, obs) {
+        if (entries[0].isIntersecting) {
+          requestAnimationFrame(function() { el.style.opacity='1'; el.style.transform='translateY(0)'; });
+          obs.disconnect();
+        }
+      }, { threshold: 0.12 }).observe(el);
+    });
+  }
 
   // ── Event delegation ─────────────────────────────────────────
   document.addEventListener('click', function(e) {
