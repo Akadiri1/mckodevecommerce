@@ -24,7 +24,12 @@ include D_PATH . "/.env/config.php";
 require APP_PATH . "/models/model.php";
 require APP_PATH . "/controllers/controller.php";
 
-setcookie("admc", "mckodevecommerce", time() + 31536000, "/", "", false, false);
+if (getenv("ADMC_USERNAME")) {
+  $admc_username = getenv("ADMC_USERNAME");
+  setcookie("admc", "", time() - 3600, "/", null, false, false);
+  setcookie("admc", "", time() - 3600, null, null, false, false);
+  setcookie("admc", $admc_username, time() + 31536000, "/", null, false, false);
+}
 
 $shopConfig   = selectContent($conn, "settings_shop_config", ["visibility" => "show"]);
 $websiteStyle = selectContent($conn, "website_status",       ["visibility" => "show"]);
@@ -44,7 +49,8 @@ $logo_directory   = $shopConfig[0]["image_1"]                ?? "/assets/img/bra
 $logo_dark        = $shopConfig[0]["image_2"]                ?? "/assets/img/brand/venora-dark.svg";
 $metaDescription  = $shopConfig[0]["text_description"]       ?? "";
 $metakeys         = $shopConfig[0]["input_seo_keywords"]     ?? "";
-$metaImage        = $baseUrl . '/screenshot.png';
+$_seoProtocol     = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$metaImage        = $_seoProtocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/screenshot.png';
 
 $site_email_from             = $shopConfig[0]["input_email_from"]             ?? "";
 $site_email_smtp_host        = $shopConfig[0]["input_email_smtp_host"]        ?? "smtp.gmail.com";
