@@ -44,7 +44,7 @@ $logo_directory   = $shopConfig[0]["image_1"]                ?? "/assets/img/bra
 $logo_dark        = $shopConfig[0]["image_2"]                ?? "/assets/img/brand/venora-dark.svg";
 $metaDescription  = $shopConfig[0]["text_description"]       ?? "";
 $metakeys         = $shopConfig[0]["input_seo_keywords"]     ?? "";
-$metaImage        = $logo_directory;
+$metaImage        = $baseUrl . '/screenshot.png';
 
 $site_email_from             = $shopConfig[0]["input_email_from"]             ?? "";
 $site_email_smtp_host        = $shopConfig[0]["input_email_smtp_host"]        ?? "smtp.gmail.com";

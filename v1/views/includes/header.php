@@ -15,7 +15,13 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   <meta property="og:title"       content="<?= htmlspecialchars($shop_name, ENT_QUOTES, "UTF-8") ?>">
   <meta property="og:description" content="<?= htmlspecialchars($metaDescription, ENT_QUOTES, "UTF-8") ?>">
   <meta property="og:image"       content="<?= htmlspecialchars($metaImage, ENT_QUOTES, "UTF-8") ?>">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:type"        content="website">
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="<?= htmlspecialchars($shop_name, ENT_QUOTES, "UTF-8") ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDescription, ENT_QUOTES, "UTF-8") ?>">
+  <meta name="twitter:image"       content="<?= htmlspecialchars($metaImage, ENT_QUOTES, "UTF-8") ?>">
 
   <?php if (!empty($fetchFavicon[0]["image_1"])): ?>
     <link rel="icon" href="<?= htmlspecialchars($fetchFavicon[0]["image_1"], ENT_QUOTES, "UTF-8") ?>">
