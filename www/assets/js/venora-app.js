@@ -70,7 +70,7 @@
   }
 
   function updateCartBadge(count) {
-    var badges = $$('.cart-count-badge');
+    var badges = [document.getElementById('cartBadge')].filter(Boolean);
     badges.forEach(function(b) {
       b.textContent = count;
       b.classList.toggle('has-items', count > 0);
