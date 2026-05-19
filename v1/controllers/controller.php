@@ -542,7 +542,7 @@ function selectContent($dbconn, $table, $columnWhere)
     $newt = $columnWhere;
     // die(var_dump($newt));
     if (count($columnWhere) > 0) {
-      $stmt->execute($newt);
+      $stmt->execute($columnWhere);
     } else {
       $stmt->execute();
     }
@@ -554,7 +554,7 @@ function selectContent($dbconn, $table, $columnWhere)
 
     return $result;
   } catch (PDOException $e) {
-    die($e);
+    throw $e;
   }
 }
 function selectContentDesc($dbconn, $table, $columnWhere, $order, $limit)
@@ -915,4 +915,16 @@ if (!function_exists('stringStartWith')) {
       return false;
     }
   }
+
+  function fixImagePath($path) {
+      global $baseUrl;
+      if (empty($path)) return '';
+      if (strpos($path, 'http') === 0) return $path;
+      $path = '/' . ltrim($path, '/');
+      if ($baseUrl && strpos($path, $baseUrl) !== 0) {
+          return $baseUrl . $path;
+      }
+      return $path;
+  }
+
 }

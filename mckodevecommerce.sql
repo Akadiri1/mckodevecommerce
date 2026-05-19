@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: May 15, 2026 at 04:40 PM
+-- Generation Time: May 18, 2026 at 01:29 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -21,36 +21,6 @@ SET time_zone = "+00:00";
 -- Database: `mckodevecommerce`
 --
 
--- --------------------------------------------------------
-
---
--- Table structure for table `addition_mm_pages`
---
-
-DROP TABLE IF EXISTS `addition_mm_pages`;
-CREATE TABLE IF NOT EXISTS `addition_mm_pages` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(255) NOT NULL,
-  `tb` varchar(255) DEFAULT 'panel_mm_pages',
-  `tb_link` varchar(255) DEFAULT NULL,
-  `input_name` varchar(255) DEFAULT NULL,
-  `input_link` varchar(255) DEFAULT NULL,
-  `input_order` int DEFAULT '0',
-  `visibility` varchar(50) DEFAULT 'show',
-  `date_created` date NOT NULL,
-  `time_created` time NOT NULL,
-  `created_by` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `addition_mm_pages`
---
-
-INSERT INTO `addition_mm_pages` (`id`, `hash_id`, `tb`, `tb_link`, `input_name`, `input_link`, `input_order`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'mmapg001', 'panel_mm_pages', 'mmpg003', 'NetSuite Sprint', '/services/mmns001/netsuite-reporting-clarity-sprint', 1, 'show', '2026-05-14', '08:17:39', 'system'),
-(2, 'mmapg002', 'panel_mm_pages', 'mmpg003', 'DCAT Method', '/services/mmdc001/decentralized-a-team-method', 2, 'show', '2026-05-14', '08:17:39', 'system'),
-(3, 'mmapg003', 'panel_mm_pages', 'mmpg003', 'Fractional CTO', '/services/mmcto01/fractional-cto-services', 3, 'show', '2026-05-14', '08:17:39', 'system');
 
 -- --------------------------------------------------------
 
@@ -62,7 +32,7 @@ DROP TABLE IF EXISTS `addition_product_images`;
 CREATE TABLE IF NOT EXISTS `addition_product_images` (
   `id` int NOT NULL AUTO_INCREMENT,
   `hash_id` varchar(255) NOT NULL,
-  `tb` varchar(255) DEFAULT 'panel_products',
+  `tb` varchar(255) DEFAULT 'panel_product',
   `tb_link` varchar(255) DEFAULT NULL,
   `input_order` int DEFAULT '0',
   `image_1` text,
@@ -77,125 +47,19 @@ CREATE TABLE IF NOT EXISTS `addition_product_images` (
 -- Dumping data for table `addition_product_images`
 --
 
-INSERT INTO `addition_product_images` (`id`, `hash_id`, `tb`, `tb_link`, `input_order`, `image_1`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'img001', 'panel_products', 'mmhs001', 1, '/assets/img/products/hydrasilk-2.webp', 'show', '2026-05-14', '12:51:54', 'system'),
-(2, 'img002', 'panel_products', 'mmhs001', 2, '/assets/img/products/hydrasilk-3.webp', 'show', '2026-05-14', '12:51:54', 'system');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `addition_product_variants`
---
-
-DROP TABLE IF EXISTS `addition_product_variants`;
-CREATE TABLE IF NOT EXISTS `addition_product_variants` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(255) NOT NULL,
-  `tb` varchar(255) DEFAULT 'panel_products',
-  `tb_link` varchar(255) DEFAULT NULL,
-  `input_name` varchar(100) DEFAULT 'Size',
-  `input_value` varchar(100) DEFAULT NULL,
-  `input_price` varchar(50) DEFAULT NULL,
-  `input_stock` varchar(20) DEFAULT '999',
-  `input_sku` varchar(100) DEFAULT NULL,
-  `input_order` int DEFAULT '0',
-  `visibility` varchar(50) DEFAULT 'show',
-  `date_created` date NOT NULL,
-  `time_created` time NOT NULL,
-  `created_by` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `addition_product_variants`
---
-
-INSERT INTO `addition_product_variants` (`id`, `hash_id`, `tb`, `tb_link`, `input_name`, `input_value`, `input_price`, `input_stock`, `input_sku`, `input_order`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'vsize_mmns001_large', 'panel_products', 'mmns001', 'Size', '30ml', '50.00', '999', 'VNR-SRM-001-SZ-LA', 1, 'show', '2026-05-14', '22:27:17', 'system'),
-(2, 'vsize_mmns001_xlarge', 'panel_products', 'mmns001', 'Size', '50ml', '50.00', '999', 'VNR-SRM-001-SZ-XL', 2, 'show', '2026-05-14', '22:27:17', 'system'),
-(3, 'vcol_mmns001_red', 'panel_products', 'mmns001', 'Skin Type', 'Normal', '50.00', '999', 'VNR-SRM-001-CL-RE', 3, 'show', '2026-05-14', '22:27:17', 'system'),
-(4, 'vcol_mmns001_blue', 'panel_products', 'mmns001', 'Skin Type', 'Oily', '50.00', '999', 'VNR-SRM-001-CL-BL', 4, 'show', '2026-05-14', '22:27:17', 'system'),
-(5, 'vcol_mmns001_green', 'panel_products', 'mmns001', 'Skin Type', 'Dry', '50.00', '999', 'VNR-SRM-001-CL-GR', 5, 'show', '2026-05-14', '22:27:17', 'system'),
-(6, 'vcol_mmns001_yellow', 'panel_products', 'mmns001', 'Skin Type', 'Sensitive', '50.00', '999', 'VNR-SRM-001-CL-YE', 6, 'show', '2026-05-14', '22:27:17', 'system'),
-(7, 'vsize_mmac001_large', 'panel_products', 'mmac001', 'Size', '30ml', '30.00', '999', 'VNR-EYE-001-SZ-LA', 7, 'show', '2026-05-14', '22:27:17', 'system'),
-(8, 'vsize_mmac001_xlarge', 'panel_products', 'mmac001', 'Size', '50ml', '30.00', '999', 'VNR-EYE-001-SZ-XL', 8, 'show', '2026-05-14', '22:27:17', 'system'),
-(9, 'vcol_mmac001_red', 'panel_products', 'mmac001', 'Skin Type', 'Normal', '30.00', '999', 'VNR-EYE-001-CL-RE', 9, 'show', '2026-05-14', '22:27:17', 'system'),
-(10, 'vcol_mmac001_blue', 'panel_products', 'mmac001', 'Skin Type', 'Oily', '30.00', '999', 'VNR-EYE-001-CL-BL', 10, 'show', '2026-05-14', '22:27:17', 'system'),
-(11, 'vcol_mmac001_green', 'panel_products', 'mmac001', 'Skin Type', 'Dry', '30.00', '999', 'VNR-EYE-001-CL-GR', 11, 'show', '2026-05-14', '22:27:17', 'system'),
-(12, 'vcol_mmac001_yellow', 'panel_products', 'mmac001', 'Skin Type', 'Sensitive', '30.00', '999', 'VNR-EYE-001-CL-YE', 12, 'show', '2026-05-14', '22:27:17', 'system'),
-(13, 'vsize_mmgc001_large', 'panel_products', 'mmgc001', 'Size', '30ml', '30.00', '999', 'VNR-CLN-001-SZ-LA', 13, 'show', '2026-05-14', '22:27:17', 'system'),
-(14, 'vsize_mmgc001_xlarge', 'panel_products', 'mmgc001', 'Size', '50ml', '30.00', '999', 'VNR-CLN-001-SZ-XL', 14, 'show', '2026-05-14', '22:27:17', 'system'),
-(15, 'vcol_mmgc001_red', 'panel_products', 'mmgc001', 'Skin Type', 'Normal', '30.00', '999', 'VNR-CLN-001-CL-RE', 15, 'show', '2026-05-14', '22:27:17', 'system'),
-(16, 'vcol_mmgc001_blue', 'panel_products', 'mmgc001', 'Skin Type', 'Oily', '30.00', '999', 'VNR-CLN-001-CL-BL', 16, 'show', '2026-05-14', '22:27:17', 'system'),
-(17, 'vcol_mmgc001_green', 'panel_products', 'mmgc001', 'Skin Type', 'Dry', '30.00', '999', 'VNR-CLN-001-CL-GR', 17, 'show', '2026-05-14', '22:27:17', 'system'),
-(18, 'vcol_mmgc001_yellow', 'panel_products', 'mmgc001', 'Skin Type', 'Sensitive', '30.00', '999', 'VNR-CLN-001-CL-YE', 18, 'show', '2026-05-14', '22:27:17', 'system'),
-(19, 'vsize_mmhs001_large', 'panel_products', 'mmhs001', 'Size', '30ml', '70.00', '999', 'VNR-MOS-001-SZ-LA', 19, 'show', '2026-05-14', '22:27:17', 'system'),
-(20, 'vsize_mmhs001_xlarge', 'panel_products', 'mmhs001', 'Size', '50ml', '70.00', '999', 'VNR-MOS-001-SZ-XL', 20, 'show', '2026-05-14', '22:27:17', 'system'),
-(21, 'vcol_mmhs001_red', 'panel_products', 'mmhs001', 'Skin Type', 'Normal', '70.00', '999', 'VNR-MOS-001-CL-RE', 21, 'show', '2026-05-14', '22:27:17', 'system'),
-(22, 'vcol_mmhs001_blue', 'panel_products', 'mmhs001', 'Skin Type', 'Oily', '70.00', '999', 'VNR-MOS-001-CL-BL', 22, 'show', '2026-05-14', '22:27:17', 'system'),
-(23, 'vcol_mmhs001_green', 'panel_products', 'mmhs001', 'Skin Type', 'Dry', '70.00', '999', 'VNR-MOS-001-CL-GR', 23, 'show', '2026-05-14', '22:27:17', 'system'),
-(24, 'vcol_mmhs001_yellow', 'panel_products', 'mmhs001', 'Skin Type', 'Sensitive', '70.00', '999', 'VNR-MOS-001-CL-YE', 24, 'show', '2026-05-14', '22:27:17', 'system'),
-(25, 'vsize_mmvc001_large', 'panel_products', 'mmvc001', 'Size', '30ml', '65.00', '999', 'VNR-NIT-001-SZ-LA', 25, 'show', '2026-05-14', '22:27:17', 'system'),
-(26, 'vsize_mmvc001_xlarge', 'panel_products', 'mmvc001', 'Size', '50ml', '65.00', '999', 'VNR-NIT-001-SZ-XL', 26, 'show', '2026-05-14', '22:27:17', 'system'),
-(27, 'vcol_mmvc001_red', 'panel_products', 'mmvc001', 'Skin Type', 'Normal', '65.00', '999', 'VNR-NIT-001-CL-RE', 27, 'show', '2026-05-14', '22:27:17', 'system'),
-(28, 'vcol_mmvc001_blue', 'panel_products', 'mmvc001', 'Skin Type', 'Oily', '65.00', '999', 'VNR-NIT-001-CL-BL', 28, 'show', '2026-05-14', '22:27:17', 'system'),
-(29, 'vcol_mmvc001_green', 'panel_products', 'mmvc001', 'Skin Type', 'Dry', '65.00', '999', 'VNR-NIT-001-CL-GR', 29, 'show', '2026-05-14', '22:27:17', 'system'),
-(30, 'vcol_mmvc001_yellow', 'panel_products', 'mmvc001', 'Skin Type', 'Sensitive', '65.00', '999', 'VNR-NIT-001-CL-YE', 30, 'show', '2026-05-14', '22:27:17', 'system'),
-(31, 'vsize_mmld001_large', 'panel_products', 'mmld001', 'Size', '30ml', '60.00', '999', 'VNR-DAY-001-SZ-LA', 31, 'show', '2026-05-14', '22:27:17', 'system'),
-(32, 'vsize_mmld001_xlarge', 'panel_products', 'mmld001', 'Size', '50ml', '60.00', '999', 'VNR-DAY-001-SZ-XL', 32, 'show', '2026-05-14', '22:27:17', 'system'),
-(33, 'vcol_mmld001_red', 'panel_products', 'mmld001', 'Skin Type', 'Normal', '60.00', '999', 'VNR-DAY-001-CL-RE', 33, 'show', '2026-05-14', '22:27:17', 'system'),
-(34, 'vcol_mmld001_blue', 'panel_products', 'mmld001', 'Skin Type', 'Oily', '60.00', '999', 'VNR-DAY-001-CL-BL', 34, 'show', '2026-05-14', '22:27:17', 'system'),
-(35, 'vcol_mmld001_green', 'panel_products', 'mmld001', 'Skin Type', 'Dry', '60.00', '999', 'VNR-DAY-001-CL-GR', 35, 'show', '2026-05-14', '22:27:17', 'system'),
-(36, 'vcol_mmld001_yellow', 'panel_products', 'mmld001', 'Skin Type', 'Sensitive', '60.00', '999', 'VNR-DAY-001-CL-YE', 36, 'show', '2026-05-14', '22:27:17', 'system'),
-(37, 'vsize_mmbs001_large', 'panel_products', 'mmbs001', 'Size', '30ml', '55.00', '999', 'VNR-EYS-001-SZ-LA', 37, 'show', '2026-05-14', '22:27:17', 'system'),
-(38, 'vsize_mmbs001_xlarge', 'panel_products', 'mmbs001', 'Size', '50ml', '55.00', '999', 'VNR-EYS-001-SZ-XL', 38, 'show', '2026-05-14', '22:27:17', 'system'),
-(39, 'vcol_mmbs001_red', 'panel_products', 'mmbs001', 'Skin Type', 'Normal', '55.00', '999', 'VNR-EYS-001-CL-RE', 39, 'show', '2026-05-14', '22:27:17', 'system'),
-(40, 'vcol_mmbs001_blue', 'panel_products', 'mmbs001', 'Skin Type', 'Oily', '55.00', '999', 'VNR-EYS-001-CL-BL', 40, 'show', '2026-05-14', '22:27:17', 'system'),
-(41, 'vcol_mmbs001_green', 'panel_products', 'mmbs001', 'Skin Type', 'Dry', '55.00', '999', 'VNR-EYS-001-CL-GR', 41, 'show', '2026-05-14', '22:27:17', 'system'),
-(42, 'vcol_mmbs001_yellow', 'panel_products', 'mmbs001', 'Skin Type', 'Sensitive', '55.00', '999', 'VNR-EYS-001-CL-YE', 42, 'show', '2026-05-14', '22:27:17', 'system'),
-(43, 'vsize_mmfc001_large', 'panel_products', 'mmfc001', 'Size', '30ml', '28.00', '999', 'VNR-FCL-001-SZ-LA', 43, 'show', '2026-05-14', '22:27:17', 'system'),
-(44, 'vsize_mmfc001_xlarge', 'panel_products', 'mmfc001', 'Size', '50ml', '28.00', '999', 'VNR-FCL-001-SZ-XL', 44, 'show', '2026-05-14', '22:27:17', 'system'),
-(45, 'vcol_mmfc001_red', 'panel_products', 'mmfc001', 'Skin Type', 'Normal', '28.00', '999', 'VNR-FCL-001-CL-RE', 45, 'show', '2026-05-14', '22:27:17', 'system'),
-(46, 'vcol_mmfc001_blue', 'panel_products', 'mmfc001', 'Skin Type', 'Oily', '28.00', '999', 'VNR-FCL-001-CL-BL', 46, 'show', '2026-05-14', '22:27:17', 'system'),
-(47, 'vcol_mmfc001_green', 'panel_products', 'mmfc001', 'Skin Type', 'Dry', '28.00', '999', 'VNR-FCL-001-CL-GR', 47, 'show', '2026-05-14', '22:27:17', 'system'),
-(48, 'vcol_mmfc001_yellow', 'panel_products', 'mmfc001', 'Skin Type', 'Sensitive', '28.00', '999', 'VNR-FCL-001-CL-YE', 48, 'show', '2026-05-14', '22:27:17', 'system'),
-(49, 'vsize_mmdh001_large', 'panel_products', 'mmdh001', 'Size', '30ml', '75.00', '999', 'VNR-DHY-001-SZ-LA', 49, 'show', '2026-05-14', '22:27:17', 'system'),
-(50, 'vsize_mmdh001_xlarge', 'panel_products', 'mmdh001', 'Size', '50ml', '75.00', '999', 'VNR-DHY-001-SZ-XL', 50, 'show', '2026-05-14', '22:27:17', 'system'),
-(51, 'vcol_mmdh001_red', 'panel_products', 'mmdh001', 'Skin Type', 'Normal', '75.00', '999', 'VNR-DHY-001-CL-RE', 51, 'show', '2026-05-14', '22:27:17', 'system'),
-(52, 'vcol_mmdh001_blue', 'panel_products', 'mmdh001', 'Skin Type', 'Oily', '75.00', '999', 'VNR-DHY-001-CL-BL', 52, 'show', '2026-05-14', '22:27:17', 'system'),
-(53, 'vcol_mmdh001_green', 'panel_products', 'mmdh001', 'Skin Type', 'Dry', '75.00', '999', 'VNR-DHY-001-CL-GR', 53, 'show', '2026-05-14', '22:27:17', 'system'),
-(54, 'vcol_mmdh001_yellow', 'panel_products', 'mmdh001', 'Skin Type', 'Sensitive', '75.00', '999', 'VNR-DHY-001-CL-YE', 54, 'show', '2026-05-14', '22:27:17', 'system'),
-(55, 'vsize_mmpp001_large', 'panel_products', 'mmpp001', 'Size', '30ml', '45.00', '999', 'VNR-POR-001-SZ-LA', 55, 'show', '2026-05-14', '22:27:17', 'system'),
-(56, 'vsize_mmpp001_xlarge', 'panel_products', 'mmpp001', 'Size', '50ml', '45.00', '999', 'VNR-POR-001-SZ-XL', 56, 'show', '2026-05-14', '22:27:17', 'system'),
-(57, 'vcol_mmpp001_red', 'panel_products', 'mmpp001', 'Skin Type', 'Normal', '45.00', '999', 'VNR-POR-001-CL-RE', 57, 'show', '2026-05-14', '22:27:17', 'system'),
-(58, 'vcol_mmpp001_blue', 'panel_products', 'mmpp001', 'Skin Type', 'Oily', '45.00', '999', 'VNR-POR-001-CL-BL', 58, 'show', '2026-05-14', '22:27:17', 'system'),
-(59, 'vcol_mmpp001_green', 'panel_products', 'mmpp001', 'Skin Type', 'Dry', '45.00', '999', 'VNR-POR-001-CL-GR', 59, 'show', '2026-05-14', '22:27:17', 'system'),
-(60, 'vcol_mmpp001_yellow', 'panel_products', 'mmpp001', 'Skin Type', 'Sensitive', '45.00', '999', 'VNR-POR-001-CL-YE', 60, 'show', '2026-05-14', '22:27:17', 'system'),
-(61, 'vsize_mmmc001_large', 'panel_products', 'mmmc001', 'Size', '30ml', '32.00', '999', 'VNR-MCL-001-SZ-LA', 61, 'show', '2026-05-14', '22:27:17', 'system'),
-(62, 'vsize_mmmc001_xlarge', 'panel_products', 'mmmc001', 'Size', '50ml', '32.00', '999', 'VNR-MCL-001-SZ-XL', 62, 'show', '2026-05-14', '22:27:17', 'system'),
-(63, 'vcol_mmmc001_red', 'panel_products', 'mmmc001', 'Skin Type', 'Normal', '32.00', '999', 'VNR-MCL-001-CL-RE', 63, 'show', '2026-05-14', '22:27:17', 'system'),
-(64, 'vcol_mmmc001_blue', 'panel_products', 'mmmc001', 'Skin Type', 'Oily', '32.00', '999', 'VNR-MCL-001-CL-BL', 64, 'show', '2026-05-14', '22:27:17', 'system'),
-(65, 'vcol_mmmc001_green', 'panel_products', 'mmmc001', 'Skin Type', 'Dry', '32.00', '999', 'VNR-MCL-001-CL-GR', 65, 'show', '2026-05-14', '22:27:17', 'system'),
-(66, 'vcol_mmmc001_yellow', 'panel_products', 'mmmc001', 'Skin Type', 'Sensitive', '32.00', '999', 'VNR-MCL-001-CL-YE', 66, 'show', '2026-05-14', '22:27:17', 'system'),
-(67, 'vsize_mmne001_large', 'panel_products', 'mmne001', 'Size', '30ml', '40.00', '999', 'VNR-NEY-001-SZ-LA', 67, 'show', '2026-05-14', '22:27:17', 'system'),
-(68, 'vsize_mmne001_xlarge', 'panel_products', 'mmne001', 'Size', '50ml', '40.00', '999', 'VNR-NEY-001-SZ-XL', 68, 'show', '2026-05-14', '22:27:17', 'system'),
-(69, 'vcol_mmne001_red', 'panel_products', 'mmne001', 'Skin Type', 'Normal', '40.00', '999', 'VNR-NEY-001-CL-RE', 69, 'show', '2026-05-14', '22:27:17', 'system'),
-(70, 'vcol_mmne001_blue', 'panel_products', 'mmne001', 'Skin Type', 'Oily', '40.00', '999', 'VNR-NEY-001-CL-BL', 70, 'show', '2026-05-14', '22:27:17', 'system'),
-(71, 'vcol_mmne001_green', 'panel_products', 'mmne001', 'Skin Type', 'Dry', '40.00', '999', 'VNR-NEY-001-CL-GR', 71, 'show', '2026-05-14', '22:27:17', 'system'),
-(72, 'vcol_mmne001_yellow', 'panel_products', 'mmne001', 'Skin Type', 'Sensitive', '40.00', '999', 'VNR-NEY-001-CL-YE', 72, 'show', '2026-05-14', '22:27:17', 'system');
+-- addition_product_images: populated via ADMC admin when extra gallery images are uploaded per product
+-- tb = 'panel_product', tb_link = panel_product.hash_id
 
 -- --------------------------------------------------------
 
 --
 -- Table structure for table `addition_special_offers`
 --
-
-DROP TABLE IF EXISTS `addition_special_offers`;
 CREATE TABLE IF NOT EXISTS `addition_special_offers` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `hash_id` varchar(255) NOT NULL,
-  `tb` varchar(255) DEFAULT 'panel_products' COMMENT 'parent table',
-  `tb_link` varchar(255) DEFAULT NULL COMMENT 'panel_products.hash_id',
+  `tb` varchar(255) DEFAULT 'panel_product' COMMENT 'parent table',
+  `tb_link` varchar(255) DEFAULT NULL COMMENT 'panel_product.hash_id',
   `input_offer_title` varchar(255) DEFAULT NULL,
   `input_discount_percent` int DEFAULT NULL COMMENT '0-100',
   `input_discount_fixed` varchar(20) DEFAULT NULL COMMENT 'flat amount off',
@@ -331,24 +195,15 @@ CREATE TABLE IF NOT EXISTS `admin_password_resets` (
 DROP TABLE IF EXISTS `images`;
 CREATE TABLE IF NOT EXISTS `images` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `image_hash_id` varchar(225) DEFAULT NULL,
-  `asset_hash_id` varchar(255) DEFAULT NULL,
+  `image_hash_id` varchar(225) NOT NULL,
+  `asset_hash_id` varchar(255) NOT NULL,
   `image_1` text,
-  `date_created` date DEFAULT NULL,
-  `time_created` time DEFAULT NULL,
-  `created_by` varchar(255) DEFAULT NULL,
+  `date_created` date NOT NULL,
+  `time_created` time NOT NULL,
   `hash_id` varchar(225) DEFAULT NULL,
+  `created_by` varchar(225) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `images`
---
-
-INSERT INTO `images` (`id`, `image_hash_id`, `asset_hash_id`, `image_1`, `date_created`, `time_created`, `created_by`, `hash_id`) VALUES
-(25, 'IMG_17677752051193871721', 'nhilwhgpw', 'https://mck-admc.s3.amazonaws.com/easyeven7977525/uploads/2026/01/07/17677752045283580WhatsApp_Image_2026_01_07_at_9.23.40_AM.jpeg', '2026-01-07', '08:40:05', NULL, NULL),
-(27, 'IMG_17689932982108670764', 'nhilwhgpw', 'https://mck-admc.s3.amazonaws.com/easyeven7977525/uploads/2026/01/21/17689932972199126WhatsApp_Image_2026_01_07_at_9.23.32_AM.jpeg', '2026-01-21', '11:01:38', NULL, NULL),
-(28, 'IMG_17689932981483460530', 'nhilwhgpw', 'https://mck-admc.s3.amazonaws.com/easyeven7977525/uploads/2026/01/21/17689932982199126WhatsApp_Image_2026_01_07_at_9.23.40_AM.jpeg', '2026-01-21', '11:01:38', NULL, NULL);
+) ENGINE=InnoDB AUTO_INCREMENT=122 DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -466,38 +321,6 @@ INSERT INTO `panel_allowed_headers` (`id`, `hash_id`, `input_name`, `visibility`
 (3, NULL, 'app.demo30.com', 'show', '2023-05-10', '11:22:37', NULL),
 (4, '8283672_1767617588', 'easyeven7977525.mckodev.ng', 'show', '2026-01-05', '12:53:08', NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `panel_brand_values`
---
-
-DROP TABLE IF EXISTS `panel_brand_values`;
-CREATE TABLE IF NOT EXISTS `panel_brand_values` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(255) NOT NULL,
-  `input_title` varchar(255) DEFAULT NULL,
-  `input_emoji` varchar(20) DEFAULT NULL,
-  `text_description` text,
-  `input_order` int DEFAULT '0',
-  `visibility` varchar(50) DEFAULT 'show',
-  `date_created` date NOT NULL,
-  `time_created` time NOT NULL,
-  `created_by` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `panel_brand_values`
---
-
-INSERT INTO `panel_brand_values` (`id`, `hash_id`, `input_title`, `input_emoji`, `text_description`, `input_order`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'val001', 'Clean Ingredients', '🌿', 'Every formula is free from parabens, sulphates, and artificial fragrances. Pure efficacy, nothing else.', 1, 'show', '2026-05-14', '12:51:55', 'system'),
-(2, 'val002', 'Dermatologist Tested', '🔬', 'All products are clinically tested and approved by board-certified dermatologists.', 2, 'show', '2026-05-14', '12:51:55', 'system'),
-(3, 'val003', 'Sustainably Crafted', '♻', 'From recyclable packaging to ethically sourced ingredients, sustainability guides every decision.', 3, 'show', '2026-05-14', '12:51:55', 'system'),
-(4, 'val004', 'Cruelty Free', '🐰', 'We never test on animals. Certified cruelty-free by Leaping Bunny.', 4, 'show', '2026-05-14', '12:51:55', 'system'),
-(5, 'val005', 'Science-Backed', '🧪', 'Every claim is supported by clinical evidence and peer-reviewed research.', 5, 'show', '2026-05-14', '12:51:55', 'system'),
-(6, 'val006', 'For Every Skin', '✨', 'Formulated for all skin types, tones, and textures. Inclusivity is not optional.', 6, 'show', '2026-05-14', '12:51:55', 'system');
 
 -- --------------------------------------------------------
 
@@ -664,86 +487,46 @@ INSERT INTO `panel_partners` (`id`, `hash_id`, `input_name`, `input_link`, `inpu
 -- --------------------------------------------------------
 
 --
--- Table structure for table `panel_products`
+-- Table structure for table `panel_product`
 --
 
-DROP TABLE IF EXISTS `panel_products`;
-CREATE TABLE IF NOT EXISTS `panel_products` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(255) NOT NULL,
-  `input_title` varchar(255) DEFAULT NULL,
-  `input_slug` varchar(255) DEFAULT NULL,
-  `select_category` varchar(255) DEFAULT NULL,
-  `text_description` longtext,
-  `text_short_desc` text,
-  `text_ingredients` text,
-  `input_price` varchar(50) DEFAULT NULL,
-  `input_compare_price` varchar(50) DEFAULT NULL,
-  `input_sku` varchar(100) DEFAULT NULL,
-  `input_stock` varchar(20) DEFAULT '999',
-  `input_weight` varchar(50) DEFAULT NULL,
-  `input_badge` varchar(50) DEFAULT NULL,
-  `input_rating` varchar(10) DEFAULT '4.5',
-  `input_order` int DEFAULT '0',
-  `image_1` text,
-  `image_2` text,
-  `add_product_variants` varchar(255) DEFAULT NULL,
-  `visibility` varchar(50) DEFAULT 'show',
-  `date_created` date NOT NULL,
-  `time_created` time NOT NULL,
-  `created_by` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE IF NOT EXISTS `panel_product` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `input_product_name` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text_description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `select_product_category` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `input_discount_percentage` char(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dated_discount_enddate` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hash_id` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_2` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `visibility` char(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_created` date DEFAULT NULL,
+  `time_created` time DEFAULT NULL,
+  `created_by` char(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `input_order` int NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `hash_id` (`hash_id`),
+  KEY `input_order` (`input_order`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `panel_products`
+-- Dumping data for table `panel_product`
 --
 
-INSERT INTO `panel_products` (`id`, `hash_id`, `input_title`, `input_slug`, `select_category`, `text_description`, `text_short_desc`, `text_ingredients`, `input_price`, `input_compare_price`, `input_sku`, `input_stock`, `input_weight`, `input_badge`, `input_rating`, `input_order`, `image_1`, `image_2`, `add_product_variants`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'mmns001', 'Radiance Boost Serum', 'radiance-boost-serum', 'Serums', 'Transform your complexion with this powerful brightening serum, formulated with a potent blend of Vitamin C, Niacinamide, and Hyaluronic Acid. This lightweight serum fades dark spots, evens skin tone, and boosts your natural radiance. With regular use, your skin becomes visibly brighter, firmer, and more luminous. Suitable for all skin types including sensitive skin.', 'A lightweight brightening serum that fades dark spots and boosts natural radiance.', 'Aqua, Ascorbic Acid (Vitamin C 15%), Niacinamide, Hyaluronic Acid, Glycerin, Ferulic Acid, Panthenol, Allantoin, Tocopherol.', '50.00', '65.00', 'VNR-SRM-001', '999', '30ml', 'New', '4.8', 1, '/assets/img/products/radiance-serum-1.webp', '/assets/img/products/radiance-serum-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(2, 'mmac001', 'Anti-Aging Eye Cream', 'anti-aging-eye-cream', 'Eye Care', 'Revive the delicate skin around your eyes with this targeted anti-aging eye cream. Enriched with Retinol, Peptides, and Caffeine, it visibly reduces fine lines, puffiness, and dark circles while firming the skin. The ultra-rich yet lightweight formula absorbs quickly and is gentle enough for even the most sensitive eye areas.', 'A targeted eye cream that reduces fine lines, puffiness, and dark circles.', 'Aqua, Retinol, Palmitoyl Tripeptide-1, Caffeine, Niacinamide, Hyaluronic Acid, Shea Butter, Vitamin E.', '30.00', NULL, 'VNR-EYE-001', '999', '15ml', NULL, '4.6', 2, '/assets/img/products/anti-aging-cream-1.webp', '/assets/img/products/anti-aging-cream-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(3, 'mmgc001', 'Refreshing Gel Cleanser', 'refreshing-gel-cleanser', 'Cleansers', 'Start and end your day with this gentle, refreshing gel cleanser that deeply cleanses without stripping the skin. Formulated with Aloe Vera, Green Tea Extract, and Salicylic Acid, it effectively removes impurities, excess oil, and makeup residue while keeping skin balanced and hydrated. Perfect for oily and combination skin.', 'A gentle gel cleanser that deeply cleanses while keeping skin balanced and hydrated.', 'Aqua, Aloe Barbadensis Leaf Juice, Camellia Sinensis (Green Tea) Leaf Extract, Salicylic Acid, Sodium Cocoyl Glutamate, Panthenol.', '30.00', NULL, 'VNR-CLN-001', '999', '150ml', NULL, '4.7', 3, '/assets/img/products/gel-cleanser-1.webp', '/assets/img/products/gel-cleanser-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(4, 'mmhs001', 'Hydrasilk Moisturizer', 'hydrasilk-moisturizer', 'Moisturizers', 'Nourish and hydrate your skin with Hydrasilk Moisturizer, a luxurious, lightweight cream that delivers deep moisture while leaving your skin silky-smooth and radiant. Enriched with Hyaluronic Acid and Squalane, this moisturizer replenishes hydration, softens fine lines, and restores elasticity. Ideal for all skin types, it absorbs quickly without leaving a greasy residue, making it perfect for daily use.', 'A luxurious cream that delivers deep moisture, leaving skin silky-smooth and radiant.', 'Aqua, Hyaluronic Acid, Squalane, Shea Butter, Tocopherol (Vitamin E), Aloe Vera, Glycerin, Caprylic/Capric Triglyceride.', '70.00', NULL, 'VNR-MOS-001', '999', '50ml', NULL, '4.6', 4, '/assets/img/products/hydrasilk-1.webp', '/assets/img/products/hydrasilk-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(5, 'mmvc001', 'Velvet Night Cream', 'velvet-night-cream', 'Moisturizers', 'Wake up to softer, smoother, more radiant skin with this luxurious overnight treatment. Formulated with a rich blend of Bakuchiol (natural Retinol alternative), Ceramides, and Rosehip Oil, this night cream works while you sleep to repair, regenerate, and deeply nourish your skin. Morning after morning, skin looks visibly rejuvenated.', 'An overnight treatment that repairs and deeply nourishes skin while you sleep.', 'Aqua, Bakuchiol, Ceramide NP, Rosa Canina (Rosehip) Seed Oil, Peptides, Shea Butter, Squalane, Niacinamide.', '65.00', NULL, 'VNR-NIT-001', '999', '50ml', 'Best Seller', '4.9', 5, '/assets/img/products/velvet-cream-1.webp', '/assets/img/products/velvet-cream-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(6, 'mmld001', 'Luminous Day Cream', 'luminous-day-cream', 'Moisturizers', 'Achieve a naturally luminous complexion with this lightweight day cream that hydrates, protects, and brightens throughout the day. Packed with Vitamin C, Pearl Extract, and SPF 15, it shields your skin from environmental stressors while delivering a radiant, healthy glow. Ideal for daily use under makeup.', 'A lightweight day cream that hydrates, protects, and delivers a radiant glow.', 'Aqua, Ascorbic Acid, Pearl Extract, Titanium Dioxide (SPF 15), Glycerin, Hyaluronic Acid, Tocopherol.', '60.00', NULL, 'VNR-DAY-001', '999', '50ml', NULL, '4.7', 6, '/assets/img/products/luminous-day-1.webp', '/assets/img/products/luminous-day-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(7, 'mmbs001', 'Brightening Eye Serum', 'brightening-eye-serum', 'Eye Care', 'Tackle dark circles and dullness with this concentrated brightening eye serum. Formulated with Vitamin K, Kojic Acid, and Caffeine, it targets hyperpigmentation and puffiness around the eyes, revealing a brighter, more awake appearance. The silky texture absorbs instantly for long-lasting hydration.', 'A concentrated serum that targets dark circles and puffiness for brighter eyes.', 'Aqua, Phytonadione (Vitamin K), Kojic Acid, Caffeine, Hyaluronic Acid, Niacinamide, Peptides.', '55.00', '70.00', 'VNR-EYS-001', '999', '15ml', 'Sale', '4.5', 7, '/assets/img/products/brightening-serum-1.webp', '/assets/img/products/brightening-serum-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(8, 'mmfc001', 'Gentle Foaming Cleanser', 'gentle-foaming-cleanser', 'Cleansers', 'Experience the luxury of a spa-like cleanse at home. This gentle foaming cleanser creates a rich, pillowy lather that melts away impurities, makeup, and excess oil without disrupting your skin barrier. Enriched with Chamomile and Oat Extract, it calms, soothes, and leaves skin feeling clean, soft, and comfortable.', 'A gentle foaming cleanser that creates a rich lather to remove impurities without irritation.', 'Aqua, Cocamidopropyl Betaine, Chamomilla Recutita Extract, Avena Sativa (Oat) Extract, Allantoin, Panthenol.', '28.00', NULL, 'VNR-FCL-001', '999', '150ml', NULL, '4.8', 8, '/assets/img/products/foaming-cleanser-1.webp', '/assets/img/products/foaming-cleanser-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(9, 'mmdh001', 'Deep Hydration Serum', 'deep-hydration-serum', 'Serums', 'Quench even the most dehydrated skin with this intensive hydrating serum. Combining three molecular weights of Hyaluronic Acid with Betaine and Polyglutamic Acid, it penetrates deep into the skin layers to restore moisture balance, plump fine lines, and create a visibly dewy complexion that lasts all day.', 'An intensive serum that deeply hydrates with multiple forms of Hyaluronic Acid.', 'Aqua, Sodium Hyaluronate (Low, Medium, High Molecular Weight), Betaine, Polyglutamic Acid, Glycerin, Panthenol.', '75.00', NULL, 'VNR-DHY-001', '999', '30ml', NULL, '4.9', 9, '/assets/img/products/deep-hydration-1.webp', '/assets/img/products/deep-hydration-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(10, 'mmpp001', 'Pore Perfect Treatment', 'pore-perfect-treatment', 'Treatments', 'Minimize the appearance of enlarged pores and achieve a smoother, more refined complexion with this targeted treatment. Formulated with Niacinamide, Salicylic Acid, and Zinc, it regulates sebum production, unclogs pores, and visibly reduces their appearance over time. Lightweight and oil-free for daily use.', 'A targeted treatment that minimizes pores and refines skin texture.', 'Aqua, Niacinamide (10%), Salicylic Acid, Zinc PCA, Witch Hazel Extract, Glycerin, Allantoin.', '45.00', NULL, 'VNR-POR-001', '999', '30ml', NULL, '4.6', 10, '/assets/img/products/pore-perfect-1.webp', '/assets/img/products/pore-perfect-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(11, 'mmmc001', 'Hydrating Milk Cleanser', 'hydrating-milk-cleanser', 'Cleansers', 'Dissolve the day with this creamy, hydrating milk cleanser that leaves skin feeling nourished rather than stripped. Enriched with Ceramides, Oat Milk, and Rose Water, it gently removes makeup and impurities while reinforcing the skin barrier. Suitable for dry, sensitive, and mature skin types.', 'A creamy milk cleanser that removes makeup while nourishing and protecting the skin barrier.', 'Aqua, Rosa Damascena (Rose Water), Avena Sativa (Oat) Milk, Ceramide NP, Glycerin, Panthenol, Sodium Cocoyl Glutamate.', '32.00', NULL, 'VNR-MCL-001', '999', '150ml', NULL, '4.7', 11, '/assets/img/products/milk-cleanser-1.webp', '/assets/img/products/milk-cleanser-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system'),
-(12, 'mmne001', 'Soothing Night Eye Cream', 'soothing-night-eye-cream', 'Eye Care', 'Restore and rejuvenate the delicate eye area overnight with this rich, soothing night cream. Formulated with Bakuchiol, Ceramides, and Lavender Extract, it targets crow feet, puffiness, and loss of firmness while you sleep. Wake up to visibly smoother, plumper, more youthful-looking eyes.', 'A rich overnight eye cream that targets crow feet and restores firmness while you sleep.', 'Aqua, Bakuchiol, Ceramide NP, Lavandula Angustifolia (Lavender) Extract, Retinyl Palmitate, Shea Butter, Peptides.', '40.00', NULL, 'VNR-NEY-001', '999', '15ml', NULL, '4.8', 12, '/assets/img/products/night-eye-cream-1.webp', '/assets/img/products/night-eye-cream-2.webp', NULL, 'show', '2026-05-14', '12:51:54', 'system');
+INSERT INTO `panel_product` (`id`, `hash_id`, `input_product_name`, `text_description`, `select_product_category`, `input_discount_percentage`, `dated_discount_enddate`, `image_2`, `visibility`, `date_created`, `time_created`, `created_by`, `input_order`) VALUES
+(1,  'vnr-srs-001', 'Radiance Boost Serum',      'Bring back your skin\'s natural glow with VENORA\'s Radiance Boost Serum. Enriched with Vitamin C and Hyaluronic Acid, this lightweight serum brightens dull skin, smooths fine lines, and deeply hydrates for a luminous, healthy complexion. Ideal for daily use, it absorbs quickly, leaving your skin soft, radiant, and revitalized.', '1', '', NULL, '/assets/img/products/radiance-serum-1.webp',     'show', '2026-01-01', '12:00:00', 'system', 1),
+(2,  'vnr-eye-001', 'Anti-Aging Eye Cream',       'Combat the signs of aging around your eyes with Venora Anti-Aging Eye Cream, a rich yet fast-absorbing formula designed to reduce fine lines, wrinkles, and sagging while hydrating and firming the delicate eye area. Enriched with Retinol and Peptides, this cream supports skin renewal, improves elasticity, and promotes a youthful, lifted appearance.', '2', '', NULL, '/assets/img/products/anti-aging-cream-1.webp',   'show', '2026-01-01', '12:00:00', 'system', 2),
+(3,  'vnr-cln-001', 'Refreshing Gel Cleanser',    'Start your skincare routine with Refreshing Gel Cleanser, a gentle yet effective formula that purifies and revitalizes your skin. Infused with Green Tea Extract and Aloe Vera, this refreshing gel removes impurities, excess oil, and makeup without stripping your skin of its natural moisture.', '3', '', NULL, '/assets/img/products/gel-cleanser-1.webp',        'show', '2026-01-01', '12:00:00', 'system', 3),
+(4,  'vnr-mos-001', 'Hydrasilk Moisturizer',      'Nourish and hydrate your skin with Hydrasilk Moisturizer, a luxurious, lightweight cream that delivers deep moisture while leaving your skin silky-smooth and radiant. Enriched with Hyaluronic Acid and Squalane, this moisturizer replenishes hydration, softens fine lines, and restores elasticity.', '4', '', NULL, '/assets/img/products/hydrasilk-1.webp',          'show', '2026-01-01', '12:00:00', 'system', 4),
+(5,  'vnr-nit-001', 'Velvet Night Cream',          'Replenish and rejuvenate your skin overnight with Venora Velvet Night Cream, a rich, luxurious formula designed to deeply hydrate and repair while you sleep. Infused with Retinol and Hyaluronic Acid, this cream smooths fine lines, restores elasticity, and nourishes the skin for a soft, supple, and radiant complexion by morning.', '5', '', NULL, '/assets/img/products/velvet-cream-1.webp',       'show', '2026-01-01', '12:00:00', 'system', 5),
+(6,  'vnr-day-001', 'Luminous Day Cream',          'Start your day with radiant, hydrated skin using Venora Luminous Day Cream, a luxurious, lightweight moisturizer designed to brighten and protect your complexion. Enriched with Vitamin C and Hyaluronic Acid, this cream deeply hydrates, smooths fine lines, and promotes a luminous, even skin tone.', '4', '', NULL, '/assets/img/products/luminous-day-1.webp',       'show', '2026-01-01', '12:00:00', 'system', 6),
+(7,  'vnr-eye-002', 'Brightening Eye Serum',       'Illuminate and refresh your delicate eye area with Venora Brightening Eye Serum, a lightweight, fast-absorbing formula designed to reduce dark circles, puffiness, and fine lines. Enriched with Vitamin C and Peptides, this serum brightens the under-eye area, smooths texture, and provides gentle hydration.', '2', '', NULL, '/assets/img/products/brightening-serum-1.webp',  'show', '2026-01-01', '12:00:00', 'system', 7),
+(8,  'vnr-fcl-001', 'Gentle Foaming Cleanser',    'Experience a delicate yet thorough cleanse with Venora Gentle Foaming Cleanser, a lightweight foaming formula that purifies and refreshes your skin without stripping its natural moisture. Enriched with Chamomile Extract and Aloe Vera, this gentle cleanser removes impurities, excess oil, and light makeup.', '3', '', NULL, '/assets/img/products/foaming-cleanser-1.webp',   'show', '2026-01-01', '12:00:00', 'system', 8),
+(9,  'vnr-dhy-001', 'Deep Hydration Serum',        'Quench your skin\'s thirst with Venora Deep Hydration Serum, a luxurious, fast-absorbing formula designed to deliver intense moisture and restore suppleness. Enriched with Hyaluronic Acid and Aloe Vera, this serum deeply penetrates the skin to smooth fine lines, plump dehydrated areas, and leave your complexion radiant.', '1', '', NULL, '/assets/img/products/deep-hydration-1.webp',     'show', '2026-01-01', '12:00:00', 'system', 9),
+(10, 'vnr-por-001', 'Pore Perfect Treatment',      'Refine and clarify your complexion with Venora Pore Perfect Serum. This lightweight, fast-absorbing serum is enriched with Niacinamide and Salicylic Acid to minimize the appearance of pores, control excess oil, and smooth skin texture. Ideal for combination and oily skin.', '5', '', NULL, '/assets/img/products/pore-perfect-1.webp',       'show', '2026-01-01', '12:00:00', 'system', 10),
+(11, 'vnr-mcl-001', 'Hydrating Milk Cleanser',    'Gently cleanse and nourish your skin with Venora Hydrating Milk Cleanser, a luxurious formula that removes impurities and makeup while delivering lasting hydration. Enriched with Shea Butter and Aloe Vera, this creamy milk cleanser softens and soothes the skin.', '3', '', NULL, '/assets/img/products/milk-cleanser-1.webp',      'show', '2026-01-01', '12:00:00', 'system', 11),
+(12, 'vnr-ney-001', 'Soothing Night Eye Cream',    'Repair and rejuvenate your delicate eye area overnight with Venora Soothing Night Eye Cream, a rich, calming formula designed to reduce puffiness, dark circles, and fine lines while you sleep. Enriched with Hyaluronic Acid and Chamomile Extract, this cream deeply hydrates and soothes.', '2', '', NULL, '/assets/img/products/night-eye-cream-1.webp',    'show', '2026-01-01', '12:00:00', 'system', 12);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `panel_team`
---
-
-DROP TABLE IF EXISTS `panel_team`;
-CREATE TABLE IF NOT EXISTS `panel_team` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(255) NOT NULL,
-  `input_name` varchar(255) DEFAULT NULL,
-  `input_role` varchar(255) DEFAULT NULL,
-  `text_bio` text,
-  `input_order` int DEFAULT '0',
-  `image_1` text,
-  `visibility` varchar(50) DEFAULT 'show',
-  `date_created` date NOT NULL,
-  `time_created` time NOT NULL,
-  `created_by` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `panel_team`
---
-
-INSERT INTO `panel_team` (`id`, `hash_id`, `input_name`, `input_role`, `text_bio`, `input_order`, `image_1`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'team001', 'Dr. Isabella Hartman', 'Chief Dermatologist', 'Board-certified dermatologist with 15 years of clinical experience.', 1, NULL, 'show', '2026-05-14', '12:51:55', 'system'),
-(2, 'team002', 'Sofia Laurent', 'Founder & CEO', 'Passionate skincare entrepreneur with a background in biochemistry.', 2, NULL, 'show', '2026-05-14', '12:51:55', 'system'),
-(3, 'team003', 'Amara Chen', 'Head of Formulation', 'Cosmetic chemist specialising in natural and active ingredients.', 3, NULL, 'show', '2026-05-14', '12:51:55', 'system'),
-(4, 'team004', 'Nina Rossi', 'Creative Director', 'Brand designer with a passion for sustainable luxury aesthetics.', 4, NULL, 'show', '2026-05-14', '12:51:55', 'system');
 
 -- --------------------------------------------------------
 
@@ -811,36 +594,6 @@ INSERT INTO `panel_trust_badges` (`id`, `hash_id`, `input_label`, `input_icon`, 
 (2, 'bdg002', 'Cruelty Free', 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z', 2, 'show', '2026-05-15', '17:12:40', 'system'),
 (3, 'bdg003', '30-Day Returns', 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M9 12l2 2 4-4', 3, 'show', '2026-05-15', '17:12:40', 'system');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `panel_venora_faq`
---
-
-DROP TABLE IF EXISTS `panel_venora_faq`;
-CREATE TABLE IF NOT EXISTS `panel_venora_faq` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(255) NOT NULL,
-  `input_question` varchar(500) DEFAULT NULL,
-  `text_answer` text,
-  `input_order` int DEFAULT '0',
-  `visibility` varchar(50) DEFAULT 'show',
-  `date_created` date NOT NULL,
-  `time_created` time NOT NULL,
-  `created_by` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `panel_venora_faq`
---
-
-INSERT INTO `panel_venora_faq` (`id`, `hash_id`, `input_question`, `text_answer`, `input_order`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'faq001', 'Can I use your products if I have sensitive skin?', 'Yes! All our products are dermatologist-tested and formulated to be gentle on sensitive skin. We recommend doing a patch test before full use.', 1, 'show', '2026-05-14', '14:11:00', 'system'),
-(2, 'faq002', 'How should I store the products for best results?', 'Store your products in a cool, dry place away from direct sunlight. Most products perform best at room temperature between 15-25 degrees Celsius.', 2, 'show', '2026-05-14', '14:11:00', 'system'),
-(3, 'faq003', 'Are your products cruelty-free and vegan?', 'Yes, all Venora products are 100% cruelty-free and never tested on animals. The majority of our range is vegan — check individual product labels for confirmation.', 3, 'show', '2026-05-14', '14:11:00', 'system'),
-(4, 'faq004', 'How long does it take to see results?', 'Most customers see visible improvements within 2 to 4 weeks of consistent use. For best results, use products as directed both morning and evening.', 4, 'show', '2026-05-14', '14:11:00', 'system'),
-(5, 'faq005', 'What is your return policy?', 'We offer a 30-day satisfaction guarantee. If you are not happy with your purchase, contact us and we will arrange a full refund or exchange.', 5, 'show', '2026-05-14', '14:11:00', 'system');
 
 -- --------------------------------------------------------
 
@@ -864,7 +617,7 @@ CREATE TABLE IF NOT EXISTS `read_cart` (
   `time_created` time NOT NULL,
   `created_by` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `read_cart`
@@ -905,7 +658,19 @@ INSERT INTO `read_cart` (`id`, `hash_id`, `input_session_id`, `input_user_id`, `
 (32, 'cart_6a0735948e1721.97712229', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmne001', 'vsize_mmne001_large,vcol_mmne001_blue', 'Large / Blue', 2, '40.00', 'hide', '2026-05-15', '15:02:44', 'mpkt36nqgki6vo0vb93nb44te4'),
 (33, 'cart_6a073e098b6c27.88418223', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmne001', 'vsize_mmne001_large,vcol_mmne001_blue', '30ml / Oily', 2, '40.00', 'hide', '2026-05-15', '15:38:49', 'mpkt36nqgki6vo0vb93nb44te4'),
 (34, 'cart_6a073e6385c651.65186018', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmmc001', 'vsize_mmmc001_large,vcol_mmmc001_green', '30ml / Dry', 2, '32.00', 'hide', '2026-05-15', '15:40:19', 'mpkt36nqgki6vo0vb93nb44te4'),
-(35, 'cart_6a0749edd0b3e7.75793651', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmns001', 'vsize_mmns001_large,vcol_mmns001_red', '30ml / Normal', 1, '50.00', 'hide', '2026-05-15', '16:29:33', 'mpkt36nqgki6vo0vb93nb44te4');
+(35, 'cart_6a0749edd0b3e7.75793651', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmns001', 'vsize_mmns001_large,vcol_mmns001_red', '30ml / Normal', 1, '50.00', 'hide', '2026-05-15', '16:29:33', 'mpkt36nqgki6vo0vb93nb44te4'),
+(36, 'cart_6a0754b8ea86c1.03409159', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmmc001', 'vsize_mmmc001_large,vcol_mmmc001_blue', '30ml / Oily', 1, '32.00', 'hide', '2026-05-15', '17:15:36', 'mpkt36nqgki6vo0vb93nb44te4'),
+(37, 'cart_6a0754db80d751.34792245', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmmc001', 'vsize_mmmc001_xlarge,vcol_mmmc001_red', '50ml / Normal', 1, '32.00', 'hide', '2026-05-15', '17:16:11', 'mpkt36nqgki6vo0vb93nb44te4'),
+(38, 'cart_6a0755d29f4cf7.37851712', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmmc001', 'vsize_mmmc001_large,vcol_mmmc001_blue', '30ml / Oily', 1, '32.00', 'hide', '2026-05-15', '17:20:18', 'mpkt36nqgki6vo0vb93nb44te4'),
+(39, 'cart_6a07596cd296b1.43792396', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmpp001', '', '', 1, '45.00', 'hide', '2026-05-15', '17:35:40', 'mpkt36nqgki6vo0vb93nb44te4'),
+(40, 'cart_6a07597a6a4966.46721221', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmpp001', '', '', 1, '45.00', 'hide', '2026-05-15', '17:35:54', 'mpkt36nqgki6vo0vb93nb44te4'),
+(41, 'cart_6a075c0a756956.79894132', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmns001', 'vsize_mmns001_large,vcol_mmns001_blue', '30ml / Oily', 1, '50.00', 'hide', '2026-05-15', '17:46:50', 'mpkt36nqgki6vo0vb93nb44te4'),
+(42, 'cart_6a075c88664484.04057711', 'mpkt36nqgki6vo0vb93nb44te4', NULL, 'mmne001', 'vsize_mmne001_xlarge,vcol_mmne001_yellow', '50ml / Sensitive', 1, '40.00', 'hide', '2026-05-15', '17:48:56', 'mpkt36nqgki6vo0vb93nb44te4'),
+(43, 'cart_6a0ad5e0829860.73534259', 'o83g825lthbm6kslfgehisvoon', NULL, 'mmac001', 'vsize_mmac001_large,vcol_mmac001_blue', '30ml / Oily', 2, '30.00', 'hide', '2026-05-18', '09:03:28', 'o83g825lthbm6kslfgehisvoon'),
+(44, 'cart_6a0ad63d7e6e68.44620695', 'o83g825lthbm6kslfgehisvoon', NULL, 'mmac001', 'vsize_mmac001_large,vcol_mmac001_green', '30ml / Dry', 1, '30.00', 'hide', '2026-05-18', '09:05:01', 'o83g825lthbm6kslfgehisvoon'),
+(45, 'cart_6a0ad84971d315.46822602', 'o83g825lthbm6kslfgehisvoon', NULL, 'mmns001', 'vsize_mmns001_large,vcol_mmns001_blue', '30ml / Oily', 1, '50.00', 'hide', '2026-05-18', '09:13:45', 'o83g825lthbm6kslfgehisvoon'),
+(46, 'cart_6a0ae737a693f0.62631641', 'o83g825lthbm6kslfgehisvoon', NULL, 'mmne001', 'vsize_mmne001_large,vcol_mmne001_blue', '30ml / Oily', 1, '40.00', 'hide', '2026-05-18', '10:17:27', 'o83g825lthbm6kslfgehisvoon'),
+(47, 'cart_6a0aee08d01cc3.23050419', 'o83g825lthbm6kslfgehisvoon', NULL, 'mmfc001', 'vsize_mmfc001_xlarge,vcol_mmfc001_yellow', '50ml / Sensitive', 3, '28.00', 'hide', '2026-05-18', '10:46:32', 'o83g825lthbm6kslfgehisvoon');
 
 -- --------------------------------------------------------
 
@@ -951,7 +716,7 @@ CREATE TABLE IF NOT EXISTS `read_favicon` (
 --
 
 INSERT INTO `read_favicon` (`id`, `hash_id`, `image_1`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'fav001', '/assets/img/brand/venora-white.svg', 'show', '2026-05-14', '13:02:01', 'system');
+(1, 'fav001', '/assets/img/brand/venora-dark.svg', 'show', '2026-05-14', '13:02:01', 'system');
 
 -- --------------------------------------------------------
 
@@ -1007,14 +772,15 @@ CREATE TABLE IF NOT EXISTS `read_orders` (
   `time_created` time NOT NULL,
   `created_by` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `read_orders`
 --
 
 INSERT INTO `read_orders` (`id`, `hash_id`, `input_user_id`, `input_first_name`, `input_last_name`, `input_email`, `input_phone`, `text_address`, `input_status`, `input_total`, `input_subtotal`, `input_tax`, `input_shipping`, `input_payment_method`, `input_payment_ref`, `text_notes`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'ORDE4894558', NULL, 'Kato', 'Howe', 'gewez@mailinator.com', '+1 (929) 447-9334', '490 West Hague Lane\nQui porro natus qui \nDebitis eos nisi cu, Iure earum ipsum er Quis qui dolores ius\nNG', 'paid', '150.00', '150.00', '0.00', '0.00', 'card', NULL, 'Elit dolore veritat', 'show', '2026-05-14', '21:27:36', 'fa2nt2pr381rh2jmqbcvmsb0bm');
+(1, 'ORDE4894558', NULL, 'Kato', 'Howe', 'gewez@mailinator.com', '+1 (929) 447-9334', '490 West Hague Lane\nQui porro natus qui \nDebitis eos nisi cu, Iure earum ipsum er Quis qui dolores ius\nNG', 'paid', '150.00', '150.00', '0.00', '0.00', 'card', NULL, 'Elit dolore veritat', 'show', '2026-05-14', '21:27:36', 'fa2nt2pr381rh2jmqbcvmsb0bm'),
+(2, 'ORD07D30802', NULL, 'Emmanuel', 'Okikiola', 'akadiriokiki@gmail.com', '07082783187', 'lagos state\n\nlagos State Nigeria, Lagos 0002\nNG', 'paid', '84.00', '84.00', '0.00', '0.00', 'card', NULL, '', 'show', '2026-05-18', '10:57:01', 'o83g825lthbm6kslfgehisvoon');
 
 -- --------------------------------------------------------
 
@@ -1040,14 +806,15 @@ CREATE TABLE IF NOT EXISTS `read_order_items` (
   `time_created` time NOT NULL,
   `created_by` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `read_order_items`
 --
 
 INSERT INTO `read_order_items` (`id`, `hash_id`, `tb`, `tb_link`, `input_product_id`, `input_title`, `input_variant`, `input_quantity`, `input_price`, `input_total`, `image_1`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'oi_6a063e48950c04.61777795', 'read_orders', 'ORDE4894558', 'mmac001', 'Anti-Aging Eye Cream', '', 5, '30.00', '150.00', '/assets/img/products/anti-aging-cream-1.webp', 'show', '2026-05-14', '21:27:36', 'fa2nt2pr381rh2jmqbcvmsb0bm');
+(1, 'oi_6a063e48950c04.61777795', 'read_orders', 'ORDE4894558', 'mmac001', 'Anti-Aging Eye Cream', '', 5, '30.00', '150.00', '/assets/img/products/anti-aging-cream-1.webp', 'show', '2026-05-14', '21:27:36', 'fa2nt2pr381rh2jmqbcvmsb0bm'),
+(2, 'oi_6a0af07d30aae5.48157682', 'read_orders', 'ORD07D30802', 'mmfc001', 'Gentle Foaming Cleanser', '50ml / Sensitive', 3, '28.00', '84.00', '/assets/img/products/foaming-cleanser-1.webp', 'show', '2026-05-18', '10:57:01', 'o83g825lthbm6kslfgehisvoon');
 
 -- --------------------------------------------------------
 
@@ -1081,6 +848,9 @@ DROP TABLE IF EXISTS `read_reviews`;
 CREATE TABLE IF NOT EXISTS `read_reviews` (
   `id` int NOT NULL AUTO_INCREMENT,
   `hash_id` varchar(255) NOT NULL,
+  `tb` varchar(255) DEFAULT 'panel_product',
+  `tb_link` varchar(255) DEFAULT NULL,
+  `image_1` text,
   `input_product_id` varchar(255) DEFAULT NULL,
   `input_reviewer_name` varchar(255) DEFAULT NULL,
   `input_rating` int DEFAULT '5',
@@ -1217,26 +987,59 @@ CREATE TABLE IF NOT EXISTS `read_user_addresses` (
 
 DROP TABLE IF EXISTS `selection_product_category`;
 CREATE TABLE IF NOT EXISTS `selection_product_category` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(255) NOT NULL,
-  `input_name` varchar(255) DEFAULT NULL,
-  `visibility` varchar(50) DEFAULT 'show',
-  `date_created` date NOT NULL,
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `input_title` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hash_id` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_1` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `visibility` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `time_created` time NOT NULL,
-  `created_by` varchar(255) NOT NULL,
+  `date_created` date NOT NULL,
+  `created_by` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon_icon` varchar(2222) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `selection_product_category`
 --
 
-INSERT INTO `selection_product_category` (`id`, `hash_id`, `input_name`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
-(1, 'cat001', 'Serums', 'show', '2026-05-14', '12:51:54', 'system'),
-(2, 'cat002', 'Moisturizers', 'show', '2026-05-14', '12:51:54', 'system'),
-(3, 'cat003', 'Eye Care', 'show', '2026-05-14', '12:51:54', 'system'),
-(4, 'cat004', 'Cleansers', 'show', '2026-05-14', '12:51:54', 'system'),
-(5, 'cat005', 'Treatments', 'show', '2026-05-14', '12:51:54', 'system');
+INSERT INTO `selection_product_category` (`id`, `input_title`, `hash_id`, `image_1`, `visibility`, `time_created`, `date_created`, `created_by`, `icon_icon`) VALUES
+(1, 'Serums',       'cat-serums',       NULL, 'show', '12:00:00', '2026-01-01', 'system', ''),
+(2, 'Eye Care',     'cat-eye-care',     NULL, 'show', '12:00:00', '2026-01-01', 'system', ''),
+(3, 'Cleansers',    'cat-cleansers',    NULL, 'show', '12:00:00', '2026-01-01', 'system', ''),
+(4, 'Moisturizers', 'cat-moisturizers', NULL, 'show', '12:00:00', '2026-01-01', 'system', ''),
+(5, 'Treatments',   'cat-treatments',   NULL, 'show', '12:00:00', '2026-01-01', 'system', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `settings_checkout`
+--
+
+DROP TABLE IF EXISTS `settings_checkout`;
+CREATE TABLE IF NOT EXISTS `settings_checkout` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `hash_id` varchar(100) NOT NULL,
+  `input_page_title` varchar(100) DEFAULT 'Checkout',
+  `input_contact_title` varchar(100) DEFAULT 'Contact Information',
+  `input_address_title` varchar(100) DEFAULT 'Shipping Address',
+  `input_shipping_title` varchar(100) DEFAULT 'Shipping Method',
+  `input_payment_title` varchar(100) DEFAULT 'Payment Information',
+  `input_btn_text` varchar(100) DEFAULT 'Place Order',
+  `input_summary_title` varchar(100) DEFAULT 'Order Summary',
+  `visibility` char(4) NOT NULL DEFAULT 'show',
+  `date_created` date NOT NULL,
+  `time_created` time NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `settings_checkout`
+--
+
+INSERT INTO `settings_checkout` (`id`, `hash_id`, `input_page_title`, `input_contact_title`, `input_address_title`, `input_shipping_title`, `input_payment_title`, `input_btn_text`, `input_summary_title`, `visibility`, `date_created`, `time_created`) VALUES
+(1, 'chk001', 'Checkout', 'Contact Information', 'Shipping Address', 'Shipping Method', 'Payment Information', 'Place Order', 'Order Summary', 'show', '2026-05-18', '10:05:59'),
+(2, 'chk001', 'Checkout', 'Contact Information', 'Shipping Address', 'Shipping Method', 'Payment Information', 'Place Order', 'Order Summary', 'show', '2026-05-18', '10:05:59');
 
 -- --------------------------------------------------------
 
@@ -1780,11 +1583,11 @@ INSERT INTO `settings_shop_footer` (`id`, `hash_id`, `input_cta_heading`, `input
 -- --------------------------------------------------------
 
 --
--- Table structure for table `settings_shop_hero`
+-- Table structure for table `settings_home_hero`
 --
 
-DROP TABLE IF EXISTS `settings_shop_hero`;
-CREATE TABLE IF NOT EXISTS `settings_shop_hero` (
+DROP TABLE IF EXISTS `settings_home_hero`;
+CREATE TABLE IF NOT EXISTS `settings_home_hero` (
   `id` int NOT NULL AUTO_INCREMENT,
   `hash_id` varchar(255) NOT NULL,
   `input_heading` varchar(255) DEFAULT NULL,
@@ -1804,10 +1607,10 @@ CREATE TABLE IF NOT EXISTS `settings_shop_hero` (
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `settings_shop_hero`
+-- Dumping data for table `settings_home_hero`
 --
 
-INSERT INTO `settings_shop_hero` (`id`, `hash_id`, `input_heading`, `input_btn1_label`, `input_btn2_label`, `input_trust_text`, `input_rating`, `input_video_url`, `image_1`, `visibility`, `date_created`, `time_created`, `created_by`, `input_partners_heading`, `input_scroll_text`) VALUES
+INSERT INTO `settings_home_hero` (`id`, `hash_id`, `input_heading`, `input_btn1_label`, `input_btn2_label`, `input_trust_text`, `input_rating`, `input_video_url`, `image_1`, `visibility`, `date_created`, `time_created`, `created_by`, `input_partners_heading`, `input_scroll_text`) VALUES
 (1, 'hero001', 'Your natural beauty, expressed with care', 'Shop now', 'Our collection', 'Trusted by 300+ clients', '4.9/5', 'https://videos.pexels.com/video-files/7304311/7304311-hd_1920_1080_30fps.mp4', '/assets/img/products/radiance-serum-1.webp', 'show', '2026-05-14', '12:51:53', 'system', 'Trusted by leading brands', 'Scroll Down');
 
 -- --------------------------------------------------------
@@ -1957,27 +1760,25 @@ INSERT INTO `settings_shop_ui_labels` (`id`, `hash_id`, `input_add_to_cart`, `in
 DROP TABLE IF EXISTS `settings_website_info`;
 CREATE TABLE IF NOT EXISTS `settings_website_info` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(225) NOT NULL,
+  `hash_id` varchar(225) DEFAULT NULL,
   `input_name` varchar(225) NOT NULL,
-  `input_tagline` varchar(255) DEFAULT '',
   `input_email` varchar(225) DEFAULT NULL,
   `input_phone_number` varchar(225) DEFAULT NULL,
-  `input_whatsapp_number` varchar(100) DEFAULT '',
+  `input_whatsapp_number` char(50) DEFAULT NULL,
+  `input_bank_account_name` char(150) DEFAULT NULL,
+  `input_bank_name` char(150) DEFAULT NULL,
+  `input_bank_account_number` char(50) DEFAULT NULL,
   `input_address` varchar(225) NOT NULL,
   `input_linkedin` varchar(225) NOT NULL,
-  `input_podcast_link` varchar(255) DEFAULT '',
-  `input_apple_podcast` varchar(500) DEFAULT '',
-  `input_book_session_url` varchar(500) DEFAULT '',
   `input_facebook` varchar(225) NOT NULL,
   `input_instagram` varchar(225) NOT NULL,
   `input_behance` varchar(225) DEFAULT NULL,
   `input_dribbble` varchar(225) DEFAULT NULL,
   `input_twitter` varchar(225) NOT NULL,
-  `input_pinterest` varchar(225) DEFAULT NULL,
-  `image_1` text NOT NULL,
+  `image_1` text,
   `text_description` text NOT NULL,
-  `input_day` varchar(225) DEFAULT NULL,
-  `input_time` varchar(225) DEFAULT NULL,
+  `input_day_open_closed` varchar(225) DEFAULT NULL,
+  `input_time_open_closed` varchar(225) DEFAULT NULL,
   `input_country` varchar(225) DEFAULT NULL,
   `input_seo_keywords` text,
   `visibility` varchar(20) NOT NULL,
@@ -1988,8 +1789,15 @@ CREATE TABLE IF NOT EXISTS `settings_website_info` (
   `input_email_smtp_host` varchar(225) DEFAULT NULL,
   `input_email_smtp_secure_type` varchar(225) DEFAULT NULL,
   `input_email_from` varchar(225) DEFAULT NULL,
-  `created_by` varchar(255) DEFAULT NULL,
-  `input_image_width` varchar(225) DEFAULT NULL,
+  `created_by` varchar(225) NOT NULL,
+  `input_logo_width` varchar(225) DEFAULT NULL,
+  `input_usd_toggle` int DEFAULT NULL,
+  `input_size_chart_toggle` int NOT NULL DEFAULT 0,
+  `input_paystack_toggle` char(1) DEFAULT NULL,
+  `input_whatsapp_toggle` char(1) DEFAULT NULL,
+  `input-seo_keyword` text,
+  `text_bank_details` text,
+  `input_bank_label` text,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
@@ -1997,35 +1805,9 @@ CREATE TABLE IF NOT EXISTS `settings_website_info` (
 -- Dumping data for table `settings_website_info`
 --
 
-INSERT INTO `settings_website_info` (`id`, `hash_id`, `input_name`, `input_tagline`, `input_email`, `input_phone_number`, `input_whatsapp_number`, `input_address`, `input_linkedin`, `input_podcast_link`, `input_apple_podcast`, `input_book_session_url`, `input_facebook`, `input_instagram`, `input_behance`, `input_dribbble`, `input_twitter`, `input_pinterest`, `image_1`, `text_description`, `input_day`, `input_time`, `input_country`, `input_seo_keywords`, `visibility`, `date_created`, `time_created`, `input_email_smtp_port`, `input_email_password`, `input_email_smtp_host`, `input_email_smtp_secure_type`, `input_email_from`, `created_by`, `input_image_width`) VALUES
-(1, '345yjhgfse3456yhbgvfc', 'Mike Mahony', 'Fractional CTO', 'hello@mikemahony.com', '', '447344225808', 'North Las Vegas, Nevada', 'https://www.linkedin.com/in/michaeljmahony/', 'https://gtle.show', 'https://podcasts.apple.com/us/podcast/gaining-the-technology-leadership-edge/id1664607772', 'https://GetYourVirtualCTO.com/StrategySession', 'http://facebook.com', 'http://instagram.com', 'https://behance.net', 'https://dibbble.com', 'http://twitter.com', 'http://pinterest.com', '/uploads/mm_logo.jpg', 'Mike Mahony helps tech leaders and NetSuite-driven operators eliminate decision bottlenecks and build autonomous, high-performing teams.', 'Monday-Friday', '8AM-9PM', 'Nigeria', 'Fractional CTO, NetSuite Expert, DCAT Method, Tech Leadership', 'show', '2021-06-20', '11:33:49', '587', '', 'smtp.gmail.com', 'tls', 'hello@nextshinegroup.co.uk', NULL, '48');
+INSERT INTO `settings_website_info` (`id`, `hash_id`, `input_name`, `input_email`, `input_phone_number`, `input_whatsapp_number`, `input_bank_account_name`, `input_bank_name`, `input_bank_account_number`, `input_address`, `input_linkedin`, `input_facebook`, `input_instagram`, `input_behance`, `input_dribbble`, `input_twitter`, `image_1`, `text_description`, `input_day_open_closed`, `input_time_open_closed`, `input_country`, `input_seo_keywords`, `visibility`, `date_created`, `time_created`, `input_email_smtp_port`, `input_email_password`, `input_email_smtp_host`, `input_email_smtp_secure_type`, `input_email_from`, `created_by`, `input_logo_width`, `input_usd_toggle`, `input_size_chart_toggle`, `input_paystack_toggle`, `input_whatsapp_toggle`, `input-seo_keyword`, `text_bank_details`, `input_bank_label`) VALUES
+(1, '345yjhgfse3456yhbgvfc', 'Venora', 'hello@venora.com', '', '', '', '', '', 'Nigeria', 'http://linkedin.com', 'http://facebook.com', 'http://instagram.com', 'https://behance.net', 'https://dribbble.com', 'http://twitter.com', '/assets/img/brand/venora-dark.svg', 'VENORA was born from a passion for luxurious skincare that empowers women to feel confident in their own skin. Inspired by elegance, nature, and science, every product is carefully crafted to enhance your natural beauty.', 'Monday-Friday', '9AM-6PM', 'Nigeria', NULL, 'show', '2026-01-01', '12:00:00', '587', '', 'smtp.gmail.com', 'tls', 'hello@venora.com', 'system', '120', 1, 0, NULL, '1', NULL, NULL, NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `shipping_data`
---
-
-DROP TABLE IF EXISTS `shipping_data`;
-CREATE TABLE IF NOT EXISTS `shipping_data` (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `hash_id` varchar(255) DEFAULT NULL,
-  `input_order_id` varchar(255) DEFAULT NULL COMMENT 'links to read_orders.hash_id',
-  `input_carrier` varchar(255) DEFAULT NULL COMMENT 'e.g. DHL, FedEx, Royal Mail',
-  `tracking_id` varchar(255) DEFAULT NULL,
-  `tracking_code` varchar(255) DEFAULT NULL,
-  `tracking_url` text,
-  `input_status` varchar(100) DEFAULT 'pending' COMMENT 'pending|in_transit|delivered|failed',
-  `text_notes` text,
-  `text_data` text COMMENT 'raw carrier response JSON',
-  `visibility` varchar(50) DEFAULT 'show',
-  `date_created` date DEFAULT NULL,
-  `time_created` time DEFAULT NULL,
-  `created_by` varchar(255) DEFAULT 'system',
-  PRIMARY KEY (`id`),
-  KEY `idx_shipping_order` (`input_order_id`),
-  KEY `idx_shipping_hash` (`hash_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -2090,6 +1872,313 @@ CREATE TABLE IF NOT EXISTS `website_status` (
 
 INSERT INTO `website_status` (`id`, `hash_id`, `status`, `color`, `secondary_color`, `bgcolor_background`, `bgcolor_surface`, `textcolor_heading`, `textcolor_body`, `textcolor_muted`, `visibility`, `date_created`, `time_created`, `created_by`) VALUES
 (1, 'ws001', 'live', '#072708', '#202c22', '#f6f6f6', '#ffffff', '#072708', '#5c5f6a', '#b5b5b5', 'show', '2026-05-14', '13:02:01', 'system');
+COMMIT;
+
+-- ============================================================
+-- NEW TABLES PORTED FROM DEMO16 BACKEND STRUCTURE
+-- ============================================================
+
+-- --------------------------------------------------------
+-- Table: product_options (exact demo16.sql structure)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `product_options` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `option_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `product_options` (`id`, `option_name`) VALUES
+(1, 'Size'),
+(2, 'Skin Type');
+
+-- --------------------------------------------------------
+-- Table: product_option_values (exact demo16.sql structure)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `product_option_values` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `option_id` int NOT NULL,
+  `value_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `option_id` (`option_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `product_option_values` (`id`, `option_id`, `value_name`) VALUES
+(1, 1, '30ml'),
+(2, 1, '50ml'),
+(3, 2, 'Normal'),
+(4, 2, 'Oily'),
+(5, 2, 'Dry'),
+(6, 2, 'Sensitive');
+
+-- --------------------------------------------------------
+-- Table: variants (exact demo16.sql structure)
+-- One row per product (or per option combination)
+-- product_hash_id references panel_product.hash_id
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `variants` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `product_hash_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `input_price_ngn` decimal(10,2) DEFAULT NULL,
+  `input_price_usd` decimal(10,2) DEFAULT NULL,
+  `input_inventory` int DEFAULT NULL,
+  `sku` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `input_weight_in_kg` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `product_hash_id` (`product_hash_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `variants` (`id`, `product_hash_id`, `input_price_ngn`, `input_price_usd`, `input_inventory`, `sku`, `image_1`, `input_weight_in_kg`) VALUES
+(1, 'vnr-srs-001', 75000.00, 50.00, 999, 'VNR-SRM-001-SZ-LA', NULL, NULL),
+(2, 'vnr-srs-001', 75000.00, 50.00, 999, 'VNR-SRM-001-SZ-XL', NULL, NULL),
+(3, 'vnr-srs-001', 75000.00, 50.00, 999, 'VNR-SRM-001-CL-RE', NULL, NULL),
+(4, 'vnr-srs-001', 75000.00, 50.00, 999, 'VNR-SRM-001-CL-BL', NULL, NULL),
+(5, 'vnr-srs-001', 75000.00, 50.00, 999, 'VNR-SRM-001-CL-GR', NULL, NULL),
+(6, 'vnr-srs-001', 75000.00, 50.00, 999, 'VNR-SRM-001-CL-YE', NULL, NULL),
+(7, 'vnr-eye-001', 45000.00, 30.00, 999, 'VNR-EYE-001-SZ-LA', NULL, NULL),
+(8, 'vnr-eye-001', 45000.00, 30.00, 999, 'VNR-EYE-001-SZ-XL', NULL, NULL),
+(9, 'vnr-eye-001', 45000.00, 30.00, 999, 'VNR-EYE-001-CL-RE', NULL, NULL),
+(10, 'vnr-eye-001', 45000.00, 30.00, 999, 'VNR-EYE-001-CL-BL', NULL, NULL),
+(11, 'vnr-eye-001', 45000.00, 30.00, 999, 'VNR-EYE-001-CL-GR', NULL, NULL),
+(12, 'vnr-eye-001', 45000.00, 30.00, 999, 'VNR-EYE-001-CL-YE', NULL, NULL),
+(13, 'vnr-cln-001', 45000.00, 30.00, 999, 'VNR-CLN-001-SZ-LA', NULL, NULL),
+(14, 'vnr-cln-001', 45000.00, 30.00, 999, 'VNR-CLN-001-SZ-XL', NULL, NULL),
+(15, 'vnr-cln-001', 45000.00, 30.00, 999, 'VNR-CLN-001-CL-RE', NULL, NULL),
+(16, 'vnr-cln-001', 45000.00, 30.00, 999, 'VNR-CLN-001-CL-BL', NULL, NULL),
+(17, 'vnr-cln-001', 45000.00, 30.00, 999, 'VNR-CLN-001-CL-GR', NULL, NULL),
+(18, 'vnr-cln-001', 45000.00, 30.00, 999, 'VNR-CLN-001-CL-YE', NULL, NULL),
+(19, 'vnr-mos-001', 105000.00, 70.00, 999, 'VNR-MOS-001-SZ-LA', NULL, NULL),
+(20, 'vnr-mos-001', 105000.00, 70.00, 999, 'VNR-MOS-001-SZ-XL', NULL, NULL),
+(21, 'vnr-mos-001', 105000.00, 70.00, 999, 'VNR-MOS-001-CL-RE', NULL, NULL),
+(22, 'vnr-mos-001', 105000.00, 70.00, 999, 'VNR-MOS-001-CL-BL', NULL, NULL),
+(23, 'vnr-mos-001', 105000.00, 70.00, 999, 'VNR-MOS-001-CL-GR', NULL, NULL),
+(24, 'vnr-mos-001', 105000.00, 70.00, 999, 'VNR-MOS-001-CL-YE', NULL, NULL),
+(25, 'vnr-nit-001', 97500.00, 65.00, 999, 'VNR-NIT-001-SZ-LA', NULL, NULL),
+(26, 'vnr-nit-001', 97500.00, 65.00, 999, 'VNR-NIT-001-SZ-XL', NULL, NULL),
+(27, 'vnr-nit-001', 97500.00, 65.00, 999, 'VNR-NIT-001-CL-RE', NULL, NULL),
+(28, 'vnr-nit-001', 97500.00, 65.00, 999, 'VNR-NIT-001-CL-BL', NULL, NULL),
+(29, 'vnr-nit-001', 97500.00, 65.00, 999, 'VNR-NIT-001-CL-GR', NULL, NULL),
+(30, 'vnr-nit-001', 97500.00, 65.00, 999, 'VNR-NIT-001-CL-YE', NULL, NULL),
+(31, 'vnr-day-001', 90000.00, 60.00, 999, 'VNR-DAY-001-SZ-LA', NULL, NULL),
+(32, 'vnr-day-001', 90000.00, 60.00, 999, 'VNR-DAY-001-SZ-XL', NULL, NULL),
+(33, 'vnr-day-001', 90000.00, 60.00, 999, 'VNR-DAY-001-CL-RE', NULL, NULL),
+(34, 'vnr-day-001', 90000.00, 60.00, 999, 'VNR-DAY-001-CL-BL', NULL, NULL),
+(35, 'vnr-day-001', 90000.00, 60.00, 999, 'VNR-DAY-001-CL-GR', NULL, NULL),
+(36, 'vnr-day-001', 90000.00, 60.00, 999, 'VNR-DAY-001-CL-YE', NULL, NULL),
+(37, 'vnr-eye-002', 82500.00, 55.00, 999, 'VNR-EYS-001-SZ-LA', NULL, NULL),
+(38, 'vnr-eye-002', 82500.00, 55.00, 999, 'VNR-EYS-001-SZ-XL', NULL, NULL),
+(39, 'vnr-eye-002', 82500.00, 55.00, 999, 'VNR-EYS-001-CL-RE', NULL, NULL),
+(40, 'vnr-eye-002', 82500.00, 55.00, 999, 'VNR-EYS-001-CL-BL', NULL, NULL),
+(41, 'vnr-eye-002', 82500.00, 55.00, 999, 'VNR-EYS-001-CL-GR', NULL, NULL),
+(42, 'vnr-eye-002', 82500.00, 55.00, 999, 'VNR-EYS-001-CL-YE', NULL, NULL),
+(43, 'vnr-fcl-001', 42000.00, 28.00, 999, 'VNR-FCL-001-SZ-LA', NULL, NULL),
+(44, 'vnr-fcl-001', 42000.00, 28.00, 999, 'VNR-FCL-001-SZ-XL', NULL, NULL),
+(45, 'vnr-fcl-001', 42000.00, 28.00, 999, 'VNR-FCL-001-CL-RE', NULL, NULL),
+(46, 'vnr-fcl-001', 42000.00, 28.00, 999, 'VNR-FCL-001-CL-BL', NULL, NULL),
+(47, 'vnr-fcl-001', 42000.00, 28.00, 999, 'VNR-FCL-001-CL-GR', NULL, NULL),
+(48, 'vnr-fcl-001', 42000.00, 28.00, 999, 'VNR-FCL-001-CL-YE', NULL, NULL),
+(49, 'vnr-dhy-001', 112500.00, 75.00, 999, 'VNR-DHY-001-SZ-LA', NULL, NULL),
+(50, 'vnr-dhy-001', 112500.00, 75.00, 999, 'VNR-DHY-001-SZ-XL', NULL, NULL),
+(51, 'vnr-dhy-001', 112500.00, 75.00, 999, 'VNR-DHY-001-CL-RE', NULL, NULL),
+(52, 'vnr-dhy-001', 112500.00, 75.00, 999, 'VNR-DHY-001-CL-BL', NULL, NULL),
+(53, 'vnr-dhy-001', 112500.00, 75.00, 999, 'VNR-DHY-001-CL-GR', NULL, NULL),
+(54, 'vnr-dhy-001', 112500.00, 75.00, 999, 'VNR-DHY-001-CL-YE', NULL, NULL),
+(55, 'vnr-por-001', 67500.00, 45.00, 999, 'VNR-POR-001-SZ-LA', NULL, NULL),
+(56, 'vnr-por-001', 67500.00, 45.00, 999, 'VNR-POR-001-SZ-XL', NULL, NULL),
+(57, 'vnr-por-001', 67500.00, 45.00, 999, 'VNR-POR-001-CL-RE', NULL, NULL),
+(58, 'vnr-por-001', 67500.00, 45.00, 999, 'VNR-POR-001-CL-BL', NULL, NULL),
+(59, 'vnr-por-001', 67500.00, 45.00, 999, 'VNR-POR-001-CL-GR', NULL, NULL),
+(60, 'vnr-por-001', 67500.00, 45.00, 999, 'VNR-POR-001-CL-YE', NULL, NULL),
+(61, 'vnr-mcl-001', 48000.00, 32.00, 999, 'VNR-MCL-001-SZ-LA', NULL, NULL),
+(62, 'vnr-mcl-001', 48000.00, 32.00, 999, 'VNR-MCL-001-SZ-XL', NULL, NULL),
+(63, 'vnr-mcl-001', 48000.00, 32.00, 999, 'VNR-MCL-001-CL-RE', NULL, NULL),
+(64, 'vnr-mcl-001', 48000.00, 32.00, 999, 'VNR-MCL-001-CL-BL', NULL, NULL),
+(65, 'vnr-mcl-001', 48000.00, 32.00, 999, 'VNR-MCL-001-CL-GR', NULL, NULL),
+(66, 'vnr-mcl-001', 48000.00, 32.00, 999, 'VNR-MCL-001-CL-YE', NULL, NULL),
+(67, 'vnr-ney-001', 60000.00, 40.00, 999, 'VNR-NEY-001-SZ-LA', NULL, NULL),
+(68, 'vnr-ney-001', 60000.00, 40.00, 999, 'VNR-NEY-001-SZ-XL', NULL, NULL),
+(69, 'vnr-ney-001', 60000.00, 40.00, 999, 'VNR-NEY-001-CL-RE', NULL, NULL),
+(70, 'vnr-ney-001', 60000.00, 40.00, 999, 'VNR-NEY-001-CL-BL', NULL, NULL),
+(71, 'vnr-ney-001', 60000.00, 40.00, 999, 'VNR-NEY-001-CL-GR', NULL, NULL),
+(72, 'vnr-ney-001', 60000.00, 40.00, 999, 'VNR-NEY-001-CL-YE', NULL, NULL);
+
+-- --------------------------------------------------------
+-- Table: variant_values_link (exact demo16.sql structure)
+-- Junction linking variants to product_option_values
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `variant_values_link` (
+  `variant_id` int NOT NULL,
+  `value_id` int NOT NULL,
+  PRIMARY KEY (`variant_id`,`value_id`),
+  KEY `value_id` (`value_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `variant_values_link` (`variant_id`, `value_id`) VALUES
+(1, 1),(7, 1),(13, 1),(19, 1),(25, 1),(31, 1),(37, 1),(43, 1),(49, 1),(55, 1),(61, 1),(67, 1),
+(2, 2),(8, 2),(14, 2),(20, 2),(26, 2),(32, 2),(38, 2),(44, 2),(50, 2),(56, 2),(62, 2),(68, 2),
+(3, 3),(9, 3),(15, 3),(21, 3),(27, 3),(33, 3),(39, 3),(45, 3),(51, 3),(57, 3),(63, 3),(69, 3),
+(4, 4),(10, 4),(16, 4),(22, 4),(28, 4),(34, 4),(40, 4),(46, 4),(52, 4),(58, 4),(64, 4),(70, 4),
+(5, 5),(11, 5),(17, 5),(23, 5),(29, 5),(35, 5),(41, 5),(47, 5),(53, 5),(59, 5),(65, 5),(71, 5),
+(6, 6),(12, 6),(18, 6),(24, 6),(30, 6),(36, 6),(42, 6),(48, 6),(54, 6),(60, 6),(66, 6),(72, 6);
+
+
+-- --------------------------------------------------------
+-- Table: cart
+-- Shopping cart (user-linked, variant-aware)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `cart` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `hash_id` varchar(225) DEFAULT NULL,
+  `user_id` char(150) DEFAULT NULL,
+  `product_id` varchar(225) DEFAULT NULL COMMENT 'References panel_product.hash_id',
+  `variant_id` char(50) DEFAULT NULL COMMENT 'References variants.id',
+  `quantity` char(11) DEFAULT NULL,
+  `date_created` date NOT NULL,
+  `time_created` time NOT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Table: invoice
+-- Orders / invoices from checkout
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `invoice` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `hash_id` varchar(225) DEFAULT NULL,
+  `user_id` varchar(225) DEFAULT NULL,
+  `invoice_id` varchar(225) DEFAULT NULL,
+  `shipping_id` varchar(225) DEFAULT NULL,
+  `shipping_amount` varchar(20) DEFAULT NULL,
+  `shipping_amount2` varchar(20) DEFAULT NULL COMMENT 'USD shipping',
+  `shipping_data` text,
+  `shipping_status` char(2) DEFAULT NULL,
+  `rate_id` char(100) DEFAULT NULL,
+  `payment_plan` varchar(225) DEFAULT NULL,
+  `plan_id` varchar(225) DEFAULT NULL,
+  `amount_due` varchar(20) DEFAULT NULL,
+  `amount_due2` varchar(20) DEFAULT NULL COMMENT 'USD amount',
+  `amount_paid` varchar(20) DEFAULT NULL,
+  `subtotal_amount` decimal(15,2) DEFAULT NULL,
+  `subtotal_amount2` decimal(15,2) DEFAULT NULL COMMENT 'USD subtotal',
+  `discount_amount` decimal(15,2) DEFAULT 0.00,
+  `discount_amount2` decimal(15,2) DEFAULT 0.00 COMMENT 'USD discount',
+  `tax_amount` decimal(15,2) DEFAULT 0.00,
+  `tax_amount2` decimal(15,2) DEFAULT 0.00 COMMENT 'USD tax',
+  `tax_percentage` decimal(5,2) DEFAULT 0.00,
+  `applied_coupon_code` varchar(100) DEFAULT NULL,
+  `status` varchar(225) DEFAULT NULL,
+  `title` varchar(500) DEFAULT NULL,
+  `quantity` varchar(500) DEFAULT NULL,
+  `unit_price` varchar(1000) DEFAULT NULL,
+  `unit_price2` varchar(1000) DEFAULT NULL COMMENT 'USD unit prices',
+  `name` varchar(225) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phonenumber` varchar(225) DEFAULT NULL,
+  `description` text,
+  `date_created` date DEFAULT NULL,
+  `time_created` time DEFAULT NULL,
+  `custom` text,
+  `paystack_ref` varchar(225) DEFAULT NULL,
+  `currency` char(4) DEFAULT NULL,
+  `address` text,
+  `created_by` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `invoice_id` (`invoice_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Table: ecommerce_coupon
+-- Coupon codes with global and per-user usage limits
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `ecommerce_coupon` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `hash_id` varchar(225) NOT NULL,
+  `code` varchar(100) NOT NULL,
+  `type` varchar(20) NOT NULL COMMENT 'percentage or fixed',
+  `value` decimal(15,2) NOT NULL,
+  `min_cart_amount` decimal(15,2) DEFAULT 0.00,
+  `max_global_usage` int(11) NOT NULL DEFAULT 0 COMMENT '0 = unlimited',
+  `max_user_usage` int(11) NOT NULL DEFAULT 1,
+  `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `time_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Table: ecommerce_coupon_usage
+-- Tracks coupon usage per user/invoice
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `ecommerce_coupon_usage` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `coupon_id` int(10) UNSIGNED NOT NULL,
+  `identifier` varchar(255) NOT NULL COMMENT 'user email or user_id',
+  `invoice_id` varchar(225) NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'applied' COMMENT 'applied or consumed',
+  `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `time_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `coupon_id` (`coupon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Table: settings_global_discount
+-- System-wide sale/discount toggle with expiry
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `settings_global_discount` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `hash_id` varchar(225) NOT NULL,
+  `discount_type` varchar(20) NOT NULL DEFAULT 'percentage' COMMENT 'percentage or fixed',
+  `discount_value` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `is_active` tinyint(1) NOT NULL DEFAULT 0,
+  `discount_label` varchar(100) DEFAULT 'Flash Sale',
+  `expires_at` datetime DEFAULT NULL,
+  `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `time_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT IGNORE INTO `settings_global_discount`
+  (`id`, `hash_id`, `discount_type`, `discount_value`, `is_active`, `discount_label`, `expires_at`)
+VALUES
+  (1, 'globaldisc_001', 'percentage', 0.00, 0, 'Flash Sale', NULL);
+
+-- --------------------------------------------------------
+-- Table: panel_shipping_locations
+-- Location-based shipping cost matrix
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `panel_shipping_locations` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `hash_id` varchar(225) NOT NULL,
+  `input_location_name` varchar(255) NOT NULL,
+  `input_shipping_fee` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `input_shipping_fee_usd` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `input_estimated_delivery_time` varchar(100) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `time_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Table: settings_vat_settings
+-- VAT percentage configuration
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `settings_vat_settings` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `hash_id` varchar(225) NOT NULL,
+  `input_vat_percentage` decimal(5,2) NOT NULL DEFAULT 7.50,
+  `visibility` varchar(20) NOT NULL DEFAULT 'show',
+  `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `time_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT IGNORE INTO `settings_vat_settings` (`id`, `hash_id`, `input_vat_percentage`, `visibility`)
+VALUES (1, 'vatset_001', 7.50, 'show');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,22 +1,17 @@
-﻿<?php
+<?php
 $page_title = "Your Cart";
 $bodyClass  = "page-light-navbar";
 
-$sessionId = session_id();
-$cartRows  = selectContent($conn, "read_cart", ["input_session_id" => $sessionId, "visibility" => "show"]);
-
-$productIds  = array_unique(array_column($cartRows, "input_product_id"));
-$cartProducts = [];
-foreach ($productIds as $pid) {
-    $p = selectContent($conn, "panel_products", ["hash_id" => $pid, "visibility" => "show"]);
-    if (!empty($p)) $cartProducts[$pid] = $p[0];
+$userId = $_SESSION['user_id'] ?? null;
+try {
+    $cartData = getCartItems();
+    $cartItems = $cartData['cart_items'] ?? [];
+    $subtotal = $usdEnabled ? $cartData['total_usd'] : $cartData['total_ngn'];
+} catch (Exception $e) {
+    $cartItems = [];
+    $subtotal = 0;
 }
 
-$subtotal = 0;
-foreach ($cartRows as $row) {
-    $price = isset($cartProducts[$row["input_product_id"]]) ? (float)$cartProducts[$row["input_product_id"]]["input_price"] : 0;
-    $subtotal += $price * (int)$row["input_quantity"];
-}
 $shipping = $shop_free_ship > 0 && $subtotal >= $shop_free_ship ? 0 : $shop_ship_rate;
 $tax      = $subtotal * ($shop_tax_rate / 100);
 $total    = $subtotal + $shipping + $tax;
@@ -35,7 +30,7 @@ include APP_PATH . "/views/includes/header.php";
   <div class="container">
     <h1 class="heading-02" style="margin-bottom:40px;">Your Cart</h1>
 
-    <?php if (empty($cartRows)): ?>
+    <?php if (empty($cartItems)): ?>
       <div style="text-align:center;padding:80px 20px;">
         <div style="font-size:64px;margin-bottom:20px;">🛍</div>
         <h2 class="heading-03" style="margin-bottom:12px;">Your cart is empty</h2>
@@ -56,41 +51,36 @@ include APP_PATH . "/views/includes/header.php";
           <div class="cart-table-header">
             <span>Product</span><span style="text-align:center;">Qty</span><span style="text-align:right;">Total</span>
           </div>
-          <?php foreach ($cartRows as $row):
-            $p = $cartProducts[$row["input_product_id"]] ?? null;
-            if (!$p) continue;
-            $rowId     = htmlspecialchars($row["hash_id"], ENT_QUOTES, "UTF-8");
-            $prodId    = (int)($p["id"] ?? 0);
-            $lineTotal = (float)$p["input_price"] * (int)$row["input_quantity"];
-            $prodLink  = $baseUrl . '/products/' . htmlspecialchars($p["hash_id"], ENT_QUOTES, "UTF-8") . '/' . cleans($p["input_title"]);
+          <?php foreach ($cartItems as $item):
+            $rowId     = $item["cart_id"];
+            $lineTotal = $usdEnabled ? $item["subtotal_usd"] : $item["subtotal_ngn"];
+            $prodLink  = $baseUrl . '/products/' . htmlspecialchars($item["product_id"], ENT_QUOTES, "UTF-8") . '/' . cleans($item["product_name"]);
+            $price     = $usdEnabled ? $item["price_usd"] : $item["price_ngn"];
           ?>
             <div class="cart-item-row" id="cart-row-<?= $rowId ?>">
-              <a href="<?= $prodLink ?>"
-                 style="text-decoration:none;display:flex;gap:16px;align-items:flex-start;">
-                <div data-admc-image="panel_products" data-admc-id="<?= $prodId ?>"
-                     style="flex-shrink:0;">
-                  <img src="<?= htmlspecialchars($p["image_1"] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>"
+              <div style="display:flex;gap:16px;align-items:flex-start;">
+                <a href="<?= $prodLink ?>" style="flex-shrink:0;">
+                  <img src="<?= htmlspecialchars($item["image"] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>"
                        style="width:72px;height:88px;object-fit:cover;border-radius:4px;"
-                       alt="<?= htmlspecialchars($p["input_title"], ENT_QUOTES, "UTF-8") ?>">
-                </div>
+                       alt="<?= htmlspecialchars($item["product_name"], ENT_QUOTES, "UTF-8") ?>">
+                </a>
                 <div>
-                  <div style="font-size:15px;font-weight:600;color:#072708;margin-bottom:4px;line-height:1.3;"
-                       data-admc-manage="panel_products" data-admc-id="<?= $prodId ?>">
-                    <?= htmlspecialchars($p["input_title"], ENT_QUOTES, "UTF-8") ?>
-                  </div>
-                  <?php if (!empty($row["input_variant"])): ?>
-                    <div style="font-size:12px;color:#5c5f6a;margin-bottom:4px;"><?= htmlspecialchars($row["input_variant"], ENT_QUOTES, "UTF-8") ?></div>
+                  <a href="<?= $prodLink ?>" style="text-decoration:none; font-size:15px;font-weight:600;color:#072708;margin-bottom:4px;line-height:1.3;display:block;">
+                    <?= htmlspecialchars($item["product_name"], ENT_QUOTES, "UTF-8") ?>
+                  </a>
+                  <?php if (!empty($item["variant_options"])): ?>
+                    <div style="font-size:12px;color:#5c5f6a;margin-bottom:4px;"><?= htmlspecialchars($item["variant_options"], ENT_QUOTES, "UTF-8") ?></div>
                   <?php endif; ?>
-                  <div style="font-size:14px;color:#5c5f6a;"><?= $sym ?><?= number_format((float)$p["input_price"], 2) ?></div>
+                  <div style="font-size:14px;color:#5c5f6a;"><?= $sym ?><?= number_format((float)$price, 2) ?></div>
                   <button onclick="doCartRemove('<?= $rowId ?>')"
                           style="background:none;border:none;font-size:12px;color:#b5b5b5;cursor:pointer;text-decoration:underline;padding:0;margin-top:6px;">
                     Remove
                   </button>
                 </div>
-              </a>
+              </div>
               <div class="qty-control" style="justify-self:center;">
                 <button class="qty-btn" onclick="doCartUpdate('<?= $rowId ?>', Math.max(1, parseInt(document.getElementById('qty-<?= $rowId ?>').value)-1))">−</button>
-                <input class="qty-input" id="qty-<?= $rowId ?>" type="number" value="<?= (int)$row["input_quantity"] ?>" min="1"
+                <input class="qty-input" id="qty-<?= $rowId ?>" type="number" value="<?= (int)$item["quantity"] ?>" min="1"
                        onchange="doCartUpdate('<?= $rowId ?>', this.value)">
                 <button class="qty-btn" onclick="doCartUpdate('<?= $rowId ?>', parseInt(document.getElementById('qty-<?= $rowId ?>').value)+1)">+</button>
               </div>
@@ -140,7 +130,7 @@ include APP_PATH . "/views/includes/header.php";
   </div>
 </div>
 </div>
-<?php/*##cbcode_60001c##*/>
+<?php/*##cbcode_60001c##*?>
 
 <?php/*##cb1c##*/>
 </div>

@@ -33,9 +33,14 @@ try {
     ':' . implode(',:', array_keys($data['values']))
   );
   // //die(var_dump($sql));
-  $stmt =  $conn->prepare($sql);
+  $stmt = $conn->prepare($sql);
   $stmt->execute($data['values']);
   $result["success"] = true;
+
+  // If a product was just added, notify newsletter subscribers
+  if ($data['data'] === 'panel_product') {
+      notifySubscribersNewProduct($conn, $data['values']);
+  }
 } catch (PDOException $e) {
   // die($e);
   http_response_code(409);

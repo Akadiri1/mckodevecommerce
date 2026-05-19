@@ -3,36 +3,51 @@ $page_title = "Products";
 $bodyClass  = "page-light-navbar";
 
 // ── Fetch categories ─────────────────────────────────────────
-$categories = selectContentAsc($conn, "selection_product_category", ["visibility" => "show"], "input_name", 20);
+$categories = selectContentAsc($conn, "selection_product_category", ["visibility" => "show"], "id", 20);
+// Build ID → name lookup so products can be grouped by category name
+$catById = [];
+foreach ($categories as $c) { $catById[(string)$c['id']] = $c['input_title'] ?? ''; }
 
 // ── Active tab from URL ───────────────────────────────────────
 $activeTab = isset($_GET["tab"]) ? htmlspecialchars($_GET["tab"], ENT_QUOTES, "UTF-8") : "";
 
 // ── Fetch all products ────────────────────────────────────────
-$allProducts = selectContentDesc($conn, "panel_products", ["visibility" => "show"], "id", 100);
+$allProducts = selectContentAsc($conn, "panel_product", ["visibility" => "show"], "input_order", 100);
 
-// Pre-index all variants once (ADMC: no queries inside loops)
-$allVariantsRaw   = selectContent($conn, "addition_product_variants", ["visibility" => "show"]);
-$variantsIndexed  = [];
-foreach ($allVariantsRaw as $av) {
-    $variantsIndexed[$av['tb_link']] = true;
+// Pre-index variant prices from new variants table (ADMC: no queries inside loops)
+$allVariantRows = selectContent($conn, "variants", []);
+$variantPriceIdx = [];
+foreach ($allVariantRows as $v) {
+    $h = $v['product_hash_id'];
+    $p = $usdEnabled ? (float)$v['input_price_usd'] : (float)$v['input_price_ngn'];
+    if (!isset($variantPriceIdx[$h]) || $p < $variantPriceIdx[$h]) $variantPriceIdx[$h] = $p;
 }
 
-// Group products by category
+// Pre-index variants (for has_variants flag)
+$variantsIndexed = [];
+foreach ($allVariantRows as $av) { $variantsIndexed[$av['product_hash_id']] = true; }
+
+// Group products by category name (resolve numeric ID → name)
 $productsByCategory = ["" => []];
 foreach ($allProducts as &$p) {
-    $p['has_variants'] = isset($variantsIndexed[$p['hash_id']]) ? "true" : "false";
+    $p['input_price']      = $variantPriceIdx[$p['hash_id']] ?? 0;
+    $p['has_variants']     = isset($variantsIndexed[$p['hash_id']]) ? "true" : "false";
+    $catId                 = (string)($p["select_product_category"] ?? "");
+    $catName               = $catById[$catId] ?? $catId; // resolve ID → name
+    $p['_category_name']   = $catName;
     $productsByCategory[""][] = $p;
-    $cat = $p["select_category"] ?? "";
-    if (!isset($productsByCategory[$cat])) $productsByCategory[$cat] = [];
-    $productsByCategory[$cat][] = $p;
+    if ($catName !== "") {
+        if (!isset($productsByCategory[$catName])) $productsByCategory[$catName] = [];
+        $productsByCategory[$catName][] = $p;
+    }
 }
 unset($p);
 
-// ── Build tab list ────────────────────────────────────────────
+// ── Build tab list (keyed by category name, not ID) ───────────
 $tabList = [["key" => "", "label" => "All products"]];
 foreach ($categories as $cat) {
-    $tabList[] = ["key" => $cat["input_name"], "label" => $cat["input_name"]];
+    $name = $cat["input_title"] ?? '';
+    if ($name !== '') $tabList[] = ["key" => $name, "label" => $name];
 }
 if (empty($activeTab)) $activeTab = "";
 
@@ -135,23 +150,23 @@ include APP_PATH . "/views/includes/header.php";
                     <p class="p-01">No products in this category yet.</p>
                   </div>
                 <?php else: ?>
-                  <div class="product-grid w-dyn-items" data-admc-tb="panel_products" role="list">
+                  <div class="product-grid w-dyn-items" data-admc-tb="panel_product" role="list">
                     <?php foreach ($tabProducts as $product):
-                      $imgSrc   = htmlspecialchars($product["image_1"] ?? "", ENT_QUOTES, "UTF-8");
+                      $imgSrc   = htmlspecialchars($product["image_2"] ?? $product["image_1"] ?? "", ENT_QUOTES, "UTF-8");
                       $imgHover = htmlspecialchars($product["image_2"] ?? $product["image_1"] ?? "", ENT_QUOTES, "UTF-8");
-                      $detailUrl= $baseUrl . "/products/" . $product["hash_id"] . "/" . cleans($product["input_title"]);
+                      $detailUrl= $baseUrl . "/products/" . $product["hash_id"] . "/" . cleans($product["input_product_name"]);
                       $sym      = htmlspecialchars($shop_symbol, ENT_QUOTES, "UTF-8");
                     ?>
                       <div class="w-dyn-item" role="listitem">
                         <a class="product-link w-inline-block" href="<?= $detailUrl ?>">
                           <div class="product-card">
                             <div class="product-card-img"
-                                 data-admc-image="panel_products"
+                                 data-admc-image="panel_product"
                                  data-admc-id="<?= $product['id'] ?>">
-                              <img alt="<?= htmlspecialchars($product['input_title'], ENT_QUOTES, 'UTF-8') ?>"
+                              <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>"
                                    class="all-img" loading="lazy"
                                    src="<?= $imgSrc ?>">
-                              <?php if (!empty($product["image_2"]) && $product["image_2"] !== $product["image_1"]): ?>
+                              <?php if (!empty($imgHover) && $imgHover !== $imgSrc): ?>
                                 <div class="product-float">
                                   <img alt="" class="all-img" loading="lazy" src="<?= $imgHover ?>">
                                 </div>
@@ -176,16 +191,16 @@ include APP_PATH . "/views/includes/header.php";
                             </div>
                             <div class="product-card-bottom">
                               <div class="color-gray">
-                                <div class="p-02 caps"><?= htmlspecialchars($product['select_category'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="p-02 caps"><?= htmlspecialchars($product['_category_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                               </div>
                               <div class="product-name-price">
                                 <div class="heading-06"
-                                     data-admc-manage="panel_products"
+                                     data-admc-manage="panel_product"
                                      data-admc-id="<?= $product['id'] ?>">
-                                  <?= htmlspecialchars($product['input_title'], ENT_QUOTES, 'UTF-8') ?>
+                                  <?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>
                                 </div>
                                 <div class="heading-07"
-                                     data-admc-manage="panel_products"
+                                     data-admc-manage="panel_product"
                                      data-admc-id="<?= $product['id'] ?>">
                                   <?php if (!empty($product['input_compare_price'])): ?>
                                     <span style="text-decoration:line-through;color:#b5b5b5;font-size:13px;margin-right:6px;">

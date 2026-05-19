@@ -7,12 +7,17 @@ $wishlistIds = $_SESSION['wishlist'] ?? [];
 $wishlistProducts = [];
 
 if (!empty($wishlistIds)) {
-    // We use IN clause or loop. ADMC's selectContent usually handles simple where.
-    // Let's loop for simplicity or check if selectContent supports multiple.
-    // Usually it doesn't support IN, so we fetch and filter or custom query.
-    $allP = selectContent($conn, "panel_products", ["visibility" => "show"]);
+    $allP = selectContent($conn, "panel_product", ["visibility" => "show"]);
+    // Pre-index variant prices
+    $_wVars = selectContent($conn, "variants", []);
+    $_wPriceIdx = [];
+    foreach ($_wVars as $_v) {
+        $h = $_v['product_hash_id'];
+        if (!isset($_wPriceIdx[$h])) $_wPriceIdx[$h] = $usdEnabled ? (float)$_v['input_price_usd'] : (float)$_v['input_price_ngn'];
+    }
     foreach ($allP as $p) {
         if (in_array($p['hash_id'], $wishlistIds)) {
+            $p['input_price'] = $_wPriceIdx[$p['hash_id']] ?? 0;
             $wishlistProducts[] = $p;
         }
     }
@@ -51,10 +56,10 @@ include APP_PATH . "/views/includes/header.php";
         <div class="product-collection">
           <div class="product-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;">
             <?php foreach ($wishlistProducts as $product): 
-              $detailUrl = $baseUrl . "/products/" . $product["hash_id"] . "/" . cleans($product["input_title"]);
+              $detailUrl = $baseUrl . "/products/" . $product["hash_id"] . "/" . cleans($product["input_product_name"]);
               
               // Check for variants
-              $vars = selectContent($conn, "addition_product_variants", ["tb_link" => $product['hash_id'], "visibility" => "show"], 1);
+              $vars = selectContentAsc($conn, "variants", ["product_hash_id" => $product['hash_id']], "id", 1);
               $hasVariants = !empty($vars) ? "true" : "false";
             ?>
               <div class="product-card-wrap">
@@ -76,8 +81,8 @@ include APP_PATH . "/views/includes/header.php";
 
                   <a class="product-link w-inline-block" href="<?= $detailUrl ?>">
                     <div class="product-card-img">
-                      <img alt="<?= htmlspecialchars($product['input_title'], ENT_QUOTES, 'UTF-8') ?>" 
-                           class="all-img" loading="lazy" src="<?= htmlspecialchars($product['image_1'], ENT_QUOTES, 'UTF-8') ?>">
+                      <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>" 
+                           class="all-img" loading="lazy" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                       
                       <div class="add-to-card-02" 
                            data-product-id="<?= $product['hash_id'] ?>" 
@@ -90,7 +95,7 @@ include APP_PATH . "/views/includes/header.php";
                     <div class="product-card-bottom">
                       <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($product['select_category'] ?? "Skincare", ENT_QUOTES, 'UTF-8') ?></div></div>
                       <div class="product-name-price">
-                        <div class="heading-06"><?= htmlspecialchars($product['input_title'], ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="heading-06"><?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?></div>
                         <div class="heading-07"><?= $sym ?><?= number_format((float)$product['input_price'], 2) ?></div>
                       </div>
                     </div>

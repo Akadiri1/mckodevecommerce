@@ -19,6 +19,99 @@
     return symbol + parseFloat(amount).toFixed(2);
   }
 
+  // ── Flying Cart Preview Animation ────────────────────────────
+  var flyStyle = document.createElement('style');
+  flyStyle.textContent = `
+    .cart-flyer {
+      box-shadow: 0 8px 24px rgba(7,39,8,0.25);
+      border: 2px solid #fff;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      max-width: none !important;
+      max-height: none !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      transform-origin: center center !important;
+    }
+    @keyframes cartWiggle {
+      0% { transform: scale(1); }
+      20% { transform: scale(0.8) rotate(-8deg); }
+      40% { transform: scale(1.2) rotate(8deg); }
+      60% { transform: scale(0.9) rotate(-4deg); }
+      80% { transform: scale(1.05) rotate(4deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+    .cart-wiggle {
+      animation: cartWiggle 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+  `;
+  document.head.appendChild(flyStyle);
+
+  function animateFlyToCart(clickedBtn) {
+    var sourceImg = null;
+    if (clickedBtn) {
+      var qv = clickedBtn.closest('.quick-view-modal');
+      if (qv) {
+        sourceImg = qv.querySelector('#qvMainImg') || qv.querySelector('img');
+      } else {
+        var card = clickedBtn.closest('.product-card') || clickedBtn.closest('.product-card-wrap') || clickedBtn.closest('.product-details') || clickedBtn.closest('#addToCartSection');
+        if (card) sourceImg = card.querySelector('img');
+      }
+    }
+    
+    if (!sourceImg) {
+      if (document.querySelector('.quick-view-modal.active')) {
+        sourceImg = document.getElementById('qvMainImg');
+      } else if (document.getElementById('mainProductImg')) {
+        sourceImg = document.getElementById('mainProductImg');
+      }
+    }
+    
+    if (!sourceImg) return;
+    
+    var target = document.getElementById('cartBadge') || document.querySelector('[data-open-cart]');
+    if (!target) return;
+    
+    var rect = sourceImg.getBoundingClientRect();
+    var targetRect = target.getBoundingClientRect();
+    
+    if (rect.width === 0 || rect.height === 0) return;
+    
+    var clone = document.createElement('img');
+    clone.src = sourceImg.src;
+    clone.className = 'cart-flyer';
+    clone.style.position = 'fixed';
+    clone.style.top = rect.top + 'px';
+    clone.style.left = rect.left + 'px';
+    clone.style.width = rect.width + 'px';
+    clone.style.height = rect.height + 'px';
+    clone.style.zIndex = '999999';
+    clone.style.transition = 'all 0.85s cubic-bezier(0.19, 1, 0.22, 1)';
+    clone.style.pointerEvents = 'none';
+    
+    document.body.appendChild(clone);
+    
+    // Force immediate reflow/layout-flush to trigger CSS transition properly
+    clone.offsetWidth;
+    
+    // Animate coordinates and size
+    clone.style.top = (targetRect.top + (targetRect.height / 2) - 15) + 'px';
+    clone.style.left = (targetRect.left + (targetRect.width / 2) - 15) + 'px';
+    clone.style.width = '30px';
+    clone.style.height = '30px';
+    clone.style.opacity = '0.1';
+    clone.style.transform = 'scale(0.1) rotate(360deg)';
+    
+    setTimeout(function() {
+      clone.remove();
+      var parentIcon = target.closest('[data-open-cart]') || target;
+      parentIcon.classList.add('cart-wiggle');
+      setTimeout(function() { parentIcon.classList.remove('cart-wiggle'); }, 600);
+    }, 850);
+  }
+
   // ── Toast notifications ──────────────────────────────────────
   var toastContainer = null;
   function showToast(msg, type, duration) {
@@ -156,6 +249,7 @@
     })
     .then(function(data) {
       if (data.success) {
+        animateFlyToCart(clickedBtn);
         updateCartBadge(data.cart_count);
         showToast('Added to cart!');
         openCartDrawer();
@@ -236,7 +330,17 @@
 
   function renderQuickView(p) {
     var content = $('#qvContent', qvModal);
-    currentGallery = p.images || [p.image_1];
+    var imageList = [];
+    if (p.images && p.images.length > 0) {
+      imageList = imageList.concat(p.images);
+    }
+    if (p.image_1 && imageList.indexOf(p.image_1) === -1) {
+      imageList.unshift(p.image_1);
+    }
+    if (imageList.length === 0) {
+      imageList.push((window.VENORA_BASE_URL || '') + '/assets/img/icons/cart.svg');
+    }
+    currentGallery = imageList;
     currentGalleryIdx = 0;
 
     var thumbsHtml = '';
@@ -256,9 +360,10 @@
         categories[cat].push(v);
       });
 
+      variantsHtml += '<div class="modal-variants-label" style="display:block; margin-bottom:12px; font-weight:700; color:var(--v-black); text-transform:uppercase; font-size:11px; letter-spacing:1px;">VARIANTS:</div>';
+
       Object.keys(categories).forEach(function(catName) {
-        variantsHtml += '<div class="modal-variants" style="margin-bottom:20px;">' +
-          '<div class="modal-variants-label" style="display:block; margin-bottom:10px; font-weight:700; color:var(--v-black); text-transform:uppercase; font-size:11px; letter-spacing:1px;">' + catName + ':</div>' +
+        variantsHtml += '<div class="modal-variants" style="margin-bottom:16px;">' +
           '<div class="modal-variant-options" data-category="' + catName + '" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">' +
           categories[catName].map(function(v) {
             var vPriceRaw = parseFloat(v.input_price ? v.input_price.toString().replace(/[^0-9.]/g, '') : mainPriceRaw);
@@ -305,7 +410,7 @@
           '<span class="modal-rating-text">(' + (p.input_reviews_count || 0) + ' Reviews)</span>' +
         '</div>' +
         '<div class="modal-price">' +
-          '<span class="modal-price-current" id="qvPrice">' + sym + p.input_price + '</span>' + compareHtml +
+          '<span class="modal-price-current" id="qvPrice">' + sym + mainPriceRaw.toFixed(2) + '</span>' + compareHtml +
         '</div>' +
         '<p class="modal-short-desc">' + previewBody(p.text_description || '', 30) + '</p>' +
         variantsHtml +
@@ -396,7 +501,7 @@
         btn.innerHTML = '<img src="' + window.VENORA_BASE_URL + '/assets/img/icons/cart-white.svg" style="width:18px;height:18px;" alt=""> Add to Cart';
         closeQuickView();
         hideOverlay();
-      });
+      }, btn);
     });
 
     // Wishlist
@@ -579,13 +684,54 @@
     });
 
     var nlForm = $('.newsletter-popup-form', nlPopup);
+    var nlMsg  = document.getElementById('nlPopupMsg');
+
+    function showPopupMsg(text, isError) {
+      if (!nlMsg) return;
+      nlMsg.style.display       = 'flex';
+      nlMsg.style.alignItems    = 'center';
+      nlMsg.style.gap           = '8px';
+      nlMsg.style.padding       = '10px 14px';
+      nlMsg.style.borderRadius  = '8px';
+      nlMsg.style.fontSize      = '13px';
+      nlMsg.style.fontWeight    = '500';
+      nlMsg.style.textTransform = 'none';
+      nlMsg.style.letterSpacing = '0';
+      if (isError) {
+        nlMsg.style.background = 'rgba(193,18,31,0.08)';
+        nlMsg.style.color      = '#c1121f';
+        nlMsg.style.border     = '1px solid rgba(193,18,31,0.2)';
+        nlMsg.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>' + text + '</span>';
+      } else {
+        nlMsg.style.background = 'rgba(22,163,74,0.08)';
+        nlMsg.style.color      = '#16a34a';
+        nlMsg.style.border     = '1px solid rgba(22,163,74,0.2)';
+        nlMsg.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span>' + text + '</span>';
+      }
+    }
+
     if (nlForm) {
       on(nlForm, 'submit', function(e) {
         e.preventDefault();
-        var emailVal = nlForm.querySelector('input[type=email]').value.trim();
-        if (!emailVal) return;
+        var emailInput = nlForm.querySelector('input[type=email]');
+        var emailVal   = emailInput ? emailInput.value.trim() : '';
+
+        /* Client-side validation */
+        if (!emailVal) {
+          showPopupMsg('Please enter your email address.', true);
+          return;
+        }
+        var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRe.test(emailVal)) {
+          showPopupMsg('Please enter a valid email address.', true);
+          return;
+        }
+
         var btn = nlForm.querySelector('button[type=submit]');
+        var originalBtnText = btn ? btn.textContent : 'Subscribe';
         if (btn) { btn.disabled = true; btn.textContent = '...'; }
+        if (nlMsg) nlMsg.style.display = 'none';
+
         fetch(baseUrl + '/newsletter-subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -593,16 +739,19 @@
         })
         .then(function(r) { return r.json(); })
         .then(function(res) {
-          var msg = nlPopup.querySelector('p');
-          if (msg) msg.textContent = res.success
-            ? 'Thank you for subscribing!'
-            : 'Something went wrong. Please try again.';
-          nlForm.style.display = 'none';
-          if (res.success) setTimeout(dismissNlPopup, 2500);
-          else if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
+          if (res.success) {
+            nlForm.style.display = 'none';
+            showPopupMsg(res.message || 'Thank you for subscribing!', false);
+            setTimeout(dismissNlPopup, 3000);
+          } else {
+            /* Show the actual server error (e.g. "already subscribed") */
+            showPopupMsg(res.message || 'Something went wrong. Please try again.', true);
+            if (btn) { btn.disabled = false; btn.textContent = originalBtnText; }
+          }
         })
         .catch(function() {
-          if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
+          showPopupMsg('Connection error. Please try again.', true);
+          if (btn) { btn.disabled = false; btn.textContent = originalBtnText; }
         });
       });
     }
@@ -732,7 +881,7 @@
       var pid = addBtn.dataset.productId;
       if (pid) {
         addBtn.classList.add('is-adding');
-        cartAddItem(pid, '', 1, function() { addBtn.classList.remove('is-adding'); });
+        cartAddItem(pid, '', 1, function() { addBtn.classList.remove('is-adding'); }, addBtn);
       }
       return;
     }
@@ -758,7 +907,7 @@
         mainATC.textContent = 'Added!';
         mainATC.disabled = false;
         setTimeout(function() { mainATC.textContent = 'Add to Cart'; }, 2000);
-      });
+      }, mainATC);
       return;
     }
 

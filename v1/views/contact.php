@@ -66,10 +66,12 @@ include APP_PATH . "/views/includes/header.php";
             </a>
           </div>
           <div class="contact-box">
-            <div class="color-gray"><div class="p-02">Orders &amp; shipping</div></div>
-            <a class="contact-link w-inline-block" href="mailto:orders@venora.com">
-              <div class="heading-05">orders@venora.com</div>
-            </a>
+            <div class="color-gray"><div class="p-02">Address</div></div>
+            <div class="heading-05"
+                 data-admc-manage="settings_shop_config"
+                 data-admc-id="<?= $shopConfig[0]['id'] ?? 1 ?>">
+              <?= htmlspecialchars($shop_address ?: 'Lagos, Nigeria', ENT_QUOTES, 'UTF-8') ?>
+            </div>
           </div>
         </div>
       </div>

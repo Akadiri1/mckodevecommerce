@@ -15,7 +15,11 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
   </style>
   <section class="footer-section">
 
-    <!-- CTA Banner — editable via ADMC -->
+    <!-- CTA Banner — editable via ADMC (Only shown on home page) -->
+    <?php 
+      $isHome = (isset($s1) && ($s1 === '' || $s1 === 'home')) || (isset($currentPath) && ($currentPath === '/' || $currentPath === '/home'));
+      if ($isHome): 
+    ?>
     <div class="cta">
       <div class="cta-inner">
         <h1 class="heading-01"
@@ -41,6 +45,7 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
         </div>
       </div>
     </div>
+    <?php endif; ?>
 
     <!-- Main footer -->
     <div class="footer">
@@ -58,13 +63,12 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
               <form class="newsletter-form-02" id="footerNewsletterForm" onsubmit="handleFooterNewsletter(event)">
                 <input class="newsletter-field-02 w-input"
                        type="email" name="email"
-                       placeholder="Email address..." required>
+                       placeholder="<?= htmlspecialchars($footerConfig['input_newsletter_placeholder'] ?? 'Email address...', ENT_QUOTES, 'UTF-8') ?>"
+                       required>
                 <input class="submit-button-02 w-button"
                        type="submit" value="Subscribe">
               </form>
-              <div id="footerNewsletterSuccess" style="display:none;" class="p-02">
-                Thank you! You have been subscribed.
-              </div>
+              <div id="footerNewsletterMsg" style="display:none;margin-top:8px;font-size:13px;padding:8px 12px;border-radius:4px;" class="p-02"></div>
             </div>
           </div>
 
@@ -93,17 +97,19 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
         <!-- Footer bottom bar -->
         <div class="footer-center">
           <div class="footer-center-inner left">
-            <div class="p-02"
+            <div class="p-02" style="color:#ffffff;"
                  data-admc-manage="settings_shop_footer"
                  data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
               <?= htmlspecialchars($footerConfig['input_powered_by'] ?? '', ENT_QUOTES, 'UTF-8') ?>
             </div>
           </div>
           <div class="footer-center-inner center">
-            <a href="<?= $baseUrl ?>/privacy-policy" class="p-02" style="color: #ffffff; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Privacy policy</a>
+            <a href="<?= $baseUrl ?>/privacy-policy" class="p-02"
+               style="color:#ffffff;text-decoration:none;opacity:0.7;transition:opacity 0.2s;"
+               onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">Privacy policy</a>
           </div>
           <div class="footer-center-inner right">
-            <div class="p-02"
+            <div class="p-02" style="color:#ffffff;opacity:0.7;"
                  data-admc-manage="settings_shop_footer"
                  data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
               &copy; <?= date('Y') ?> <?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>. All Rights Reserved.
@@ -111,20 +117,20 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
           </div>
         </div>
 
-        <!-- Logo -->
+        <!-- Logo — pulled from settings_shop_config (editable via ADMC) -->
         <a class="footer-logo w-inline-block" href="<?= $baseUrl ?>/">
           <div data-admc-image="settings_shop_config"
                data-admc-id="<?= $shopConfig[0]['id'] ?? 1 ?>">
             <img alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>"
                  class="footer-logo-img"
-                 src="<?= $baseUrl ?>/assets/img/brand/venora-dark.svg">
+                 style="max-width:140px;max-height:52px;width:auto;height:auto;object-fit:contain;"
+                 src="<?= htmlspecialchars($logo_directory ?: $logo_dark ?: '', ENT_QUOTES, 'UTF-8') ?>">
           </div>
         </a>
 
         <!-- Social icons -->
         <div class="footer-bottom">
           <div class="social-block">
-            <img src="<?= $baseUrl ?>/assets/img/icons/stripe.svg" alt="Stripe" style="height:24px;opacity:0.6;">
           </div>
           <div class="social-block">
             <a class="footer-social-link-02 w-inline-block"
@@ -152,16 +158,53 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
 
   </section>
 
-  <!-- ── Newsletter Popup ────────────────────────────────────── -->
+  <!-- ── Newsletter Popup — DB-driven, ADMC-editable ─────────── -->
+  <?php
+    $popupHeading  = htmlspecialchars($footerConfig['input_newsletter_popup_heading']      ?? 'Get 10% off your first order',               ENT_QUOTES, 'UTF-8');
+    $popupDesc     = htmlspecialchars($footerConfig['text_newsletter_popup_description']   ?? 'Subscribe for exclusive offers, skincare tips, and early access to new products.', ENT_QUOTES, 'UTF-8');
+    $popupBtn      = htmlspecialchars($footerConfig['input_newsletter_popup_btn']          ?? 'Subscribe',  ENT_QUOTES, 'UTF-8');
+    $popupDismiss  = htmlspecialchars($footerConfig['input_newsletter_popup_dismiss']      ?? 'No thanks',  ENT_QUOTES, 'UTF-8');
+    $popupHolder   = htmlspecialchars($footerConfig['input_newsletter_placeholder']        ?? 'Your email address', ENT_QUOTES, 'UTF-8');
+    $ftrId         = $footerConfig['id'] ?? 1;
+  ?>
   <div class="newsletter-popup" id="newsletterPopup">
-    <button class="newsletter-popup-close" id="nlPopupClose">✕</button>
-    <h4>Get 10% off your first order</h4>
-    <p>Subscribe for exclusive offers, skincare tips, and early access to new products.</p>
-    <form class="newsletter-popup-form" id="nlPopupForm">
-      <input class="newsletter-popup-input" type="email" placeholder="Your email address" required>
-      <button class="newsletter-popup-btn" type="submit">Subscribe</button>
+    <button class="newsletter-popup-close" id="nlPopupClose" aria-label="Close">✕</button>
+
+    <!-- Editable heading -->
+    <h4 style="margin:0 0 12px;font-size:20px;line-height:1.35;color:#072708;"
+        data-admc-manage="settings_shop_footer"
+        data-admc-id="<?= $ftrId ?>">
+      <?= $popupHeading ?>
+    </h4>
+
+    <!-- Editable description -->
+    <p style="margin:0 0 20px;line-height:1.75;color:#5c5f6a;font-size:14px;"
+       data-admc-manage="settings_shop_footer"
+       data-admc-id="<?= $ftrId ?>">
+      <?= $popupDesc ?>
+    </p>
+
+    <!-- Form with error/success message area -->
+    <div id="nlPopupMsg" style="display:none;margin-bottom:12px;font-size:13px;padding:8px 12px;border-radius:4px;"></div>
+
+    <form class="newsletter-popup-form" id="nlPopupForm" novalidate>
+      <input class="newsletter-popup-input" type="email"
+             placeholder="<?= $popupHolder ?>"
+             required
+             style="margin-bottom:10px;">
+      <button class="newsletter-popup-btn" type="submit"
+              data-admc-manage="settings_shop_footer"
+              data-admc-id="<?= $ftrId ?>">
+        <?= $popupBtn ?>
+      </button>
     </form>
-    <button class="newsletter-popup-dismiss" id="nlPopupDismiss">No thanks</button>
+
+    <button class="newsletter-popup-dismiss" id="nlPopupDismiss"
+            style="margin-top:14px;display:block;width:100%;text-align:center;background:none;border:none;color:#b5b5b5;font-size:13px;cursor:pointer;"
+            data-admc-manage="settings_shop_footer"
+            data-admc-id="<?= $ftrId ?>">
+      <?= $popupDismiss ?>
+    </button>
   </div>
 
   <!-- jQuery (for Webflow CSS class compatibility) -->
@@ -218,17 +261,63 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
       document.body.style.overflow = '';
     });
 
-    // Footer newsletter
+    // Footer newsletter — with validation and server message display
     function handleFooterNewsletter(e) {
       e.preventDefault();
-      var email = e.target.querySelector('input[type=email]').value;
+      var form    = e.target;
+      var email   = form.querySelector('input[type=email]').value.trim();
+      var msgEl   = document.getElementById('footerNewsletterMsg');
+      var submitBtn = form.querySelector('input[type=submit]');
+
+      function showMsg(text, isError) {
+        if (!msgEl) return;
+        msgEl.style.display      = 'flex';
+        msgEl.style.alignItems   = 'center';
+        msgEl.style.gap          = '8px';
+        msgEl.style.padding      = '10px 14px';
+        msgEl.style.borderRadius = '8px';
+        msgEl.style.fontSize     = '13px';
+        msgEl.style.fontWeight   = '500';
+        msgEl.style.textTransform = 'none';
+        msgEl.style.letterSpacing = '0';
+        if (isError) {
+          msgEl.style.background = 'rgba(193,18,31,0.08)';
+          msgEl.style.color      = '#c1121f';
+          msgEl.style.border     = '1px solid rgba(193,18,31,0.2)';
+          msgEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>' + text + '</span>';
+        } else {
+          msgEl.style.background = 'rgba(22,163,74,0.08)';
+          msgEl.style.color      = '#16a34a';
+          msgEl.style.border     = '1px solid rgba(22,163,74,0.2)';
+          msgEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span>' + text + '</span>';
+        }
+      }
+
+      if (!email) { showMsg('Please enter your email address.', true); return; }
+      var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!re.test(email)) { showMsg('Please enter a valid email address.', true); return; }
+
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.value = '...'; }
+      if (msgEl) msgEl.style.display = 'none';
+
       fetch('/newsletter-subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'email=' + encodeURIComponent(email)
-      }).finally(function() {
-        document.getElementById('footerNewsletterForm').style.display = 'none';
-        document.getElementById('footerNewsletterSuccess').style.display = 'block';
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res.success) {
+          form.style.display = 'none';
+          showMsg(res.message || 'Thank you! You have been subscribed.', false);
+        } else {
+          showMsg(res.message || 'Something went wrong. Please try again.', true);
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.value = 'Subscribe'; }
+        }
+      })
+      .catch(function() {
+        showMsg('Connection error. Please try again.', true);
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.value = 'Subscribe'; }
       });
     }
   </script>

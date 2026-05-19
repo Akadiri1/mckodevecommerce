@@ -1,7 +1,7 @@
 <?php
 // ── Fetch nav from panel_pages (ADMC compliant — DB-driven) ──
 $navPages = selectContentAsc($conn, "panel_pages", ["visibility" => "show"], "input_order", 15);
-$navCategories = selectContentAsc($conn, "selection_product_category", ["visibility" => "show"], "input_name", 10);
+$navCategories = selectContentAsc($conn, "selection_product_category", ["visibility" => "show"], "id", 10);
 $currentPath = '/' . ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
 ?>
@@ -53,15 +53,14 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
       <div class="navbar-container">
         <div class="navbar-wrapper">
 
-          <!-- Logo — icon only -->
+          <!-- Logo — from settings_shop_config -->
           <div class="nav-left">
-            <a href="<?= $baseUrl ?>/" class="navbar-brand w-nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-              <!-- Icon logo (leaf/geometric mark) -->
+            <a href="<?= $baseUrl ?>/" class="navbar-brand w-nav-brand" style="display:flex;align-items:center;text-decoration:none;">
               <img alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, "UTF-8") ?>"
                    class="nav-logo-icon"
                    loading="lazy"
-                   src="https://cdn.prod.website-files.com/69142cc410c97b6153a00e32/6914577f7eba7d2c03a6c183_Group 2087333717.svg"
-                   style="height:36px;width:auto;display:block;">
+                   src="<?= htmlspecialchars($logo_directory, ENT_QUOTES, 'UTF-8') ?>"
+                   style="max-height:40px;max-width:160px;width:auto;height:auto;object-fit:contain;display:block;">
             </a>
           </div>
 
@@ -174,9 +173,9 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   <div class="mobile-nav-sidebar" id="mobileNavSidebar">
     <div class="mobile-nav-header">
       <a href="<?= $baseUrl ?>/" class="mobile-nav-logo">
-        <img src="https://cdn.prod.website-files.com/69142cc410c97b6153a00e32/6914577f7eba7d2c03a6c183_Group 2087333717.svg"
+        <img src="<?= htmlspecialchars($logo_directory, ENT_QUOTES, 'UTF-8') ?>"
              alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>"
-             style="height:32px;width:auto;filter:brightness(0) invert(1);">
+             style="max-height:32px;max-width:140px;width:auto;height:auto;object-fit:contain;">
       </a>
       <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">✕</button>
     </div>

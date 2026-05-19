@@ -1177,7 +1177,10 @@ ADMC supports full e-commerce websites. This section covers the table structure,
 |---|---|---|
 | `panel_products` | `panel_` | Product listings |
 | `addition_product_images` | `addition_` | Extra gallery images per product |
-| `addition_product_variants` | `addition_` | Size, colour, or option variants |
+| `variants` | `variant_` | Product variant combinations (Size, Color, etc.) |
+| `product_options` | `option_` | Available option types (e.g. Size, Color) |
+| `product_option_values` | `value_` | Available values for options (e.g. Red, Large) |
+| `variant_values_link` | - | Junction linking variants to option values |
 | `selection_product_category` | `selection_` | Category dropdown options |
 | `selection_product_tag` | `selection_` | Tag dropdown options |
 | `panel_collections` | `panel_` | Featured collections (homepage sections) |
@@ -1224,24 +1227,21 @@ CREATE TABLE IF NOT EXISTS `panel_products` (
 
 ---
 
-### 20.3 Product Variants (`addition_product_variants`)
+### 20.3 Product Variants (`variants`)
+The store uses a structured variant system:
+- `product_options`: Defines types (e.g. Size).
+- `product_option_values`: Defines values (e.g. 50ml).
+- `variants`: Specific SKUs with price and stock.
+- `variant_values_link`: Connects variants to options.
 
 ```sql
-CREATE TABLE IF NOT EXISTS `addition_product_variants` (
-  `id`             INT PRIMARY KEY AUTO_INCREMENT,
-  `hash_id`        VARCHAR(255) NOT NULL,
-  `tb`             VARCHAR(255) DEFAULT 'panel_products',
-  `tb_link`        VARCHAR(255),       -- hash_id of parent product
-  `input_name`     VARCHAR(255),       -- e.g. "Size", "Colour"
-  `input_value`    VARCHAR(255),       -- e.g. "XL", "Red"
-  `input_price`    VARCHAR(50),        -- override price for this variant
-  `input_stock`    VARCHAR(20),        -- stock for this specific variant
-  `input_sku`      VARCHAR(100),
-  `input_order`    INT DEFAULT 0,
-  `visibility`     VARCHAR(50) DEFAULT 'show',
-  `date_created`   DATE NOT NULL,
-  `time_created`   TIME NOT NULL,
-  `created_by`     VARCHAR(255) NOT NULL
+CREATE TABLE IF NOT EXISTS `variants` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `product_hash_id` varchar(255) NOT NULL,
+  `input_price_ngn` decimal(10,2),
+  `input_price_usd` decimal(10,2),
+  `input_inventory` int,
+  `sku` varchar(100)
 );
 ```
 
@@ -1358,10 +1358,10 @@ if (!empty($activeCategory)) {
 $products = selectContentDesc($conn, "panel_products", $where, "id", 24);
 
 // Pre-index variants
-$variantsRaw = selectContent($conn, "addition_product_variants", ["visibility" => "show"]);
+$variantsRaw = selectContent($conn, "variants", ["product_hash_id" => $id]);
 $variantsByHash = [];
 foreach ($variantsRaw as $v) {
-    $variantsByHash[$v['tb_link']][] = $v;
+    $variantsByHash[$v['product_hash_id']][] = $v;
 }
 
 include 'includes/header.php';

@@ -23,6 +23,11 @@ if ($script_dir === '') {
 include D_PATH . "/.env/config.php";
 require APP_PATH . "/models/model.php";
 require APP_PATH . "/controllers/controller.php";
+require APP_PATH . "/controllers/ProductController.php";
+require APP_PATH . "/controllers/CouponManager.php";
+require APP_PATH . "/controllers/PaystackClient.php";
+require APP_PATH . "/controllers/cart_functions.php";
+require APP_PATH . "/controllers/mailer_helper.php";
 
 if (getenv("ADMC_USERNAME")) {
   $admc_username = getenv("ADMC_USERNAME");
@@ -30,6 +35,10 @@ if (getenv("ADMC_USERNAME")) {
   setcookie("admc", "", time() - 3600, null, null, false, false);
   setcookie("admc", $admc_username, time() + 31536000, "/", null, false, false);
 }
+
+// ADMC header whitelist — must be set before any AJAX file is included
+$allowedHeadersArr = selectContent($conn, "panel_allowed_headers", ["visibility" => "show"]);
+$headersName       = array_column($allowedHeadersArr, "input_name");
 
 $shopConfig   = selectContent($conn, "settings_shop_config", ["visibility" => "show"]);
 $websiteStyle = selectContent($conn, "website_status",       ["visibility" => "show"]);
@@ -59,8 +68,27 @@ $site_email_smtp_port        = $shopConfig[0]["input_email_smtp_port"]        ??
 $site_email_password         = $shopConfig[0]["input_email_password"]         ?? "";
 
 $sessionId = session_id();
-$cartItems = selectContent($conn, "read_cart", ["input_session_id" => $sessionId, "visibility" => "show"]);
-$cartCount = (int)array_sum(array_column($cartItems, "input_quantity"));
+
+// User identity for cart/coupon functions (MD5 of session id for guests)
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = md5($sessionId);
+}
+$userId = $_SESSION['user_id'];
+
+$cartCount = getCartCount($userId);
+
+// ── Currency mode (driven by settings_website_info.input_usd_toggle) ──────────
+// input_usd_toggle = 1 → show USD prices with $ symbol
+// input_usd_toggle = 0 → show NGN prices with ₦ symbol
+$websiteInfoRow = selectContent($conn, "settings_website_info", []);
+$usdEnabled     = isset($websiteInfoRow[0]['input_usd_toggle']) ? (int)$websiteInfoRow[0]['input_usd_toggle'] === 1 : false;
+
+// Override the shop symbol based on active currency
+// Admin sets input_currency_symbol in settings_shop_config for USD symbol
+$shop_symbol   = $usdEnabled
+    ? ($shopConfig[0]["input_currency_symbol"] ?? '$')
+    : '₦';
+$shop_currency = $usdEnabled ? 'USD' : 'NGN';
 
 $wishlistCount = isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0;
 $wishlistIds   = $_SESSION['wishlist'] ?? [];

@@ -10,23 +10,32 @@ function safeHomeFetch($conn, $table, $where = []) {
     } catch (Exception $e) { return []; }
 }
 
-$heroArr = safeHomeFetch($conn, "settings_shop_hero", ["visibility" => "show"]);
+$heroArr = safeHomeFetch($conn, "settings_home_hero", ["visibility" => "show"]);
 $hero    = !empty($heroArr) ? $heroArr[0] : [];
 
-$featuredProducts = selectContent($conn, "panel_products", ["visibility" => "show"], 3);
+// Load first page of products for initial render (6 per page)
+$featuredProducts = selectContentAsc($conn, "panel_product", ["visibility" => "show"], "input_order", 6);
 
-// Pre-index variants (ADMC pattern: no queries inside loops)
-$allFeaturedVariants = selectContent($conn, "addition_product_variants", ["visibility" => "show"]);
-$variantsByProduct   = [];
-foreach ($allFeaturedVariants as $fv) {
-    $variantsByProduct[$fv['tb_link']] = true;
+// Pre-index variant prices and has_variants flag
+$_fvPrices = selectContent($conn, "variants", []);
+$_fvPriceIdx = [];
+foreach ($_fvPrices as $_v) {
+    $h = $_v['product_hash_id'];
+    if (!isset($_fvPriceIdx[$h])) $_fvPriceIdx[$h] = $usdEnabled ? (float)$_v['input_price_usd'] : (float)$_v['input_price_ngn'];
 }
+$allFeaturedVariants = selectContent($conn, "variants", []);
+$variantsByProduct   = [];
+foreach ($allFeaturedVariants as $fv) { $variantsByProduct[$fv['product_hash_id']] = true; }
+$categories = selectContentAsc($conn, "selection_product_category", ["visibility" => "show"], "id", 4);
+$_catById   = [];
+foreach ($categories as $_c) { $_catById[(string)$_c['id']] = $_c['input_title'] ?? ''; }
+
 foreach ($featuredProducts as &$fp) {
-    $fp['has_variants'] = isset($variantsByProduct[$fp['hash_id']]) ? "true" : "false";
+    $fp['input_price']    = $_fvPriceIdx[$fp['hash_id']] ?? 0;
+    $fp['has_variants']   = isset($variantsByProduct[$fp['hash_id']]) ? "true" : "false";
+    $fp['_category_name'] = $_catById[(string)($fp['select_product_category'] ?? '')] ?? '';
 }
 unset($fp);
-
-$categories       = selectContent($conn, "selection_product_category", ["visibility" => "show"], 4);
 
 include APP_PATH . "/views/includes/header.php";
 ?>
@@ -44,7 +53,7 @@ include APP_PATH . "/views/includes/header.php";
         <div class="home-hero-top" data-w-id="56c8ce7c-05a8-e7f5-8c8d-22339360ef84">
           <h1 class="heading-01" 
               data-w-id="537cb9b7-edf7-dd89-7237-03e80fbacb5e"
-              data-admc-manage="settings_shop_hero"
+              data-admc-manage="settings_home_hero"
               data-admc-id="<?= $hero['id'] ?? 1 ?>"
               style="opacity:0;-webkit-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-moz-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-ms-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0)">
             <?= htmlspecialchars($hero['input_heading'] ?? "Your natural beauty, expressed with care", ENT_QUOTES, 'UTF-8') ?>
@@ -111,14 +120,40 @@ include APP_PATH . "/views/includes/header.php";
           </div>
         </div>
       </div>
+      <!-- Hero media: video or image — both editable via ADMC -->
+      <!-- Admin: click heading to edit text/video URL | click image area to change fallback image -->
       <div class="home-hero-img">
-        <div class="all-img w-background-video w-background-video-atom" data-autoplay="true" data-loop="true"
-          data-video-urls="<?= htmlspecialchars($hero['input_video_url'] ?? "https://cdn.prod.website-files.com/6918bd445678e83950693c7b/692cb59221dce1af58faaabd_7304311-hd_1920_1080_30fps_mp4.mp4", ENT_QUOTES, 'UTF-8') ?>"
-          data-w-id="ad63aa5c-436f-c615-1239-db03bfa67501" data-wf-ignore="true">
-          <video autoplay loop muted playsinline data-object-fit="cover" data-wf-ignore="true" id="ad63aa5c-436f-c615-1239-db03bfa67501-video">
-            <source data-wf-ignore="true" src="<?= htmlspecialchars($hero['input_video_url'] ?? "https://cdn.prod.website-files.com/6918bd445678e83950693c7b/692cb59221dce1af58faaabd_7304311-hd_1920_1080_30fps_mp4.mp4", ENT_QUOTES, 'UTF-8') ?>" />
-          </video>
-        </div>
+        <?php
+          $heroVideo = trim($hero['input_video_url'] ?? '');
+          $heroImage = trim($hero['image_1'] ?? '');
+        ?>
+        <?php if (!empty($heroVideo)): ?>
+          <!-- VIDEO mode: input_video_url is set — editable via ADMC manage on heading -->
+          <div style="position:relative;width:100%;height:100%;"
+               data-admc-manage="settings_home_hero"
+               data-admc-id="<?= $hero['id'] ?? 1 ?>">
+            <video autoplay loop muted playsinline
+                   style="width:100%;height:100%;object-fit:cover;display:block;">
+              <source src="<?= htmlspecialchars($heroVideo, ENT_QUOTES, 'UTF-8') ?>" type="video/mp4" />
+            </video>
+          </div>
+        <?php elseif (!empty($heroImage)): ?>
+          <!-- IMAGE mode: no video URL set — show image_1 -->
+          <div data-admc-image="settings_home_hero"
+               data-admc-id="<?= $hero['id'] ?? 1 ?>"
+               style="width:100%;height:100%;">
+            <img src="<?= htmlspecialchars($heroImage, ENT_QUOTES, 'UTF-8') ?>"
+                 alt="Hero background"
+                 style="width:100%;height:100%;object-fit:cover;display:block;">
+          </div>
+        <?php else: ?>
+          <!-- FALLBACK: nothing set yet — show placeholder editable via ADMC -->
+          <div data-admc-manage="settings_home_hero"
+               data-admc-id="<?= $hero['id'] ?? 1 ?>"
+               style="width:100%;height:100%;background:#0d2b0d;display:flex;align-items:center;justify-content:center;">
+            <p style="color:rgba(255,255,255,0.3);font-size:14px;">Add a video URL or image via ADMC</p>
+          </div>
+        <?php endif; ?>
       </div>
     </section>
     <!-- [cbcode_10001Heroc] -->
@@ -142,32 +177,38 @@ include APP_PATH . "/views/includes/header.php";
       <div class="home-cat-tabs" id="homeCatTabs">
         <button class="home-cat-btn active" data-cat="">All products</button>
         <?php foreach ($categories as $cat): ?>
-          <button class="home-cat-btn" data-cat="<?= htmlspecialchars($cat['input_name'], ENT_QUOTES, 'UTF-8') ?>">
-            <?= htmlspecialchars($cat['input_name'], ENT_QUOTES, 'UTF-8') ?>
+          <button class="home-cat-btn" data-cat="<?= htmlspecialchars($cat['input_title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            <?= htmlspecialchars($cat['input_title'] ?? '', ENT_QUOTES, 'UTF-8') ?>
           </button>
         <?php endforeach; ?>
       </div>
 
-      <div class="product-collection">
+      <?php
+        // Check if more products exist beyond the first 8
+        $totalProductCount = count(selectContent($conn, "panel_product", ["visibility" => "show"]));
+        $initialHasMore = $totalProductCount > 6;
+      ?>
+      <div class="product-collection" id="productCollection">
         <div class="product-grid w-dyn-items" id="homeProductGrid" role="list">
           <?php foreach ($featuredProducts as $product): ?>
             <div class="product-card-wrap">
               <a class="product-link w-inline-block" href="<?= $baseUrl ?>/products/<?= $product['hash_id'] ?>/<?= $product['input_slug'] ?? '' ?>">
                 <div class="product-card">
                   <div class="product-card-img">
-                    <img alt="<?= htmlspecialchars($product['input_title'], ENT_QUOTES, 'UTF-8') ?>" 
-                         class="all-img" loading="lazy" src="<?= htmlspecialchars($product['image_1'], ENT_QUOTES, 'UTF-8') ?>">
+                    <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>" 
+                         class="all-img" loading="lazy" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     <div class="product-float">
                       <img alt="" class="all-img" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'], ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     
-                    <!-- Quick View Button -->
-                    <button class="quick-view-btn" data-id="<?= $product['hash_id'] ?>" 
+                    <?php /* Quick View Button — commented out: Add to Cart already opens modal
+                    <button class="quick-view-btn" data-id="<?= $product['hash_id'] ?>"
                             onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.openQuickView('<?= $product['hash_id'] ?>');" aria-label="Quick view">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
                       </svg>
                     </button>
+                    */ ?>
 
                     <!-- Wishlist Button -->
                     <?php $inWishlist = in_array($product['hash_id'], $wishlistIds); ?>
@@ -188,9 +229,9 @@ include APP_PATH . "/views/includes/header.php";
                     </div>
                   </div>
                   <div class="product-card-bottom">
-                    <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($product['select_category'] ?? "Skincare", ENT_QUOTES, 'UTF-8') ?></div></div>
+                    <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($product['_category_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div></div>
                     <div class="product-name-price">
-                      <div class="heading-06"><?= htmlspecialchars($product['input_title'], ENT_QUOTES, 'UTF-8') ?></div>
+                      <div class="heading-06"><?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?></div>
                       <div class="heading-07"><?= $shop_symbol ?><?= number_format($product['input_price'], 2) ?></div>
                     </div>
                   </div>
@@ -198,6 +239,16 @@ include APP_PATH . "/views/includes/header.php";
               </a>
             </div>
           <?php endforeach; ?>
+        </div>
+
+        <!-- Load More button -->
+        <div id="loadMoreWrap" style="text-align:center;margin-top:40px;<?= $initialHasMore ? '' : 'display:none;' ?>">
+          <button id="loadMoreBtn"
+                  style="padding:14px 40px;border:1.5px solid #072708;background:none;color:#072708;font-family:inherit;font-size:15px;font-weight:600;border-radius:7px;cursor:pointer;transition:all 0.2s;"
+                  onmouseover="this.style.background='#072708';this.style.color='#fff';"
+                  onmouseout="this.style.background='none';this.style.color='#072708';">
+            Load More
+          </button>
         </div>
       </div>
     </div>
@@ -207,64 +258,91 @@ include APP_PATH . "/views/includes/header.php";
 
 <script>
 (function() {
-  var activeCats = []; // multi-select list
-  var grid = document.getElementById('homeProductGrid');
-  var baseUrl = window.VENORA_BASE_URL || '';
+  var activeCats  = [];
+  var currentPage = 1;
+  var perPage     = 6;
+  var isLoading   = false;
 
-  function setLoading(isLoading) {
-    if (grid) grid.style.opacity = isLoading ? '0.4' : '1';
+  var grid          = document.getElementById('homeProductGrid');
+  var loadMoreWrap  = document.getElementById('loadMoreWrap');
+  var loadMoreBtn   = document.getElementById('loadMoreBtn');
+  var base          = window.VENORA_BASE_URL || '';
+
+  function buildUrl(page) {
+    var url = base + '/products-filter?page=' + page + '&limit=' + perPage;
+    if (activeCats.length) url += '&cats=' + activeCats.map(encodeURIComponent).join(',');
+    return url;
+  }
+
+  function setLoading(on) {
+    isLoading = on;
+    if (grid) grid.style.opacity = on ? '0.5' : '1';
+    if (loadMoreBtn) {
+      loadMoreBtn.disabled = on;
+      loadMoreBtn.textContent = on ? 'Loading…' : 'Load More';
+    }
   }
 
   function updateButtons() {
     document.querySelectorAll('.home-cat-btn').forEach(function(b) {
       var c = b.dataset.cat;
-      if (c === '') {
-        b.classList.toggle('active', activeCats.length === 0);
-      } else {
-        b.classList.toggle('active', activeCats.indexOf(c) !== -1);
-      }
+      b.classList.toggle('active', c === '' ? activeCats.length === 0 : activeCats.indexOf(c) !== -1);
     });
   }
 
-  function fetchProducts() {
-    setLoading(true);
-    var url = baseUrl + '/products-filter';
-    if (activeCats.length) url += '?cats=' + activeCats.map(encodeURIComponent).join(',');
+  function renderProducts(products, append) {
+    if (!grid) return;
+    var html = products.map(function(p) { return p.html; }).join('');
+    if (append) {
+      grid.insertAdjacentHTML('beforeend', html);
+    } else {
+      grid.innerHTML = html || '<div style="padding:60px 20px;text-align:center;color:#b5b5b5;"><p>No products found.</p></div>';
+    }
+  }
 
-    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+  function fetchProducts(page, append) {
+    if (isLoading) return;
+    setLoading(true);
+
+    fetch(buildUrl(page), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(function(r) { return r.json(); })
       .then(function(data) {
         setLoading(false);
-        if (!grid) return;
-        if (!data.products || !data.products.length) {
-          grid.innerHTML = '<div style="padding:60px 20px;text-align:center;color:#b5b5b5;"><p>No products found in this category.</p></div>';
-          return;
+        renderProducts(data.products || [], append);
+        currentPage = page;
+        // Show or hide "Load More"
+        if (loadMoreWrap) {
+          loadMoreWrap.style.display = data.has_more ? 'block' : 'none';
         }
-        grid.innerHTML = data.products.map(function(p) { return p.html; }).join('');
       })
       .catch(function() { setLoading(false); });
   }
 
+  // Auto-load all products on page load (replaces the PHP-rendered 8)
+  fetchProducts(1, false);
+
+  // Category tab clicks
   document.querySelectorAll('.home-cat-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var cat = btn.dataset.cat;
-
       if (cat === '') {
-        // Reset — show all
         activeCats = [];
       } else {
         var idx = activeCats.indexOf(cat);
-        if (idx === -1) {
-          activeCats.push(cat);   // add to selection
-        } else {
-          activeCats.splice(idx, 1); // remove from selection
-        }
+        if (idx === -1) activeCats.push(cat);
+        else activeCats.splice(idx, 1);
       }
-
       updateButtons();
-      fetchProducts();
+      fetchProducts(1, false); // reset to page 1, replace grid
     });
   });
+
+  // Load More click
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', function() {
+      fetchProducts(currentPage + 1, true); // next page, append
+    });
+  }
 })();
 </script>
 

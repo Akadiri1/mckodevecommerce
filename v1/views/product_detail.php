@@ -1,33 +1,46 @@
 <?php
 // /products/{hash_id} or /products/{hash_id}/{slug}
 $hash = $s2 ?? $uri[2] ?? '';
-$productArr = selectContent($conn, "panel_products", ["hash_id" => $hash, "visibility" => "show"]);
-if (empty($productArr)) { include APP_PATH . "/views/404.php"; die; }
-$product = $productArr[0];
 
-$page_title = htmlspecialchars($product["input_title"], ENT_QUOTES, "UTF-8");
-$metaDescription = previewBody($product["text_description"] ?? "", 30);
+$websiteInfo = selectContent($conn, "settings_website_info", []);
+$usdToggle   = isset($websiteInfo[0]['input_usd_toggle']) ? (int) $websiteInfo[0]['input_usd_toggle'] : 0;
+$controller  = new ProductController($conn, $usdToggle === 1);
+$details     = $controller->fetchProductDetailsByHashId($hash);
+
+if (!$details) { include APP_PATH . "/views/404.php"; die; }
+
+$page_title = htmlspecialchars($details["name"] ?? "", ENT_QUOTES, "UTF-8");
+$metaDescription = previewBody($details["description"] ?? "", 30);
 $bodyClass = "page-light-navbar";
 
-// Gallery images (addition_product_images pre-indexed)
-$galleryRaw = selectContent($conn, "addition_product_images", ["tb_link" => $product["hash_id"], "visibility" => "show"]);
-$gallery = array_merge(
-    array_filter([$product["image_1"] ?? null]),
-    array_filter([$product["image_2"] ?? null]),
-    array_column($galleryRaw, "image_1")
-);
-$gallery = array_values(array_unique(array_filter($gallery)));
-if (empty($gallery)) $gallery = ["/assets/img/icons/cart.svg"];
+$productCategoryName = $details["category_name"] ?? "";
+$gallery = $details["images"] ?? [];
+if (!empty($details["primary_image"])) {
+    if (!in_array($details["primary_image"], $gallery)) {
+        array_unshift($gallery, $details["primary_image"]);
+    }
+}
+if (empty($gallery)) {
+    $gallery = ["/assets/img/icons/cart.svg"];
+}
 
-// Variants
-$variants = selectContentAsc($conn, "addition_product_variants", ["tb_link" => $product["hash_id"], "visibility" => "show"], "input_order", 20);
+// Variants from 'variants' table via ProductController
+$variants = $details['variants'] ?? [];
+
+// Base price
+$basePrice = $usdToggle === 1 ? ($details['price_range_usd']['price'] ?? $details['price_range_usd']['min'] ?? 0) : ($details['price_range_ngn']['price'] ?? $details['price_range_ngn']['min'] ?? 0);
 
 // Reviews
-$reviews = selectContentDesc($conn, "read_reviews", ["input_product_id" => $hash, "visibility" => "show"], "id", 20);
-$avgRating = !empty($reviews) ? round(array_sum(array_column($reviews, "input_rating")) / count($reviews), 1) : (float)($product["input_rating"] ?? 4.5);
+$reviews = $details['reviews'] ?? []; // ProductController might need to be updated to fetch reviews if not already
+$avgRating = $details['input_rating'] ?? 4.5;
 
-// Related products (same category, exclude current)
-$related = selectContentDesc($conn, "panel_products", ["visibility" => "show", "select_category" => $product["select_category"] ?? ""], "id", 4);
+// Related products
+$relatedOptions = [
+    'category_id' => $details['select_product_category'] ?? null,
+    'limit' => 4,
+    'currency' => $usdToggle === 1 ? 'USD' : 'NGN'
+];
+$related = $controller->fetchProducts($relatedOptions);
 $related = array_filter($related, fn($p) => $p["hash_id"] !== $hash);
 $related = array_slice(array_values($related), 0, 3);
 
@@ -50,14 +63,14 @@ include APP_PATH . "/views/includes/header.php";
           <a href="<?= $baseUrl ?>/">Home</a>
           <span class="breadcrumb-sep">/</span>
           <a href="<?= $baseUrl ?>/products">Products</a>
-          <?php if (!empty($product["select_category"])): ?>
+          <?php if (!empty($productCategoryName)): ?>
             <span class="breadcrumb-sep">/</span>
-            <a href="<?= $baseUrl ?>/products?category=<?= urlencode($product["select_category"]) ?>">
-              <?= htmlspecialchars($product["select_category"], ENT_QUOTES, "UTF-8") ?>
+            <a href="<?= $baseUrl ?>/products?tab=<?= urlencode($productCategoryName) ?>">
+              <?= htmlspecialchars($productCategoryName, ENT_QUOTES, "UTF-8") ?>
             </a>
           <?php endif; ?>
           <span class="breadcrumb-sep">/</span>
-          <span><?= htmlspecialchars($product["input_title"], ENT_QUOTES, "UTF-8") ?></span>
+          <span><?= htmlspecialchars($details["name"], ENT_QUOTES, "UTF-8") ?></span>
         </div>
       </div>
 
@@ -67,9 +80,9 @@ include APP_PATH . "/views/includes/header.php";
         <div class="product-img-wrapper">
           <!-- Main image -->
           <div class="product-img-box"
-               data-admc-image="panel_products"
-               data-admc-id="<?= $product["id"] ?>">
-            <img alt="<?= htmlspecialchars($product["input_title"], ENT_QUOTES, "UTF-8") ?>"
+               data-admc-image="panel_product"
+               data-admc-id="<?= $details["id"] ?>">
+            <img alt="<?= htmlspecialchars($details["name"], ENT_QUOTES, "UTF-8") ?>"
                  class="all-img zoom" loading="lazy"
                  id="mainProductImg"
                  src="<?= htmlspecialchars($gallery[0], ENT_QUOTES, "UTF-8") ?>">
@@ -107,58 +120,71 @@ include APP_PATH . "/views/includes/header.php";
             </div>
             <!-- Name -->
             <h2 class="heading-02"
-                data-admc-manage="panel_products"
-                data-admc-id="<?= $product["id"] ?>">
-              <?= htmlspecialchars($product["input_title"], ENT_QUOTES, "UTF-8") ?>
+                data-admc-manage="panel_product"
+                data-admc-id="<?= $details["id"] ?>">
+              <?= htmlspecialchars($details["name"], ENT_QUOTES, "UTF-8") ?>
             </h2>
             <!-- Category tag -->
-            <?php if (!empty($product["select_category"])): ?>
+            <?php if (!empty($productCategoryName)): ?>
               <div class="tagline caps color-gray" style="margin-bottom:8px;">
-                <?= htmlspecialchars($product["select_category"], ENT_QUOTES, "UTF-8") ?>
+                <?= htmlspecialchars($productCategoryName, ENT_QUOTES, "UTF-8") ?>
               </div>
             <?php endif; ?>
             <!-- Price -->
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
               <div class="heading-04" id="detailPrice"
-                   data-admc-manage="panel_products"
-                   data-admc-id="<?= $product["id"] ?>">
-                <?= $sym ?><?= htmlspecialchars(number_format((float)$product["input_price"], 2), ENT_QUOTES, "UTF-8") ?>
+                   data-admc-manage="panel_product"
+                   data-admc-id="<?= $details["id"] ?>">
+                <?= $sym ?><?= htmlspecialchars(number_format((float)$basePrice, 2), ENT_QUOTES, "UTF-8") ?>
               </div>
-              <?php if (!empty($product["input_compare_price"])): ?>
+              <?php if (!empty($details["base_price_range_ngn"]) || !empty($details["base_price_range_usd"])): ?>
+                <?php 
+                   $compPrice = $usdToggle === 1 
+                     ? ($details['base_price_range_usd']['price'] ?? $details['base_price_range_usd']['min'] ?? 0)
+                     : ($details['base_price_range_ngn']['price'] ?? $details['base_price_range_ngn']['min'] ?? 0);
+                ?>
+                <?php if ($compPrice > $basePrice): ?>
                 <div style="text-decoration:line-through;color:#b5b5b5;font-size:16px;">
-                  <?= $sym ?><?= htmlspecialchars(number_format((float)$product["input_compare_price"], 2), ENT_QUOTES, "UTF-8") ?>
+                  <?= $sym ?><?= htmlspecialchars(number_format((float)$compPrice, 2), ENT_QUOTES, "UTF-8") ?>
                 </div>
+                <?php endif; ?>
               <?php endif; ?>
             </div>
           </div>
 
           <!-- Short description -->
           <p class="p-01 color-gray" style="margin-bottom:24px;"
-             data-admc-manage="panel_products"
-             data-admc-id="<?= $product["id"] ?>">
-            <?= previewBody($product["text_description"] ?? "", 40) ?>
+             data-admc-manage="panel_product"
+             data-admc-id="<?= $details["id"] ?>">
+            <?= previewBody($details["description"] ?? "", 40) ?>
           </p>
 
           <!-- Add to cart section (anchor for sticky bar) -->
           <div class="add-to-cart-section" id="addToCartSection">
             <!-- Variants -->
-            <?php if (!empty($variants)): 
+            <?php if (!empty($variants)): ?>
+              <div class="modal-variants-label" style="text-transform:uppercase; font-weight:bold; margin-bottom:12px; font-size:12px; letter-spacing:1px; color:#000;">VARIANTS:</div>
+              <?php 
               $grouped = [];
-              foreach ($variants as $v) { $grouped[$v['input_name']][] = $v; }
+              foreach ($variants as $v) { 
+                  $optName = !empty($v['options']) ? $v['options'][0]['option_name'] : 'Options';
+                  $grouped[$optName][] = $v; 
+              }
               foreach ($grouped as $name => $opts): ?>
-                <div class="modal-variants" style="margin-bottom:20px;">
-                  <div class="modal-variants-label" style="text-transform:uppercase; font-weight:bold; margin-bottom:10px;"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>:</div>
+                <div class="modal-variants" style="margin-bottom:16px;">
                   <div class="modal-variant-options">
                     <?php foreach ($opts as $vi => $v):
-                      $vStock = (int)($v["input_stock"] ?? 1);
+                      $vStock = (int)($v["inventory"] ?? 0);
+                      $vPrice = $usdToggle === 1 ? $v['price_usd'] : $v['price_ngn'];
+                      $vVal   = !empty($v['options']) ? $v['options'][0]['value_name'] : 'Default';
                     ?>
                       <button type="button"
                               class="modal-variant-btn variant-btn <?= $vStock <= 0 ? "out-of-stock" : "" ?>"
-                              data-variant-id="<?= $v["hash_id"] ?>"
-                              data-value="<?= htmlspecialchars($v["input_value"], ENT_QUOTES, "UTF-8") ?>"
-                              data-price="<?= htmlspecialchars($v["input_price"] ?? $product["input_price"], ENT_QUOTES, "UTF-8") ?>"
+                              data-variant-id="<?= $v["id"] ?>"
+                              data-value="<?= htmlspecialchars($vVal, ENT_QUOTES, "UTF-8") ?>"
+                              data-price="<?= htmlspecialchars($vPrice, ENT_QUOTES, "UTF-8") ?>"
                               data-stock="<?= $vStock ?>">
-                        <?= htmlspecialchars($v["input_value"], ENT_QUOTES, "UTF-8") ?>
+                        <?= htmlspecialchars($vVal, ENT_QUOTES, "UTF-8") ?>
                         <?php if ($vStock <= 0): ?>
                           <span class="variant-stock-label out">Out of stock</span>
                         <?php elseif ($vStock <= 5): ?>
@@ -181,14 +207,14 @@ include APP_PATH . "/views/includes/header.php";
                   <button type="button" class="qty-btn" data-action="increase">+</button>
                 </div>
                 <div class="heading-04" id="detailPriceDisplay">
-                  <?= $sym ?><?= htmlspecialchars(number_format((float)$product["input_price"], 2), ENT_QUOTES, "UTF-8") ?>
+                  <?= $sym ?><?= htmlspecialchars(number_format((float)$basePrice, 2), ENT_QUOTES, "UTF-8") ?>
                 </div>
               </div>
             </div>
 
             <!-- Stock indicator -->
             <?php
-              $stock = (int)($product["input_stock"] ?? 99);
+              $stock = $details['base_inventory'] ?? 0;
               $hasVariants = !empty($variants);
             ?>
             <?php if (!$hasVariants): ?>
@@ -210,16 +236,16 @@ include APP_PATH . "/views/includes/header.php";
             <?php endif; ?>
 
             <!-- Add to cart + Wishlist -->
-            <?php if ((int)($product["input_stock"] ?? 1) > 0): ?>
+            <?php if ($stock > 0): ?>
               <div class="add-cart-btn" style="display:flex;gap:12px;align-items:center;margin-bottom:20px;">
                 <button type="button"
                         id="detailAddToCart"
                         class="btn-add-to-cart-main"
-                        data-product-id="<?= $product["hash_id"] ?>">
+                        data-product-id="<?= $details["hash_id"] ?>">
                   Add to Cart
                 </button>
                 <button type="button" class="modal-wishlist-btn" id="detailWishlist"
-                        data-id="<?= $product["hash_id"] ?>">
+                        data-id="<?= $details["hash_id"] ?>">
                   <img src="/assets/img/icons/heart-outline.svg" alt="Wishlist" id="detailWishlistImg">
                 </button>
               </div>
@@ -289,9 +315,9 @@ include APP_PATH . "/views/includes/header.php";
         <div class="w-tab-pane w--tab-active" data-tab-pane="tab-details">
           <div class="product-info-box">
             <div class="p-01 rich-text w-richtext"
-                 data-admc-manage="panel_products"
-                 data-admc-id="<?= $product["id"] ?>">
-              <?= nl2br(htmlspecialchars($product["text_description"] ?? "", ENT_QUOTES, "UTF-8")) ?>
+                 data-admc-manage="panel_product"
+                 data-admc-id="<?= $details["id"] ?>">
+              <?= nl2br(htmlspecialchars($details["description"] ?? "", ENT_QUOTES, "UTF-8")) ?>
             </div>
           </div>
         </div>
@@ -300,9 +326,9 @@ include APP_PATH . "/views/includes/header.php";
         <div class="w-tab-pane" data-tab-pane="tab-ingredients">
           <div class="product-info-box">
             <div class="p-01 rich-text w-richtext"
-                 data-admc-manage="panel_products"
-                 data-admc-id="<?= $product["id"] ?>">
-              <?= nl2br(htmlspecialchars($product["text_ingredients"] ?? "Ingredient list not available.", ENT_QUOTES, "UTF-8")) ?>
+                 data-admc-manage="panel_product"
+                 data-admc-id="<?= $details["id"] ?>">
+              <?= nl2br(htmlspecialchars($details["text_ingredients"] ?? "Ingredient list not available.", ENT_QUOTES, "UTF-8")) ?>
             </div>
           </div>
         </div>
@@ -327,84 +353,32 @@ include APP_PATH . "/views/includes/header.php";
                 </div>
               </div>
 
-              <!-- Write review button — only if logged in -->
-              <?php if ($isCustomerLoggedIn): ?>
-                <button class="btn-02-link w-inline-block" id="showReviewForm"
-                        style="background:none;border:1.5px solid #072708;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:600;color:#072708;border-radius:4px;">
-                  Write a Review
-                </button>
-              <?php else: ?>
-                <a href="<?= $baseUrl ?>/customer-login"
-                   style="display:inline-block;border:1.5px solid #072708;padding:10px 20px;font-size:13px;font-weight:600;color:#072708;border-radius:4px;text-decoration:none;">
-                  Sign in to write a review
-                </a>
-              <?php endif; ?>
             </div>
 
-            <!-- Review form — only shown to logged-in customers -->
-            <?php if ($isCustomerLoggedIn): ?>
-            <div class="review-form-card" id="reviewFormCard" style="display:none;">
-              <div class="review-form-title">Share your experience</div>
-              <div id="reviewFormError"
-                   style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:14px;">
-              </div>
-              <form id="reviewForm" onsubmit="submitReview(event)">
-                <input type="hidden" name="product_id" value="<?= $product["hash_id"] ?>">
-                <!-- Star rating -->
-                <div style="margin-bottom:14px;">
-                  <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Rating *</label>
-                  <div class="star-rating-input" style="flex-direction:row-reverse;justify-content:flex-end;">
-                    <?php for ($s = 5; $s >= 1; $s--): ?>
-                      <input type="radio" id="star<?= $s ?>" name="rating" value="<?= $s ?>">
-                      <label for="star<?= $s ?>">★</label>
-                    <?php endfor; ?>
-                  </div>
-                </div>
-                <!-- Name -->
-                <div style="margin-bottom:14px;">
-                  <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Your name *</label>
-                  <input type="text" name="name" id="reviewName"
-                         placeholder="<?= htmlspecialchars($customerName ?? 'Your name', ENT_QUOTES, 'UTF-8') ?>"
-                         value="<?= htmlspecialchars($customerName ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                         style="width:100%;padding:10px 12px;border:1.5px solid #dedede;border-radius:4px;font-size:14px;outline:none;box-sizing:border-box;">
-                </div>
-                <!-- Review title -->
-                <div style="margin-bottom:14px;">
-                  <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Review title</label>
-                  <input type="text" name="title" id="reviewTitle"
-                         placeholder="Summarise your experience"
-                         style="width:100%;padding:10px 12px;border:1.5px solid #dedede;border-radius:4px;font-size:14px;outline:none;box-sizing:border-box;">
-                </div>
-                <!-- Review body -->
-                <div style="margin-bottom:14px;">
-                  <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Review * <span id="reviewCharCount" style="font-weight:400;color:#aaa;">(min 10 characters)</span></label>
-                  <textarea name="review" id="reviewBody"
-                            placeholder="Tell others what you think about this product…"
-                            rows="4"
-                            style="width:100%;padding:10px 12px;border:1.5px solid #dedede;border-radius:4px;font-size:14px;resize:vertical;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
-                </div>
-                <button type="submit" id="reviewSubmitBtn"
-                        style="padding:11px 28px;background:#072708;color:white;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;">
-                  Submit Review
-                </button>
-              </form>
-              <div id="reviewSuccess" style="display:none;padding:16px;background:#f0faf0;border-radius:4px;color:#072708;font-size:14px;font-weight:500;margin-top:12px;">
-                ✓ Thank you for your review! It will appear shortly.
-              </div>
-            </div>
-            <?php endif; ?>
-
-            <!-- Review list -->
+            <!-- Review list — admin adds reviews via ADMC (pencil icon) -->
             <?php if (!empty($reviews)): ?>
-              <div class="w-dyn-list" data-admc-tb="read_reviews">
+              <div class="w-dyn-list"
+                   data-admc-tb="read_reviews"
+                   data-admc-tbadd="panel_product"
+                   data-admc-tblink="<?= htmlspecialchars($details['hash_id'], ENT_QUOTES, 'UTF-8') ?>">
                 <div class="review-list w-dyn-items" role="list">
                   <?php foreach ($reviews as $rev): ?>
                     <div class="w-dyn-item" role="listitem">
                       <div class="review-card">
-                        <div class="review-name-tag">
-                          <div class="p-02">
-                            <?= htmlspecialchars(strtoupper(substr($rev["input_reviewer_name"] ?? "A", 0, 2)), ENT_QUOTES, "UTF-8") ?>
-                          </div>
+                        <!-- Avatar -->
+                        <div class="review-name-tag"
+                             data-admc-image="read_reviews"
+                             data-admc-id="<?= $rev['id'] ?>"
+                             style="overflow:hidden;border-radius:50%;flex-shrink:0;">
+                          <?php if (!empty($rev['image_1'])): ?>
+                            <img src="<?= htmlspecialchars($rev['image_1'], ENT_QUOTES, 'UTF-8') ?>"
+                                 alt="<?= htmlspecialchars($rev['input_reviewer_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                 style="width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;">
+                          <?php else: ?>
+                            <div class="p-02" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                              <?= htmlspecialchars(strtoupper(substr($rev["input_reviewer_name"] ?? "A", 0, 2)), ENT_QUOTES, "UTF-8") ?>
+                            </div>
+                          <?php endif; ?>
                         </div>
                         <div class="review-content">
                           <div class="review-card-top">
@@ -444,8 +418,13 @@ include APP_PATH . "/views/includes/header.php";
                 </div>
               </div>
             <?php else: ?>
-              <div style="padding:32px 0;color:#b5b5b5;font-size:14px;">
-                No reviews yet. Be the first to share your experience!
+              <!-- Empty state -->
+              <div class="w-dyn-list"
+                   data-admc-tb="read_reviews"
+                   data-admc-tbadd="panel_product"
+                   data-admc-tblink="<?= htmlspecialchars($details['hash_id'], ENT_QUOTES, 'UTF-8') ?>"
+                   style="padding:32px 0;color:#b5b5b5;font-size:14px;">
+                No reviews yet.
               </div>
             <?php endif; ?>
           </div>
@@ -468,7 +447,8 @@ include APP_PATH . "/views/includes/header.php";
       <h2 class="heading-02 reveal">You might also like</h2>
       <div class="product-grid w-dyn-items" role="list">
         <?php foreach ($related as $rel):
-          $relUrl = $baseUrl . "/products/" . $rel["hash_id"] . "/" . cleans($rel["input_title"]);
+          $relUrl = $baseUrl . "/products/" . $rel["hash_id"] . "/" . cleans($rel["name"]);
+          $relPrice = $usdToggle === 1 ? ($rel['price_range_usd']['price'] ?? $rel['price_range_usd']['min'] ?? 0) : ($rel['price_range_ngn']['price'] ?? $rel['price_range_ngn']['min'] ?? 0);
         ?>
           <div class="w-dyn-item product-card-wrap reveal" role="listitem">
             <div class="product-card" style="position:relative;">
@@ -480,11 +460,11 @@ include APP_PATH . "/views/includes/header.php";
               </button>
               <a class="product-link w-inline-block" href="<?= $relUrl ?>">
                 <div class="product-card-img"
-                     data-admc-image="panel_products"
+                     data-admc-image="panel_product"
                      data-admc-id="<?= $rel["id"] ?>">
-                  <img alt="<?= htmlspecialchars($rel["input_title"], ENT_QUOTES, "UTF-8") ?>"
+                  <img alt="<?= htmlspecialchars($rel["name"], ENT_QUOTES, "UTF-8") ?>"
                        class="all-img" loading="lazy"
-                       src="<?= htmlspecialchars($rel["image_1"] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>">
+                       src="<?= htmlspecialchars($rel["primary_image"] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>">
                   <div class="add-to-card-02" data-product-id="<?= $rel["hash_id"] ?>"
                        onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.cartAddItem('<?= $rel["hash_id"] ?>', '', 1);">
                     <img alt="" class="add-to-card-icon" src="/assets/img/icons/cart-add.svg">
@@ -492,10 +472,10 @@ include APP_PATH . "/views/includes/header.php";
                   </div>
                 </div>
                 <div class="product-card-bottom">
-                  <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($rel["select_category"] ?? "", ENT_QUOTES, "UTF-8") ?></div></div>
+                  <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($rel["category_name"] ?? "", ENT_QUOTES, "UTF-8") ?></div></div>
                   <div class="product-name-price">
-                    <div class="heading-06"><?= htmlspecialchars($rel["input_title"], ENT_QUOTES, "UTF-8") ?></div>
-                    <div class="heading-07"><?= $sym ?><?= number_format((float)$rel["input_price"], 2) ?></div>
+                    <div class="heading-06"><?= htmlspecialchars($rel["name"], ENT_QUOTES, "UTF-8") ?></div>
+                    <div class="heading-07"><?= $sym ?><?= number_format((float)$relPrice, 2) ?></div>
                   </div>
                 </div>
               </a>
@@ -517,13 +497,13 @@ include APP_PATH . "/views/includes/header.php";
 <div class="sticky-cart-bar" id="stickyCartBar">
   <img src="<?= htmlspecialchars($gallery[0] ?? "/assets/img/icons/cart.svg", ENT_QUOTES, "UTF-8") ?>"
        class="sticky-cart-product-img"
-       alt="<?= htmlspecialchars($product["input_title"], ENT_QUOTES, "UTF-8") ?>">
+       alt="<?= htmlspecialchars($details["name"], ENT_QUOTES, "UTF-8") ?>">
   <span class="sticky-cart-product-name">
-    <?= htmlspecialchars($product["input_title"], ENT_QUOTES, "UTF-8") ?>
+    <?= htmlspecialchars($details["name"], ENT_QUOTES, "UTF-8") ?>
   </span>
-  <span class="sticky-cart-price"><?= $sym ?><?= number_format((float)$product["input_price"], 2) ?></span>
+  <span class="sticky-cart-price"><?= $sym ?><?= number_format((float)$basePrice, 2) ?></span>
   <button class="sticky-cart-btn"
-          data-product-id="<?= $product["hash_id"] ?>">Add to Cart</button>
+          data-product-id="<?= $details["hash_id"] ?>">Add to Cart</button>
 </div>
 
 <script>
@@ -549,15 +529,6 @@ document.querySelectorAll(".product-gallery-thumb").forEach(function(thumb) {
   });
 });
 
-// Review form toggle — guard null (button only exists when logged in)
-var showReviewFormBtn = document.getElementById("showReviewForm");
-if (showReviewFormBtn) {
-  showReviewFormBtn.addEventListener("click", function() {
-    var form = document.getElementById("reviewFormCard");
-    if (form) form.style.display = form.style.display === "none" ? "block" : "none";
-  });
-}
-
 // Sticky cart scroll
 var addToCartSection = document.getElementById("addToCartSection");
 if (addToCartSection) {
@@ -577,7 +548,7 @@ document.querySelectorAll(".variant-btn").forEach(function(btn) {
     
     var priceEl = document.getElementById("detailPrice");
     var sym = window.VENORA_CURRENCY_SYMBOL || "$";
-    var basePrice = parseFloat("<?= $product['input_price'] ?>") || 0;
+    var basePrice = parseFloat("<?= $basePrice ?>") || 0;
 
     if (!wasActive) {
       btn.classList.add("active");
@@ -614,7 +585,7 @@ function getSelectedVariantIds() {
   var totalGroups = document.querySelectorAll(".modal-variant-options").length;
   var activeButtons = document.querySelectorAll(".variant-btn.active");
   
-  if (activeButtons.length < totalGroups) {
+  if (totalGroups > 0 && activeButtons.length < totalGroups) {
       if(window.Venora) window.Venora.showToast("Please select all options (Size, Color, etc.)", "error");
       return false;
   }
@@ -638,7 +609,7 @@ document.querySelectorAll(".qty-btn").forEach(function(btn) {
     }
     // Update price display
     var priceDisplay = document.getElementById("detailPriceDisplay");
-    var basePrice = parseFloat("<?= $product['input_price'] ?>") || 0;
+    var basePrice = parseFloat("<?= $basePrice ?>") || 0;
     var sym = window.VENORA_CURRENCY_SYMBOL || "$";
     if (priceDisplay) priceDisplay.textContent = sym + (basePrice * parseInt(input.value)).toFixed(2);
   });
@@ -648,84 +619,42 @@ document.querySelectorAll(".qty-btn").forEach(function(btn) {
 document.querySelector(".sticky-cart-btn") && document.querySelector(".sticky-cart-btn").addEventListener("click", function() {
   var btn = this;
   var productId = btn.dataset.productId;
-  var variantId = getSelectedVariantIds();
-  if (variantId === false) return; // Validation failed
-  
+
+  var variantGroups = document.querySelectorAll(".modal-variant-options");
+  var activeButtons = document.querySelectorAll(".variant-btn.active");
+
+  if (variantGroups.length > 0 && activeButtons.length < variantGroups.length) {
+    var section = document.getElementById("addToCartSection");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "center" });
+      document.querySelectorAll(".modal-variants-label").forEach(function(el) {
+        el.style.transition = "color 0.3s, transform 0.3s";
+        el.style.color = "#c1121f";
+        el.style.transform = "scale(1.05)";
+        setTimeout(function() { 
+          el.style.color = ""; 
+          el.style.transform = "";
+        }, 1500);
+      });
+    }
+    return;
+  }
+
+  var variantId = variantGroups.length === 0 ? "" : Array.from(activeButtons).map(function(b) { return b.dataset.variantId; }).join(",");
   var qty = parseInt((document.getElementById("detailQty") || {}).value) || 1;
   btn.textContent = "Adding...";
-  window.Venora.cartAddItem(productId, variantId, qty, function() { btn.textContent = "Added!"; setTimeout(function() { btn.textContent = "Add to Cart"; }, 2000); });
+  btn.disabled = true;
+  window.Venora.cartAddItem(productId, variantId, qty, function() {
+    btn.textContent = "Added!";
+    btn.style.background = "#2d6a4f";
+    setTimeout(function() {
+      btn.textContent = "Add to Cart";
+      btn.style.background = "";
+      btn.disabled = false;
+    }, 2000);
+  });
 });
 
-// Review submit — with client-side validation
-function submitReview(e) {
-  e.preventDefault();
-  var errBox  = document.getElementById("reviewFormError");
-  var btn     = document.getElementById("reviewSubmitBtn");
-  errBox && (errBox.style.display = "none");
-
-  // Client-side validation
-  var rating = document.querySelector('input[name="rating"]:checked');
-  var name   = (document.getElementById("reviewName") || {}).value || "";
-  var body   = (document.getElementById("reviewBody") || {}).value || "";
-
-  if (!rating) {
-    if (errBox) { errBox.textContent = "Please select a star rating."; errBox.style.display = "block"; }
-    return;
-  }
-  if (name.trim().length < 2) {
-    if (errBox) { errBox.textContent = "Please enter your name (min 2 characters)."; errBox.style.display = "block"; }
-    return;
-  }
-  if (body.trim().length < 10) {
-    if (errBox) { errBox.textContent = "Review must be at least 10 characters."; errBox.style.display = "block"; }
-    return;
-  }
-  if (body.trim().length > 2000) {
-    if (errBox) { errBox.textContent = "Review is too long (max 2000 characters)."; errBox.style.display = "block"; }
-    return;
-  }
-
-  if (btn) { btn.textContent = "Submitting…"; btn.disabled = true; }
-
-  var data = {};
-  new FormData(e.target).forEach(function(v, k) { data[k] = v; });
-
-  fetch(window.VENORA_BASE_URL + "/review-submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(res) {
-    if (res.auth === false) {
-      // Not logged in — redirect to login
-      window.location.href = window.VENORA_BASE_URL + "/customer-login";
-      return;
-    }
-    if (res.success) {
-      document.getElementById("reviewForm").style.display = "none";
-      document.getElementById("reviewSuccess").style.display = "block";
-    } else {
-      if (errBox) { errBox.textContent = res.message || "Submission failed. Please try again."; errBox.style.display = "block"; }
-      if (btn) { btn.textContent = "Submit Review"; btn.disabled = false; }
-    }
-  })
-  .catch(function() {
-    if (errBox) { errBox.textContent = "Something went wrong. Please try again."; errBox.style.display = "block"; }
-    if (btn) { btn.textContent = "Submit Review"; btn.disabled = false; }
-  });
-}
-
-// Live character count for review body
-var reviewBody = document.getElementById("reviewBody");
-var charCount  = document.getElementById("reviewCharCount");
-if (reviewBody && charCount) {
-  reviewBody.addEventListener("input", function() {
-    var len = reviewBody.value.length;
-    charCount.textContent = len < 10 ? "(" + (10 - len) + " more characters needed)" : "(" + len + " / 2000)";
-    charCount.style.color = len < 10 ? "#dc2626" : len > 1800 ? "#f59e0b" : "#aaa";
-  });
-}
 </script>
 
 <?php include APP_PATH . "/views/includes/footer.php"; ?>

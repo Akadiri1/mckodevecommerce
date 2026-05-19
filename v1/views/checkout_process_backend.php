@@ -23,29 +23,39 @@ if (empty($firstName) || !filter_var($email, FILTER_VALIDATE_EMAIL) || empty($ad
 }
 
 // Get cart
-$sessionId = session_id();
-$cartRows  = selectContent($conn, "read_cart", ["input_session_id" => $sessionId, "visibility" => "show"]);
-if (empty($cartRows)) { echo json_encode(['success'=>false,'error'=>'Cart is empty']); die; }
+try {
+    $cartData = getCartItems();
+    if (!($cartData['success'] ?? false)) {
+        echo json_encode(['success' => false, 'error' => $cartData['error'] ?? 'Unknown error']);
+        exit;
+    }
+    $cartRows = $cartData['cart_items'] ?? [];
+    if (empty($cartRows)) {
+        echo json_encode(['success' => false, 'error' => 'Cart is empty']);
+        exit;
+    }
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'error' => 'Failed to fetch cart']);
+    exit;
+}
 
 // Calculate totals
 $subtotal = 0;
 $orderItems = [];
-foreach ($cartRows as $row) {
-    $p = selectContent($conn, "panel_products", ["hash_id" => $row['input_product_id'], "visibility" => "show"]);
-    if (empty($p)) continue;
-    $p     = $p[0];
-    $price = (float)$p['input_price'];
-    $qty   = (int)$row['input_quantity'];
+foreach ($cartRows as $item) {
+    $price     = $usdEnabled ? (float)$item['price_usd'] : (float)$item['price_ngn'];
+    $qty       = (int)$item['quantity'];
     $lineTotal = $price * $qty;
     $subtotal += $lineTotal;
+    
     $orderItems[] = [
-        'product_id' => $p['hash_id'],
-        'title'      => $p['input_title'],
-        'variant'    => $row['input_variant'] ?? '',
+        'product_id' => $item['product_id'],
+        'title'      => $item['product_name'],
+        'variant'    => $item['variant_options'],
         'qty'        => $qty,
         'price'      => $price,
         'total'      => $lineTotal,
-        'image'      => $p['image_1'] ?? '',
+        'image'      => $item['image'],
     ];
 }
 
@@ -74,7 +84,7 @@ insertSafe($conn, "read_orders", [
     'visibility'       => 'show',
     'date_created'     => date('Y-m-d'),
     'time_created'     => date('H:i:s'),
-    'created_by'       => $sessionId,
+    'created_by'       => $_SESSION['user_id'] ?? $sessionId,
 ]);
 
 // Create order items
@@ -93,14 +103,14 @@ foreach ($orderItems as $item) {
         'visibility'       => 'show',
         'date_created'     => date('Y-m-d'),
         'time_created'     => date('H:i:s'),
-        'created_by'       => $sessionId,
+        'created_by'       => $_SESSION['user_id'] ?? $sessionId,
     ]);
 }
 
 // Clear cart
-foreach ($cartRows as $row) {
-    updateContent($conn, "read_cart", ["visibility" => "hide"], ["hash_id" => $row['hash_id']]);
-}
+$conn->prepare("DELETE FROM cart WHERE (user_id COLLATE utf8mb4_unicode_ci) = :user_id")
+     ->execute([':user_id' => $_SESSION['user_id']]);
+
 
 // Send confirmation email
 if (!empty($site_email_from) && !empty($site_email_password)) {
