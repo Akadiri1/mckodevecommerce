@@ -32,26 +32,20 @@ if (!empty($hero)) {
 // Load first page of products for initial render (6 per page)
 $featuredProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "input_order", 6);
 
-// Pre-index variant prices and has_variants flag
-$_fvPrices = selectContent($conn, "variants", []);
-$_fvPriceIdx = [];
-foreach ($_fvPrices as $_v) {
-    $h = $_v['product_hash_id'];
-    if (!isset($_fvPriceIdx[$h])) $_fvPriceIdx[$h] = $usdEnabled ? (float)$_v['input_price_usd'] : (float)$_v['input_price_ngn'];
-}
-$allFeaturedVariants = selectContent($conn, "variants", []);
-$variantsByProduct   = [];
-foreach ($allFeaturedVariants as $fv) { $variantsByProduct[$fv['product_hash_id']] = true; }
+// Simple pre-indexing for initial PHP render
 $categories = selectContentAsc($conn, "selection_product_category", ["visibility" => "show"], "id", 4);
 $_catById   = [];
 foreach ($categories as $_c) { $_catById[(string)$_c['id']] = $_c['input_title'] ?? ''; }
 
 foreach ($featuredProducts as &$fp) {
-    $fp['input_price']    = $_fvPriceIdx[$fp['hash_id']] ?? 0;
-    $fp['has_variants']   = isset($variantsByProduct[$fp['hash_id']]) ? "true" : "false";
     $fp['_category_name'] = $_catById[(string)($fp['select_product_category'] ?? '')] ?? '';
     $fp['image_2']        = fixImagePath($fp['image_2'] ?? '');
     $fp['image_1']        = fixImagePath($fp['image_1'] ?? '');
+    // Actual price and variant logic is handled by ProductController via AJAX later,
+    // but we fetch a base price for the static HTML state
+    $vBase = selectContent($conn, "variants", ["product_hash_id" => $fp['hash_id']]);
+    $fp['input_price'] = !empty($vBase) ? ($usdEnabled ? $vBase[0]['input_price_usd'] : $vBase[0]['input_price_ngn']) : 0;
+    $fp['has_variants'] = !empty($vBase) ? "true" : "false";
 }
 unset($fp);
 
@@ -102,18 +96,12 @@ include APP_PATH . "/views/includes/header.php";
           </div>
         </div>
         <div class="hero-bottom">
-          <!-- Client Review — ADMC Dynamic List from images table -->
           <div class="client-review" data-w-id="dbb7e87a-fe5c-32b4-4cba-251dde4a1f67"
                style="opacity:0;-webkit-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-moz-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-ms-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0)">
             <div class="client-review-img">
-              <div class="client-img-box-wrap"
-                   data-admc-tb="images"
-                   data-admc-tbadd="settings_home_hero"
-                   data-admc-tblink="hero001">
+              <div class="client-img-box-wrap" data-admc-tb="images" data-admc-tbadd="settings_home_hero" data-admc-tblink="hero001">
                 <?php if (empty($heroClients)): ?>
-                  <?php for($i=1; $i<=3; $i++): ?>
-                    <div class="client-img-box _0<?= $i ?>"><img alt="Client" class="all-img" src="<?= $dummyImg ?>"></div>
-                  <?php endfor; ?>
+                  <?php for($i=1; $i<=3; $i++): ?><div class="client-img-box _0<?= $i ?>"><img alt="Client" class="all-img" src="<?= $dummyImg ?>"></div><?php endfor; ?>
                 <?php else: ?>
                   <?php foreach ($heroClients as $ci => $client): ?>
                     <div class="client-img-box _0<?= ($ci % 3) + 1 ?>"><img alt="Client" class="all-img" src="<?= fixImagePath($client['image_1']) ?>" data-admc-image="images" data-admc-id="<?= $client['id'] ?>"></div>
@@ -130,13 +118,10 @@ include APP_PATH . "/views/includes/header.php";
             </div>
           </div>
 
-          <!-- Partner Logos — ADMC Dynamic List from panel_partners table -->
           <div class="partner" data-w-id="7ed915f2-e7a0-7698-b16b-25f03cf9b171"
                style="opacity:0;-webkit-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-moz-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-ms-transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);transform:translate3d(0, 40px, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0)">
             <div class="partner-text">
-              <div class="p-02"
-                   data-admc-manage="settings_home_hero"
-                   data-admc-id="<?= $hero['id'] ?? 1 ?>">
+              <div class="p-02" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>">
                 <?= htmlspecialchars($hero['input_partners_heading'] ?? 'Trusted by leading brands', ENT_QUOTES, 'UTF-8') ?>
               </div>
             </div>
@@ -154,16 +139,12 @@ include APP_PATH . "/views/includes/header.php";
           </div>
           <div class="scroll-text-wrap" data-w-id="b84d2d52-ab61-6c00-c526-8f2d9cdc5053"
                style="opacity:0;-webkit-transform:translate3d(0, 20%, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-moz-transform:translate3d(0, 20%, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-ms-transform:translate3d(0, 20%, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);transform:translate3d(0, 20%, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0)">
-            <div class="scroll-icon-wrap"
-                 data-admc-manage="settings_home_hero"
-                 data-admc-id="<?= $hero['id'] ?? 1 ?>">
+            <div class="scroll-icon-wrap" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>">
               <svg class="scroll-icon _01" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%;">
                 <path d="M6 9l6 6 6-6"/>
               </svg>
             </div>
-            <div class="heading-06"
-                 data-admc-manage="settings_home_hero"
-                 data-admc-id="<?= $hero['id'] ?? 1 ?>">
+            <div class="heading-06" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>">
               <?= htmlspecialchars($hero['input_scroll_text'] ?? 'Scroll Down', ENT_QUOTES, 'UTF-8') ?>
             </div>
           </div>
@@ -176,26 +157,15 @@ include APP_PATH . "/views/includes/header.php";
           $heroImage = trim($hero['image_1'] ?? '');
         ?>
         <?php if (!empty($heroVideo)): ?>
-          <div style="position:relative;width:100%;height:100%;"
-               data-admc-manage="settings_home_hero"
-               data-admc-id="<?= $hero['id'] ?? 1 ?>">
-            <video autoplay loop muted playsinline
-                   style="width:100%;height:100%;object-fit:cover;display:block;">
-              <source src="<?= htmlspecialchars($heroVideo, ENT_QUOTES, 'UTF-8') ?>" type="video/mp4" />
-            </video>
+          <div style="position:relative;width:100%;height:100%;" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>">
+            <video autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"><source src="<?= htmlspecialchars($heroVideo, ENT_QUOTES, 'UTF-8') ?>" type="video/mp4" /></video>
           </div>
         <?php elseif (!empty($heroImage)): ?>
-          <div data-admc-image="settings_home_hero"
-               data-admc-id="<?= $hero['id'] ?? 1 ?>"
-               style="width:100%;height:100%;">
-            <img src="<?= htmlspecialchars($heroImage, ENT_QUOTES, 'UTF-8') ?>"
-                 alt="Hero background"
-                 style="width:100%;height:100%;object-fit:cover;display:block;">
+          <div data-admc-image="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>" style="width:100%;height:100%;">
+            <img src="<?= htmlspecialchars($heroImage, ENT_QUOTES, 'UTF-8') ?>" alt="Hero background" style="width:100%;height:100%;object-fit:cover;display:block;">
           </div>
         <?php else: ?>
-          <div data-admc-manage="settings_home_hero"
-               data-admc-id="<?= $hero['id'] ?? 1 ?>"
-               style="width:100%;height:100%;background:#0d2b0d;display:flex;align-items:center;justify-content:center;">
+          <div data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>" style="width:100%;height:100%;background:#0d2b0d;display:flex;align-items:center;justify-content:center;">
             <p style="color:rgba(255,255,255,0.3);font-size:14px;">Add a video URL or image via ADMC</p>
           </div>
         <?php endif; ?>
@@ -211,34 +181,20 @@ include APP_PATH . "/views/includes/header.php";
     <div class="container">
       <div class="header">
         <div class="header-left">
-          <h2 class="heading-02"
-              data-admc-manage="settings_home_hero"
-              data-admc-id="<?= $hero['id'] ?? 1 ?>">
-            <?= htmlspecialchars($hero['input_products_intro_heading'] ?? 'We believe skincare is a ritual, not a routine', ENT_QUOTES, 'UTF-8') ?>
-          </h2>
+          <h2 class="heading-02" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>"><?= htmlspecialchars($hero['input_products_intro_heading'] ?? 'We believe skincare is a ritual, not a routine', ENT_QUOTES, 'UTF-8') ?></h2>
         </div>
         <div class="header-right">
-          <div class="p-01"
-               data-admc-manage="settings_home_hero"
-               data-admc-id="<?= $hero['id'] ?? 1 ?>">
-            <?= htmlspecialchars($hero['text_products_intro_description'] ?? 'Discover our curated selection of products designed to highlight your unique beauty.', ENT_QUOTES, 'UTF-8') ?>
-          </div>
+          <div class="p-01" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>"><?= htmlspecialchars($hero['text_products_intro_description'] ?? 'Discover our selection.', ENT_QUOTES, 'UTF-8') ?></div>
         </div>
       </div>
 
       <div class="home-cat-tabs" id="homeCatTabs">
         <button class="home-cat-btn active" data-cat="">All products</button>
         <?php foreach ($categories as $cat): ?>
-          <button class="home-cat-btn" data-cat="<?= htmlspecialchars($cat['input_title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-            <?= htmlspecialchars($cat['input_title'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-          </button>
+          <button class="home-cat-btn" data-cat="<?= htmlspecialchars($cat['input_title'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($cat['input_title'] ?? '', ENT_QUOTES, 'UTF-8') ?></button>
         <?php endforeach; ?>
       </div>
 
-      <?php
-        $totalProductCount = count(selectContent($conn, "panel_product", ["visibility" => "show"]));
-        $initialHasMore = $totalProductCount > 6;
-      ?>
       <div class="product-collection" id="productCollection">
         <div class="product-grid w-dyn-items" id="homeProductGrid" data-admc-tb="panel_product" role="list">
           <?php foreach ($featuredProducts as $product):
@@ -249,49 +205,27 @@ include APP_PATH . "/views/includes/header.php";
                   <div class="product-card-img">
                     <a class="product-link w-inline-block" href="<?= $detailUrl ?>">
                       <div data-admc-image="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product">
-                        <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>" 
-                             class="all-img" loading="lazy" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>" class="all-img" loading="lazy" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                       </div>
-                      <div class="product-float">
-                        <img alt="" class="all-img" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'], ENT_QUOTES, 'UTF-8') ?>">
-                      </div>
+                      <div class="product-float"><img alt="" class="all-img" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'], ENT_QUOTES, 'UTF-8') ?>"></div>
                     </a>
                     <?php $inWishlist = in_array($product['hash_id'], $wishlistIds); ?>
-                    <button class="wishlist-btn-card <?= $inWishlist ? 'active' : '' ?>" 
-                            data-id="<?= $product['hash_id'] ?>" 
-                            onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.toggleWishlist('<?= $product['hash_id'] ?>', this);"
-                            style="position:absolute; top:12px; left:12px; z-index:15; background:white; border:none; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.1); opacity:0; transition:opacity 0.3s ease;">
-                      <img src="<?= $baseUrl ?>/assets/img/icons/<?= $inWishlist ? 'heart-filled.svg' : 'heart-outline.svg' ?>" style="width:18px; height:18px;" alt="Wishlist">
-                    </button>
-                    <div class="add-to-card-02" 
-                         data-product-id="<?= $product['hash_id'] ?>" 
-                         data-has-variants="<?= $product['has_variants'] ?>"
-                         onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.cartAddItem('<?= $product['hash_id'] ?>', '', 1, null, this);">
-                      <img alt="" class="add-to-card-icon" src="https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69767e8def202704be8ff087_Vector (1).svg">
-                      <div class="p-01">Add to cart</div>
-                    </div>
+                    <button class="wishlist-btn-card <?= $inWishlist ? 'active' : '' ?>" data-id="<?= $product['hash_id'] ?>" onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.toggleWishlist('<?= $product['hash_id'] ?>', this);" style="position:absolute; top:12px; left:12px; z-index:15; background:white; border:none; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.1); opacity:0; transition:opacity 0.3s ease;"><img src="<?= $baseUrl ?>/assets/img/icons/<?= $inWishlist ? 'heart-filled.svg' : 'heart-outline.svg' ?>" style="width:18px; height:18px;" alt="Wishlist"></button>
+                    <div class="add-to-card-02" data-product-id="<?= $product['hash_id'] ?>" data-has-variants="<?= $product['has_variants'] ?>" onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.cartAddItem('<?= $product['hash_id'] ?>', '', 1, null, this);"><img alt="" class="add-to-card-icon" src="https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69767e8def202704be8ff087_Vector (1).svg"><div class="p-01">Add to cart</div></div>
                   </div>
                   <div class="product-card-bottom">
                     <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($product['_category_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div></div>
                     <div class="product-name-price">
-                      <h3 class="heading-06" data-admc-manage="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product">
-                        <a href="<?= $detailUrl ?>" class="card-title-link"><?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?></a>
-                      </h3>
-                      <div class="heading-07" data-admc-manage="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product">
-                        <?= formatPrice($product['input_price'], $shop_symbol) ?>
-                      </div>
+                      <h3 class="heading-06" data-admc-manage="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product"><a href="<?= $detailUrl ?>" class="card-title-link"><?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?></a></h3>
+                      <div class="heading-07" data-admc-manage="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product"><?= formatPrice($product['input_price'], $shop_symbol) ?></div>
                     </div>
                   </div>
                 </div>
             </div>
           <?php endforeach; ?>
         </div>
-        <div id="loadMoreWrap" style="text-align:center;margin-top:40px;<?= $initialHasMore ? '' : 'display:none;' ?>">
-          <button id="loadMoreBtn" data-admc-manage="settings_shop_ui_labels" data-admc-id="<?= $uiLabels['id'] ?? 1 ?>"
-                  style="padding:14px 40px;border:1.5px solid #072708;background:none;color:#072708;font-family:inherit;font-size:15px;font-weight:600;border-radius:7px;cursor:pointer;transition:all 0.2s;"
-                  onmouseover="this.style.background='#072708';this.style.color='#fff';" onmouseout="this.style.background='none';this.style.color='#072708';">
-            <?= htmlspecialchars($loadMoreTxt, ENT_QUOTES, 'UTF-8') ?>
-          </button>
+        <div id="loadMoreWrap" style="text-align:center;margin-top:40px;display:none;">
+          <button id="loadMoreBtn" data-admc-manage="settings_shop_ui_labels" data-admc-id="<?= $uiLabels['id'] ?? 1 ?>" style="padding:14px 40px;border:1.5px solid #072708;background:none;color:#072708;font-family:inherit;font-size:15px;font-weight:600;border-radius:7px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#072708';this.style.color='#fff';" onmouseout="this.style.background='none';this.style.color='#072708';"><?= htmlspecialchars($loadMoreTxt, ENT_QUOTES, 'UTF-8') ?></button>
         </div>
       </div>
     </div>
@@ -355,48 +289,28 @@ include APP_PATH . "/views/includes/header.php";
       <div class="content-outer">
         <div class="content-inner">
           <div class="content-img-box" data-admc-image="panel_home_blocks" data-admc-id="<?= $homeBlock1['id'] ?? 0 ?>">
-            <img alt="<?= htmlspecialchars($homeBlock1['input_heading'] ?? 'Dermatology Tested', ENT_QUOTES, 'UTF-8') ?>" class="images speed" src="<?= fixImagePath($homeBlock1['image_1'] ?? $dummyImg) ?>" style="object-fit:cover; width:100%; height:100%;">
-            <div class="content-float">
-              <div data-admc-manage="panel_home_blocks" data-admc-id="<?= $homeBlock1['id'] ?? 0 ?>">
-                <?= htmlspecialchars($homeBlock1['input_badge'] ?? 'Dermatologist tested', ENT_QUOTES, 'UTF-8') ?>
-              </div>
-            </div>
+            <img alt="<?= htmlspecialchars($homeBlock1['input_heading'] ?? 'Tested', ENT_QUOTES, 'UTF-8') ?>" class="images speed" src="<?= fixImagePath($homeBlock1['image_1'] ?? $dummyImg) ?>" style="object-fit:cover; width:100%; height:100%;">
+            <div class="content-float"><div data-admc-manage="panel_home_blocks" data-admc-id="<?= $homeBlock1['id'] ?? 0 ?>"><?= htmlspecialchars($homeBlock1['input_badge'] ?? 'Dermatologist tested', ENT_QUOTES, 'UTF-8') ?></div></div>
           </div>
           <div class="content-text">
             <div class="content-text-inner" data-admc-manage="panel_home_blocks" data-admc-id="<?= $homeBlock1['id'] ?? 0 ?>">
-              <h2 class="heading-02"><?= htmlspecialchars($homeBlock1['input_heading'] ?? 'Dermatology-Tested Skincare You Can Trust', ENT_QUOTES, 'UTF-8') ?></h2>
-              <div class="color-gray">
-                <div class="p-01"><?= htmlspecialchars($homeBlock1['text_description'] ?? 'Our formulas are developed in collaboration with dermatologists.', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
+              <h2 class="heading-02"><?= htmlspecialchars($homeBlock1['input_heading'] ?? 'Dermatology-Tested', ENT_QUOTES, 'UTF-8') ?></h2>
+              <div class="color-gray"><div class="p-01"><?= htmlspecialchars($homeBlock1['text_description'] ?? 'Our formulas are developed in collaboration with dermatologists.', ENT_QUOTES, 'UTF-8') ?></div></div>
             </div>
-            <div class="btn-wrap" data-wf--btn--variant="green-bg">
-              <a class="btn-02-link w-inline-block" href="<?= htmlspecialchars($homeBlock1['input_btn_link'] ?? '/about', ENT_QUOTES, 'UTF-8') ?>">
-                <div class="btn-inner"><div class="btn-text-wrap"><div class="btn-text-3 _01"><div class="cta-text"><?= htmlspecialchars($homeBlock1['input_btn_label'] ?? 'About us', ENT_QUOTES, 'UTF-8') ?></div></div><div class="btn-text-3 _02"><div class="cta-text"><?= htmlspecialchars($homeBlock1['input_btn_label'] ?? 'About us', ENT_QUOTES, 'UTF-8') ?></div></div></div></div>
-              </a>
-            </div>
+            <div class="btn-wrap" data-wf--btn--variant="green-bg"><a class="btn-02-link w-inline-block" href="<?= htmlspecialchars($homeBlock1['input_btn_link'] ?? '/about', ENT_QUOTES, 'UTF-8') ?>"><div class="btn-inner"><div class="btn-text-wrap"><div class="btn-text-3 _01"><div class="cta-text"><?= htmlspecialchars($homeBlock1['input_btn_label'] ?? 'About us', ENT_QUOTES, 'UTF-8') ?></div></div><div class="btn-text-3 _02"><div class="cta-text"><?= htmlspecialchars($homeBlock1['input_btn_label'] ?? 'About us', ENT_QUOTES, 'UTF-8') ?></div></div></div></div></a></div>
           </div>
         </div>
         <div class="content-inner space-between">
           <div class="content-text">
             <div class="content-text-inner" data-admc-manage="panel_home_blocks" data-admc-id="<?= $homeBlock2['id'] ?? 0 ?>">
-              <h2 class="heading-02"><?= htmlspecialchars($homeBlock2['input_heading'] ?? 'Naturally Clean. Always Paraben-Free.', ENT_QUOTES, 'UTF-8') ?></h2>
-              <div class="color-gray">
-                <div class="p-01"><?= htmlspecialchars($homeBlock2['text_description'] ?? 'Your skin deserves only the best.', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
+              <h2 class="heading-02"><?= htmlspecialchars($homeBlock2['input_heading'] ?? 'Clean. Paraben-Free.', ENT_QUOTES, 'UTF-8') ?></h2>
+              <div class="color-gray"><div class="p-01"><?= htmlspecialchars($homeBlock2['text_description'] ?? 'Your skin deserves only the best.', ENT_QUOTES, 'UTF-8') ?></div></div>
             </div>
-            <div class="btn-wrap" data-wf--btn--variant="green-bg">
-              <a class="btn-02-link w-inline-block" href="<?= htmlspecialchars($homeBlock2['input_btn_link'] ?? '/about', ENT_QUOTES, 'UTF-8') ?>">
-                <div class="btn-inner"><div class="btn-text-wrap"><div class="btn-text-3 _01"><div class="cta-text"><?= htmlspecialchars($homeBlock2['input_btn_label'] ?? 'Learn more', ENT_QUOTES, 'UTF-8') ?></div></div><div class="btn-text-3 _02"><div class="cta-text"><?= htmlspecialchars($homeBlock2['input_btn_label'] ?? 'Learn more', ENT_QUOTES, 'UTF-8') ?></div></div></div></div>
-              </a>
-            </div>
+            <div class="btn-wrap" data-wf--btn--variant="green-bg"><a class="btn-02-link w-inline-block" href="<?= htmlspecialchars($homeBlock2['input_btn_link'] ?? '/about', ENT_QUOTES, 'UTF-8') ?>"><div class="btn-inner"><div class="btn-text-wrap"><div class="btn-text-3 _01"><div class="cta-text"><?= htmlspecialchars($homeBlock2['input_btn_label'] ?? 'Learn more', ENT_QUOTES, 'UTF-8') ?></div></div><div class="btn-text-3 _02"><div class="cta-text"><?= htmlspecialchars($homeBlock2['input_btn_label'] ?? 'Learn more', ENT_QUOTES, 'UTF-8') ?></div></div></div></div></a></div>
           </div>
           <div class="content-img-box" data-admc-image="panel_home_blocks" data-admc-id="<?= $homeBlock2['id'] ?? 0 ?>">
             <img alt="<?= htmlspecialchars($homeBlock2['input_heading'] ?? 'Paraben Free', ENT_QUOTES, 'UTF-8') ?>" class="images speed" src="<?= fixImagePath($homeBlock2['image_1'] ?? $dummyImg) ?>" style="object-fit:cover; width:100%; height:100%;">
-            <div class="content-float _02">
-              <div data-admc-manage="panel_home_blocks" data-admc-id="<?= $homeBlock2['id'] ?? 0 ?>">
-                <?= htmlspecialchars($homeBlock2['input_badge'] ?? 'Paraben free', ENT_QUOTES, 'UTF-8') ?>
-              </div>
-            </div>
+            <div class="content-float _02"><div data-admc-manage="panel_home_blocks" data-admc-id="<?= $homeBlock2['id'] ?? 0 ?>"><?= htmlspecialchars($homeBlock2['input_badge'] ?? 'Paraben free', ENT_QUOTES, 'UTF-8') ?></div></div>
           </div>
         </div>
       </div>
@@ -413,25 +327,17 @@ include APP_PATH . "/views/includes/header.php";
       <div class="content-inner-02">
         <div class="content-header" data-admc-manage="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>">
           <h2 class="heading-02"><?= htmlspecialchars($homeFeatures['input_heading'] ?? 'Why your skin deserves the best', ENT_QUOTES, 'UTF-8') ?></h2>
-          <div class="content-header-short"><div class="color-gray"><div class="p-01"><?= htmlspecialchars($homeFeatures['text_subheading'] ?? 'We combine science, care, and transparency.', ENT_QUOTES, 'UTF-8') ?></div></div></div>
+          <div class="content-header-short"><div class="color-gray"><div class="p-01"><?= htmlspecialchars($homeFeatures['text_subheading'] ?? 'Science, care, and transparency.', ENT_QUOTES, 'UTF-8') ?></div></div></div>
         </div>
         <div class="content-grid-wrap">
           <div class="content-grid" data-admc-tb="images" data-admc-tbadd="settings_home_features" data-admc-tblink="hf001">
             <div class="content-top">
               <div class="happy-client-card" data-admc-manage="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>">
-                <div class="happy-client-img-wrap" data-admc-image="images" data-admc-id="<?= $hfGallery[0]['id'] ?? 0 ?>">
-                  <img alt="Happy clients" class="happy-client-img" src="<?= fixImagePath($hfGallery[0]['image_1'] ?? $dummyImg) ?>">
-                </div>
-                <div class="happy-client-text">
-                  <div class="star-wrap"><img alt="Star" class="star" src="https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69192a1e07895c1d9149a7ad_Star 1.svg"></div>
-                  <div class="heading-05"><?= htmlspecialchars($homeFeatures['input_card1_title'] ?? '100k+ happy clients', ENT_QUOTES, 'UTF-8') ?></div>
-                </div>
+                <div class="happy-client-img-wrap" data-admc-image="images" data-admc-id="<?= $hfGallery[0]['id'] ?? 0 ?>"><img alt="Happy clients" class="happy-client-img" src="<?= fixImagePath($hfGallery[0]['image_1'] ?? $dummyImg) ?>"></div>
+                <div class="happy-client-text"><div class="star-wrap"><img alt="Star" class="star" src="https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69192a1e07895c1d9149a7ad_Star 1.svg"></div><div class="heading-05"><?= htmlspecialchars($homeFeatures['input_card1_title'] ?? '100k+ happy clients', ENT_QUOTES, 'UTF-8') ?></div></div>
               </div>
               <div class="content-card" data-admc-manage="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>">
-                <div class="content-card-inner-float">
-                  <div class="content-float-icon-box" data-admc-image="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>"><img alt="Icon" class="content-float-icon" src="<?= fixImagePath($homeFeatures['image_card2_icon'] ?? '') ?>"></div>
-                  <div class="content-bottom-title"><h2 class="heading-04"><?= htmlspecialchars($homeFeatures['input_card2_title'] ?? 'Sense of luxury', ENT_QUOTES, 'UTF-8') ?></h2></div>
-                </div>
+                <div class="content-card-inner-float"><div class="content-float-icon-box" data-admc-image="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>"><img alt="Icon" class="content-float-icon" src="<?= fixImagePath($homeFeatures['image_card2_icon'] ?? '') ?>"></div><div class="content-bottom-title"><h2 class="heading-04"><?= htmlspecialchars($homeFeatures['input_card2_title'] ?? 'Sense of luxury', ENT_QUOTES, 'UTF-8') ?></h2></div></div>
                 <img alt="Luxury" class="content-float-img" src="<?= fixImagePath($hfGallery[1]['image_1'] ?? $dummyImg) ?>" data-admc-image="images" data-admc-id="<?= $hfGallery[1]['id'] ?? 0 ?>">
                 <div class="content-overlay"></div>
               </div>
@@ -439,23 +345,16 @@ include APP_PATH . "/views/includes/header.php";
             <div class="content-bottom">
               <div class="content-card" data-admc-manage="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>">
                 <div class="content-card-inner-float-02"><div class="content-top-title"><h3 class="heading-04"><?= htmlspecialchars($homeFeatures['input_card3_title'] ?? 'Shop easily', ENT_QUOTES, 'UTF-8') ?></h3></div></div>
-                <img alt="Stores" class="content-float-img" src="<?= fixImagePath($hfGallery[2]['image_1'] ?? $dummyImg) ?>" data-admc-image="images" data-admc-id="<?= $hfGallery[2]['id'] ?? 0 ?>">
-                <div class="content-overlay"></div>
+                <img alt="Stores" class="content-float-img" src="<?= fixImagePath($hfGallery[2]['image_1'] ?? $dummyImg) ?>" data-admc-image="images" data-admc-id="<?= $hfGallery[2]['id'] ?? 0 ?>"><div class="content-overlay"></div>
               </div>
               <div class="content-card" data-admc-manage="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>">
-                <div class="content-card-inner-float">
-                   <div class="content-float-icon-box" data-admc-image="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>"><img alt="Icon" class="content-float-icon" src="<?= fixImagePath($homeFeatures['image_card4_icon'] ?? '') ?>"></div>
-                   <div class="content-bottom-title"><h3 class="heading-04"><?= htmlspecialchars($homeFeatures['input_card4_title'] ?? 'Natural ingredients', ENT_QUOTES, 'UTF-8') ?></h3></div>
-                </div>
-                <img alt="Natural" class="content-float-img" src="<?= fixImagePath($hfGallery[3]['image_1'] ?? $dummyImg) ?>" data-admc-image="images" data-admc-id="<?= $hfGallery[3]['id'] ?? 0 ?>">
-                <div class="content-overlay"></div>
+                <div class="content-card-inner-float"><div class="content-float-icon-box" data-admc-image="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>"><img alt="Icon" class="content-float-icon" src="<?= fixImagePath($homeFeatures['image_card4_icon'] ?? '') ?>"></div><div class="content-bottom-title"><h3 class="heading-04"><?= htmlspecialchars($homeFeatures['input_card4_title'] ?? 'Natural ingredients', ENT_QUOTES, 'UTF-8') ?></h3></div></div>
+                <img alt="Natural" class="content-float-img" src="<?= fixImagePath($hfGallery[3]['image_1'] ?? $dummyImg) ?>" data-admc-image="images" data-admc-id="<?= $hfGallery[3]['id'] ?? 0 ?>"><div class="content-overlay"></div>
               </div>
             </div>
           </div>
           <div class="content-card" data-admc-manage="settings_home_features" data-admc-id="<?= $homeFeatures['id'] ?? 1 ?>">
-             <div class="content-card-inner-float large">
-                <div class="content-bottom-title"><h3 class="heading-04"><?= htmlspecialchars($homeFeatures['input_card5_title'] ?? 'Visible results', ENT_QUOTES, 'UTF-8') ?></h3></div>
-             </div>
+             <div class="content-card-inner-float large"><div class="content-bottom-title"><h3 class="heading-04"><?= htmlspecialchars($homeFeatures['input_card5_title'] ?? 'Visible results', ENT_QUOTES, 'UTF-8') ?></h3></div></div>
              <img alt="Results" class="content-float-img" src="<?= fixImagePath($hfGallery[4]['image_1'] ?? $dummyImg) ?>" data-admc-image="images" data-admc-id="<?= $hfGallery[4]['id'] ?? 0 ?>">
           </div>
         </div>
@@ -476,9 +375,7 @@ include APP_PATH . "/views/includes/header.php";
       <div class="testimonial-inner">
         <div class="testimonial-wrap">
           <div class="testimonial-top" data-admc-manage="settings_home_quote" data-admc-id="<?= $homeQuote['id'] ?? 1 ?>">
-            <div class="qoute" style="font-size: 32px; color: var(--primary);">
-              <i class="fas fa-quote-left"></i>
-            </div>
+            <div class="qoute" style="font-size: 32px; color: var(--primary);"><i class="fas fa-quote-left"></i></div>
             <h3 class="heading-03"><?= htmlspecialchars($homeQuote['text_quote'] ?? 'Beauty is how you feel in your own skin.', ENT_QUOTES, 'UTF-8') ?></h3>
           </div>
           <div class="author-name" data-admc-manage="settings_home_quote" data-admc-id="<?= $homeQuote['id'] ?? 1 ?>">
@@ -498,9 +395,6 @@ include APP_PATH . "/views/includes/header.php";
     </div>
   </section>
 </div>
-
-<!-- GALLERY TICKER -->
-<!-- <div data-cbsection="cb5">...</div> -->
 
 <!-- [cbcode_10001c] -->
 

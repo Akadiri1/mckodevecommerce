@@ -82,7 +82,10 @@ insertContent($conn, 'verify', [
 ]);
 
 // Send verification email
-$verifyLink = $baseUrl . '/customer-verify?token=' . urlencode($verifyToken);
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$absoluteBase = $protocol . "://" . $host . $baseUrl;
+$verifyLink = $absoluteBase . '/customer-verify?token=' . urlencode($verifyToken);
 
 // Use Correct settings from DB
 $siteInfo = selectContent($conn, "settings_website_info", ["visibility" => "show"]);

@@ -91,24 +91,24 @@
     clone.style.width = rect.width + 'px';
     clone.style.height = rect.height + 'px';
     clone.style.zIndex = '999999';
-    clone.style.transition = 'all 0.85s cubic-bezier(0.19, 1, 0.22, 1)';
+    clone.style.transition = 'all 1.25s cubic-bezier(0.19, 1, 0.22, 1)';
     clone.style.pointerEvents = 'none';
     
     document.body.appendChild(clone);
     clone.offsetWidth;
-    clone.style.top = (targetRect.top + (targetRect.height / 2) - 15) + 'px';
-    clone.style.left = (targetRect.left + (targetRect.width / 2) - 15) + 'px';
-    clone.style.width = '30px';
-    clone.style.height = '30px';
-    clone.style.opacity = '0.1';
-    clone.style.transform = 'scale(0.1) rotate(360deg)';
+    clone.style.top = (targetRect.top + (targetRect.height / 2) - 10) + 'px';
+    clone.style.left = (targetRect.left + (targetRect.width / 2) - 10) + 'px';
+    clone.style.width = '20px';
+    clone.style.height = '20px';
+    clone.style.opacity = '0.05';
+    clone.style.transform = 'scale(0.05) rotate(720deg)';
     
     setTimeout(function() {
       clone.remove();
       var parentIcon = target.closest('[data-open-cart]') || target;
       parentIcon.classList.add('cart-wiggle');
       setTimeout(function() { parentIcon.classList.remove('cart-wiggle'); }, 600);
-    }, 850);
+    }, 1250);
   }
 
   // ── Toast notifications ──────────────────────────────────────
@@ -643,74 +643,6 @@
   if (btt) {
     window.addEventListener('scroll', function() { btt.classList.toggle('visible', window.scrollY > 400); });
     on(btt, 'click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
-  }
-
-  // ── Newsletter popup ─────────────────────────────────────────
-  var nlPopup = $('.newsletter-popup');
-  if (nlPopup && !sessionStorage.getItem('nl_dismissed')) {
-    setTimeout(function() { nlPopup.classList.add('show'); }, 8000);
-
-    function dismissNlPopup() {
-      nlPopup.classList.remove('show');
-      sessionStorage.setItem('nl_dismissed', '1');
-    }
-
-    on($('.newsletter-popup-close', nlPopup), 'click', dismissNlPopup);
-    on($('.newsletter-popup-dismiss', nlPopup), 'click', dismissNlPopup);
-    on(document, 'click', function(e) {
-      if (nlPopup.classList.contains('show') && !nlPopup.contains(e.target)) {
-        dismissNlPopup();
-      }
-    });
-
-    var nlForm = $('.newsletter-popup-form', nlPopup);
-    var nlMsg  = document.getElementById('nlPopupMsg');
-
-    function showPopupMsg(text, isError) {
-      if (!nlMsg) return;
-      nlMsg.style.display = 'flex'; nlMsg.style.alignItems = 'center'; nlMsg.style.gap = '8px'; nlMsg.style.padding = '10px 14px';
-      nlMsg.style.borderRadius = '8px'; nlMsg.style.fontSize = '13px'; nlMsg.style.fontWeight = '500'; nlMsg.style.maxWidth = '370px';
-      nlMsg.style.margin = '0 auto 12px'; nlMsg.style.textTransform = 'none'; nlMsg.style.letterSpacing = '0';
-      if (isError) {
-        nlMsg.style.background = 'rgba(193,18,31,0.08)'; nlMsg.style.color = '#c1121f'; nlMsg.style.border = '1px solid rgba(193,18,31,0.2)';
-        nlMsg.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>' + text + '</span>';
-      } else {
-        nlMsg.style.background = 'rgba(22,163,74,0.08)'; nlMsg.style.color = '#16a34a'; nlMsg.style.border = '1px solid rgba(22,163,74,0.2)';
-        nlMsg.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span>' + text + '</span>';
-      }
-    }
-
-    if (nlForm) {
-      on(nlForm, 'submit', function(e) {
-        e.preventDefault();
-        var emailInput = nlForm.querySelector('input[type=email]');
-        var emailVal   = emailInput ? emailInput.value.trim() : '';
-        if (!emailVal) { showPopupMsg('Please enter your email address.', true); return; }
-        var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRe.test(emailVal)) { showPopupMsg('Please enter a valid email address.', true); return; }
-        var btn = nlForm.querySelector('button[type=submit]');
-        var originalBtnHTML = btn ? btn.innerHTML : 'Subscribe';
-        if (btn) { btn.disabled = true; btn.innerHTML = '<img src="' + (window.VENORA_BASE_URL || '') + '/lg.rotating-balls-spinner.gif" alt="..." style="width: 20px; height: 20px;"> Subscribing...'; }
-        if (nlMsg) nlMsg.style.display = 'none';
-        fetch(baseUrl + '/newsletter-subscribe', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'email=' + encodeURIComponent(emailVal) })
-        .then(r => r.json()).then(res => {
-          if (res.success) {
-            nlForm.style.display = 'none';
-            var h4 = nlPopup.querySelector('h4'), p = nlPopup.querySelector('p'), dismiss = document.getElementById('nlPopupDismiss');
-            if (h4) h4.textContent = 'Success!'; if (p) p.style.display = 'none'; if (dismiss) dismiss.style.display = 'none';
-            showPopupMsg(res.message || 'Thank you for subscribing!', false);
-            setTimeout(dismissNlPopup, 3000);
-          } else {
-            showPopupMsg(res.message || 'Something went wrong. Please try again.', true);
-            if (btn) { btn.disabled = false; btn.innerHTML = originalBtnHTML; }
-          }
-        })
-        .catch(() => {
-          showPopupMsg('Connection error. Please try again.', true);
-          if (btn) { btn.disabled = false; btn.innerHTML = originalBtnHTML; }
-        });
-      });
-    }
   }
 
   // ── Event delegation ─────────────────────────────────────────

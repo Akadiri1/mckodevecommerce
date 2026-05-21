@@ -9,7 +9,7 @@
 :root {
   --v-green:        #072708;
   --v-green-mid:    #0d3d0e;
-  --v-bg-dark:      #202c22;
+  --v-bg-dark:      var(--bg-colour, #202c22);
   --v-bg-light:     #f6f6f6;
   --v-accent:       #d7e58e;
   --v-gray:         #5c5f6a;

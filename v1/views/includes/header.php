@@ -44,14 +44,24 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   <?php
   // ── ADMC Theme & Colour System ──────────────────────────────
   $style = !empty($websiteStyle) ? $websiteStyle[0] : [];
+  
   $primaryColor = $style['color'] ?? '#072708';
-  // Ensure # prefix
   if ($primaryColor && strpos($primaryColor, '#') !== 0) { $primaryColor = '#' . $primaryColor; }
   
-  $bgDark    = $style['bgcolor_background'] ?? '#050a14';
-  $bgSurface = $style['bgcolor_surface']    ?? '#0a1128';
+  $bgColor    = $style['bgcolor_background'] ?? '#f9f9f7';
+  if ($bgColor && strpos($bgColor, '#') !== 0) { $bgColor = '#' . $bgColor; }
+
+  $surfaceColor = $style['bgcolor_surface'] ?? '#ffffff';
+  if ($surfaceColor && strpos($surfaceColor, '#') !== 0) { $surfaceColor = '#' . $surfaceColor; }
+
   $textHead  = $style['textcolor_heading']  ?? '#072708';
+  if ($textHead && strpos($textHead, '#') !== 0) { $textHead = '#' . $textHead; }
+
   $textBody  = $style['textcolor_body']     ?? '#5c5f6a';
+  if ($textBody && strpos($textBody, '#') !== 0) { $textBody = '#' . $textBody; }
+
+  $textMuted = $style['textcolor_muted']    ?? '#9ca3af';
+  if ($textMuted && strpos($textMuted, '#') !== 0) { $textMuted = '#' . $textMuted; }
   ?>
   <style data-admc-manage="website_status" data-admc-id="<?= $style['id'] ?? 1 ?>">
     :root {
@@ -59,12 +69,45 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
       --primary-rgb: <?= hexToRgb($primaryColor) ?>;
       --dark-green-colour: var(--primary);
       --dash-accent: var(--primary);
-    }
-    /* Theme variable overrides */
-    body {
+      
+      --bg-colour: <?= htmlspecialchars($bgColor, ENT_QUOTES, 'UTF-8') ?>;
+      --v-bg-dark: var(--bg-colour);
+      
+      --surface-colour: <?= htmlspecialchars($surfaceColor, ENT_QUOTES, 'UTF-8') ?>;
+      --v-white: var(--surface-colour); /* For cards, sidebar, etc */
+      
       --text-primary: <?= htmlspecialchars($textHead, ENT_QUOTES, 'UTF-8') ?>;
       --text-secondary: <?= htmlspecialchars($textBody, ENT_QUOTES, 'UTF-8') ?>;
+      --v-gray: <?= htmlspecialchars($textMuted, ENT_QUOTES, 'UTF-8') ?>;
     }
+    
+    body {
+      background-color: var(--bg-colour);
+      color: var(--text-secondary);
+    }
+    
+    /* Cart Sidebar Theme Integration */
+    .cart-drawer { background: var(--surface-colour) !important; }
+    .cart-drawer-header { border-bottom-color: rgba(var(--primary-rgb), 0.1); }
+    .cart-item { border-bottom-color: rgba(var(--primary-rgb), 0.05); }
+    .cart-item h4 { color: var(--text-primary); }
+    
+    /* Button & Element Contrast Protection */
+    .btn-02-link, .submit-button-02, .modal-add-to-cart, 
+    .v-badge, .add-to-card-02, .cart-checkout-btn, .cart-badge {
+      color: #ffffff !important;
+    }
+    .btn-02-link .cta-text, .submit-button-02 span { color: #ffffff !important; }
+    
+    /* Ensure icons in primary buttons are visible */
+    .btn-02-link svg, .submit-button-02 svg, .modal-add-to-cart svg { 
+      stroke: #ffffff !important; 
+    }
+    
+    /* Global specific overrides */
+    .product-name-price .heading-06 a { color: var(--text-primary) !important; }
+    .footer-section h1, .footer-section h2, .footer-section h3 { color: var(--text-primary) !important; }
+    .p-01, .p-02 { color: var(--text-secondary); }
   </style>
 
 

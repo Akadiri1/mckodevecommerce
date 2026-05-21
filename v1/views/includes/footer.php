@@ -6,11 +6,11 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
 
   <!-- ── Footer ──────────────────────────────────────────────── -->
   <style>
-    .footer-section { background-color: #ffffff !important; }
+    .footer-section { background-color: var(--surface-colour, #ffffff) !important; }
     .footer-section .cta {
       background-image: none !important;
-      background-color: #ffffff !important;
-      color: var(--dark-green-colour, #072708) !important;
+      background-color: var(--surface-colour, #ffffff) !important;
+      color: var(--primary) !important;
     }
   </style>
   <section class="footer-section">
@@ -156,55 +156,6 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
     </div>
 
   </section>
-
-  <!-- ── Newsletter Popup — DB-driven, ADMC-editable ─────────── -->
-  <?php
-    $popupHeading  = htmlspecialchars($footerConfig['input_newsletter_popup_heading']      ?? 'Get 10% off your first order',               ENT_QUOTES, 'UTF-8');
-    $popupDesc     = htmlspecialchars($footerConfig['text_newsletter_popup_description']   ?? 'Subscribe for exclusive offers, skincare tips, and early access to new products.', ENT_QUOTES, 'UTF-8');
-    $popupBtn      = htmlspecialchars($footerConfig['input_newsletter_popup_btn']          ?? 'Subscribe',  ENT_QUOTES, 'UTF-8');
-    $popupDismiss  = htmlspecialchars($footerConfig['input_newsletter_popup_dismiss']      ?? 'No thanks',  ENT_QUOTES, 'UTF-8');
-    $popupHolder   = htmlspecialchars($footerConfig['input_newsletter_placeholder']        ?? 'Your email address', ENT_QUOTES, 'UTF-8');
-    $ftrId         = $footerConfig['id'] ?? 1;
-  ?>
-  <div class="newsletter-popup" id="newsletterPopup">
-    <button class="newsletter-popup-close" id="nlPopupClose" aria-label="Close">✕</button>
-
-    <!-- Editable heading -->
-    <h4 style="margin:0 0 12px;font-size:20px;line-height:1.35;color:#ffffff;"
-        data-admc-manage="settings_shop_footer"
-        data-admc-id="<?= $ftrId ?>">
-      <?= $popupHeading ?>
-    </h4>
-
-    <!-- Editable description -->
-    <p style="margin:0 0 20px;line-height:1.75;color:#5c5f6a;font-size:14px;"
-       data-admc-manage="settings_shop_footer"
-       data-admc-id="<?= $ftrId ?>">
-      <?= $popupDesc ?>
-    </p>
-
-    <!-- Form with error/success message area -->
-    <div id="nlPopupMsg" style="display:none;margin-bottom:12px;font-size:13px;padding:8px 12px;border-radius:4px;"></div>
-
-    <form class="newsletter-popup-form" id="nlPopupForm" novalidate>
-      <input class="newsletter-popup-input" type="email"
-             placeholder="<?= $popupHolder ?>"
-             required
-             style="margin-bottom:10px;">
-      <button class="newsletter-popup-btn" type="submit"
-              data-admc-manage="settings_shop_footer"
-              data-admc-id="<?= $ftrId ?>">
-        <?= $popupBtn ?>
-      </button>
-    </form>
-
-    <button class="newsletter-popup-dismiss" id="nlPopupDismiss"
-            style="margin-top:14px;display:block;width:100%;text-align:center;background:none;border:none;color:#b5b5b5;font-size:13px;cursor:pointer;"
-            data-admc-manage="settings_shop_footer"
-            data-admc-id="<?= $ftrId ?>">
-      <?= $popupDismiss ?>
-    </button>
-  </div>
 
   <!-- jQuery (for Webflow CSS class compatibility) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
