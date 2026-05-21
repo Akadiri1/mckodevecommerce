@@ -332,9 +332,9 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
     }
   </script>
 
-  <?php //if (isset($_SESSION['admin_id'])): ?>
+  <?php if (isset($_SESSION['admin_id'])): ?>
     <script src="https://admc.dev/admc.min.js" charset="utf-8"></script>
-  <?php //endif; ?>
+  <?php endif; ?>
 
 </div><!-- /page-wrapper -->
 </body>
