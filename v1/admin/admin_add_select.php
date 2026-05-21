@@ -4,6 +4,7 @@ $level_check = ['MASTER',3,2,1];
 //session_start();
 
 $where['table_name'] = strtolower("selection_".$uri[2]);
+$where['table_schema'] = DBNAME;
 $column_name['column_name'] = "column_name";
 $columns = selectTableContent($conn,'information_schema.columns',$column_name,$where);
 // var_dump($where);
@@ -134,10 +135,10 @@ if(array_key_exists('submit', $_POST)){
 
                           <?php $select = selectContent($conn,'selection_'.$remains,[]); ?>
 
-                        <select class="form-control" name="">
+                        <select class="form-control" name="<?php echo $value['column_name']; ?>">
                           <option value="">-Select <?php echo ucwords(str_replace("_"," ",$remains));  ?>-</option>
                           <?php foreach ($select as $key => $value2){ ?>
-                            <option value="<?php echo $value2['id']; ?>"><?php echo $value2['input_name']; ?></option>
+                            <option value="<?php echo $value2['id']; ?>"><?php echo isset($value2['input_name']) ? $value2['input_name'] : ($value2['input_title'] ?? 'Option'); ?></option>
 
                           <?php } ?>
 

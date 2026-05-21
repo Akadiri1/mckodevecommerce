@@ -3755,6 +3755,10 @@ ul, ol {
 }
 
 .submit-button-02 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: var(--_space---space--space-xs-plus) var(--_space---space--space-l);
   border-radius: var(--_space---space--space-xs);
   background-color: var(--light-yellow);

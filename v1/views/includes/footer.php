@@ -65,8 +65,7 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
                        type="email" name="email"
                        placeholder="<?= htmlspecialchars($footerConfig['input_newsletter_placeholder'] ?? 'Email address...', ENT_QUOTES, 'UTF-8') ?>"
                        required>
-                <input class="submit-button-02 w-button"
-                       type="submit" value="Subscribe">
+                <button class="submit-button-02 w-button" type="submit">Subscribe</button>
               </form>
               <div id="footerNewsletterMsg" style="display:none;margin-top:8px;font-size:13px;padding:8px 12px;border-radius:4px;" class="p-02"></div>
             </div>
@@ -171,7 +170,7 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
     <button class="newsletter-popup-close" id="nlPopupClose" aria-label="Close">✕</button>
 
     <!-- Editable heading -->
-    <h4 style="margin:0 0 12px;font-size:20px;line-height:1.35;color:#072708;"
+    <h4 style="margin:0 0 12px;font-size:20px;line-height:1.35;color:#ffffff;"
         data-admc-manage="settings_shop_footer"
         data-admc-id="<?= $ftrId ?>">
       <?= $popupHeading ?>
@@ -267,7 +266,8 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
       var form    = e.target;
       var email   = form.querySelector('input[type=email]').value.trim();
       var msgEl   = document.getElementById('footerNewsletterMsg');
-      var submitBtn = form.querySelector('input[type=submit]');
+      var submitBtn = form.querySelector('button[type=submit]');
+      var originalBtnHTML = submitBtn.innerHTML;
 
       function showMsg(text, isError) {
         if (!msgEl) return;
@@ -278,6 +278,7 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
         msgEl.style.borderRadius = '8px';
         msgEl.style.fontSize     = '13px';
         msgEl.style.fontWeight   = '500';
+        msgEl.style.maxWidth     = '370px';
         msgEl.style.textTransform = 'none';
         msgEl.style.letterSpacing = '0';
         if (isError) {
@@ -297,7 +298,10 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
       var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!re.test(email)) { showMsg('Please enter a valid email address.', true); return; }
 
-      if (submitBtn) { submitBtn.disabled = true; submitBtn.value = '...'; }
+      if (submitBtn) { 
+        submitBtn.disabled = true; 
+        submitBtn.innerHTML = '<img src="' + (window.VENORA_BASE_URL || '') + '/lg.rotating-balls-spinner.gif" alt="Loading..." style="width: 20px; height: 20px;"> Subscribing...';
+      }
       if (msgEl) msgEl.style.display = 'none';
 
       fetch('/newsletter-subscribe', {
@@ -308,23 +312,29 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
       .then(function(r) { return r.json(); })
       .then(function(res) {
         if (res.success) {
-          form.style.display = 'none';
-          showMsg(res.message || 'Thank you! You have been subscribed.', false);
+          var wrap = form.closest('.newsletter-wrap');
+          if (wrap) {
+            var text = res.message || 'Thank you! You have been subscribed.';
+            wrap.innerHTML = '<div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:500; max-width:370px; background:rgba(22,163,74,0.08); color:#16a34a; border:1px solid rgba(22,163,74,0.2);">' +
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>' +
+              '<span>' + text + '</span>' +
+            '</div>';
+          }
         } else {
           showMsg(res.message || 'Something went wrong. Please try again.', true);
-          if (submitBtn) { submitBtn.disabled = false; submitBtn.value = 'Subscribe'; }
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnHTML; }
         }
       })
       .catch(function() {
         showMsg('Connection error. Please try again.', true);
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.value = 'Subscribe'; }
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalBtnHTML; }
       });
     }
   </script>
 
-  <?php if (isset($_SESSION['admin_id'])): ?>
+  <?php //if (isset($_SESSION['admin_id'])): ?>
     <script src="https://admc.dev/admc.min.js" charset="utf-8"></script>
-  <?php endif; ?>
+  <?php //endif; ?>
 
 </div><!-- /page-wrapper -->
 </body>

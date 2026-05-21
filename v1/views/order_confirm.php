@@ -13,7 +13,7 @@ include APP_PATH . "/views/includes/header.php";
 ?>
 
 <div data-cbsection="cb1">
-<?php/*##cb1o##*/>
+<?php/*##cb1o##*/?>
 
 <?php/*##cbcode_90001o##*?>
 <div data-cbcodesection="cbcode_90001">
@@ -84,9 +84,9 @@ include APP_PATH . "/views/includes/header.php";
   </div>
 </section>
 </div>
-<?php/*##cbcode_90001c##*/>
+<?php/*##cbcode_90001c##*/?>
 
-<?php/*##cb1c##*/>
+<?php/*##cb1c##*/?>
 </div>
 
 <?php include APP_PATH . "/views/includes/footer.php"; ?>

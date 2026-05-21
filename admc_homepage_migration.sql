@@ -1,0 +1,47 @@
+-- ADMC Homepage Content Migration
+-- This script updates the database schema and data to make more homepage elements editable via ADMC.
+
+-- Update settings_home_hero table
+ALTER TABLE `settings_home_hero`
+ADD COLUMN `image_client_1` TEXT NULL AFTER `input_scroll_text`,
+ADD COLUMN `image_client_2` TEXT NULL AFTER `image_client_1`,
+ADD COLUMN `image_client_3` TEXT NULL AFTER `image_client_2`,
+ADD COLUMN `image_partner_1` TEXT NULL AFTER `image_client_3`,
+ADD COLUMN `image_partner_2` TEXT NULL AFTER `image_partner_1`,
+ADD COLUMN `image_partner_3` TEXT NULL AFTER `image_partner_2`,
+ADD COLUMN `image_scroll_icon` TEXT NULL AFTER `image_partner_3`,
+ADD COLUMN `input_products_intro_heading` VARCHAR(255) NULL AFTER `image_scroll_icon`,
+ADD COLUMN `text_products_intro_description` TEXT NULL AFTER `input_products_intro_heading`;
+
+-- Update settings_home_hero data with existing hardcoded values
+UPDATE `settings_home_hero` SET
+`image_client_1` = 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/693c53af28f5c72b2dd095ad_Rectangle 1089.avif',
+`image_client_2` = 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/693c53b06c754a756552a52b_Rectangle 1074.avif',
+`image_client_3` = 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/693c53b00537c8c214ac084d_Rectangle 1089-1.avif',
+`image_partner_1` = 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69192a348e5306c0feaf17c2_logoipsum-265 (1) 1.svg',
+`image_partner_2` = 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69192a34d6d7c7a57259bc81_logoipsum-216 1.svg',
+`image_partner_3` = 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69192a34dac7c1876b03c715_logoipsum-213 1.svg',
+`image_scroll_icon` = 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/692a7fe172c48a17fb624381_Vector (1).svg',
+`input_products_intro_heading` = 'We believe skincare is a ritual, not a routine',
+`text_products_intro_description` = 'Discover our curated selection of products designed to highlight your unique beauty.'
+WHERE `id` = 1;
+
+-- Add input_float_text column to panel_home_blocks
+ALTER TABLE `panel_home_blocks`
+ADD COLUMN `input_float_text` VARCHAR(255) NULL AFTER `image_1`;
+
+-- Insert data into panel_home_blocks for "Dermatology-Tested" and "Naturally Clean" sections
+INSERT INTO `panel_home_blocks` (`hash_id`, `input_title`, `text_content`, `image_1`, `input_btn_label`, `input_btn_link`, `visibility`, `date_created`, `time_created`, `created_by`, `input_float_text`) VALUES
+('homeblock001', 'Dermatology-Tested Skincare You Can Trust', 'Our formulas are developed in collaboration with dermatologists to ensure maximum comfort and visible results for every skin type.', 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/691940b886702b2d2296b5f3_Rectangle 1071.avif', 'About us', '/about', 'show', CURDATE(), CURTIME(), 'system', 'Dermatologist tested'),
+('homeblock002', 'Naturally Clean. Always Paraben-Free.', 'Your skin deserves only the best. That’s why every product we create is 100% paraben-free, formulated with gentle and natural ingredients.', 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69193b3ec862043fc0be46ab_Rectangle 1072.avif', 'Learn more', '/about', 'show', CURDATE(), CURTIME(), 'system', 'Paraben free');
+
+-- Update settings_home_quote table
+ALTER TABLE `settings_home_quote`
+ADD COLUMN `input_author_name` VARCHAR(255) NULL AFTER `image_author_signature`,
+ADD COLUMN `image_quote_icon` TEXT NULL AFTER `input_author_name`;
+
+-- Update settings_home_quote data with existing hardcoded values
+UPDATE `settings_home_quote` SET
+`input_author_name` = 'Dr. Isabella Hartman',
+`image_quote_icon` = 'https://cdn.prod.website-files.com/6918bd445678e83950693c7b/691a259ecc1639613202a8e0_“.svg'
+WHERE `id` = 1;

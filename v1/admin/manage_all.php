@@ -5,6 +5,7 @@ ob_start();
 // SELECT table_name FROM information_schema.tables;
 // SELECT table_name FROM information_schema.tables WHERE ;
 $where['table_name'] = strtolower("panel_".$uri[2]);
+$where['table_schema'] = DBNAME;
 $column_name['column_name'] = "column_name";
 $columns = selectTableContent($conn,'information_schema.columns',$column_name,$where);
 // include 'includes/header.php';

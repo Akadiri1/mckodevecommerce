@@ -102,7 +102,7 @@ switch ($s1) {
     case "fetch-state-backend":
         include APP_PATH . "/views/fetch_state_backend.php"; $is404 = false; die;
     case "contact-submit":
-        include APP_PATH . "/views/contact_backend.php"; $is404 = false; die;
+        include APP_PATH . "/views/contact_mail_backend.php"; $is404 = false; die;
     case "newsletter-subscribe":
         include APP_PATH . "/views/newsletter_backend.php"; $is404 = false; die;
     case "search":
@@ -290,6 +290,12 @@ switch ($s1) {
         include APP_PATH . "/views/customer_register_backend.php"; $is404 = false; die;
     case "customer-update-profile":
         include APP_PATH . "/views/customer_update_backend.php"; $is404 = false; die;
+    case "customer-change-password":
+        include APP_PATH . "/views/customer_change_password_backend.php"; $is404 = false; die;
+    case "customer-address-add":
+        include APP_PATH . "/views/customer_address_add_backend.php"; $is404 = false; die;
+    case "customer-address-delete":
+        include APP_PATH . "/views/customer_address_delete_backend.php"; $is404 = false; die;
     case "customer-forgot-submit":
         include APP_PATH . "/views/customer_forgot_backend.php"; $is404 = false; die;
     case "customer-reset-submit":

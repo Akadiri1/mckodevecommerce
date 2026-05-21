@@ -2,10 +2,12 @@
 $page_title = "Your Cart";
 $bodyClass  = "page-light-navbar";
 
-$userId = $_SESSION['user_id'] ?? null;
+// Standardized User ID resolver from cart_functions.php
+$cartUserId = getCartUserId();
+
 try {
     $cartData = getCartItems();
-    $cartItems = $cartData['cart_items'] ?? [];
+    $cartItems = $cartData['items'] ?? [];
     $subtotal = $usdEnabled ? $cartData['total_usd'] : $cartData['total_ngn'];
 } catch (Exception $e) {
     $cartItems = [];
@@ -21,10 +23,8 @@ include APP_PATH . "/views/includes/header.php";
 ?>
 
 <div data-cbsection="cb1">
-<?php/*##cb1o##*/>
+<?php/*##cb1o##*/?>
 
-<?php/*##cbcode_60001o##*?>
-<div data-cbcodesection="cbcode_60001">
 <div style="height:100px;background:#f6f6f6;"></div>
 <div style="padding:0 0 100px;background:#f6f6f6;min-height:60vh;">
   <div class="container">
@@ -53,9 +53,9 @@ include APP_PATH . "/views/includes/header.php";
           </div>
           <?php foreach ($cartItems as $item):
             $rowId     = $item["cart_id"];
-            $lineTotal = $usdEnabled ? $item["subtotal_usd"] : $item["subtotal_ngn"];
+            $lineTotal = $usdEnabled ? ($item["total_usd"] ?? 0) : ($item["total_ngn"] ?? 0);
             $prodLink  = $baseUrl . '/products/' . htmlspecialchars($item["product_id"], ENT_QUOTES, "UTF-8") . '/' . cleans($item["product_name"]);
-            $price     = $usdEnabled ? $item["price_usd"] : $item["price_ngn"];
+            $price     = $usdEnabled ? ($item["price_usd"] ?? 0) : ($item["price_ngn"] ?? 0);
           ?>
             <div class="cart-item-row" id="cart-row-<?= $rowId ?>">
               <div style="display:flex;gap:16px;align-items:flex-start;">
@@ -71,7 +71,7 @@ include APP_PATH . "/views/includes/header.php";
                   <?php if (!empty($item["variant_options"])): ?>
                     <div style="font-size:12px;color:#5c5f6a;margin-bottom:4px;"><?= htmlspecialchars($item["variant_options"], ENT_QUOTES, "UTF-8") ?></div>
                   <?php endif; ?>
-                  <div style="font-size:14px;color:#5c5f6a;"><?= $sym ?><?= number_format((float)$price, 2) ?></div>
+                  <div style="font-size:14px;color:#5c5f6a;"><?= formatPrice($price, $sym) ?></div>
                   <button onclick="doCartRemove('<?= $rowId ?>')"
                           style="background:none;border:none;font-size:12px;color:#b5b5b5;cursor:pointer;text-decoration:underline;padding:0;margin-top:6px;">
                     Remove
@@ -85,7 +85,7 @@ include APP_PATH . "/views/includes/header.php";
                 <button class="qty-btn" onclick="doCartUpdate('<?= $rowId ?>', parseInt(document.getElementById('qty-<?= $rowId ?>').value)+1)">+</button>
               </div>
               <div style="text-align:right;font-size:15px;font-weight:600;color:#072708;">
-                <?= $sym ?><?= number_format($lineTotal, 2) ?>
+                <?= formatPrice($lineTotal, $sym) ?>
               </div>
             </div>
           <?php endforeach; ?>
@@ -96,26 +96,26 @@ include APP_PATH . "/views/includes/header.php";
           <div class="order-summary-title">Order Summary</div>
           <div class="order-row">
             <span class="order-row-label">Subtotal</span>
-            <span class="order-row-value"><?= $sym ?><?= number_format($subtotal, 2) ?></span>
+            <span class="order-row-value"><?= formatPrice($subtotal, $sym) ?></span>
           </div>
           <div class="order-row">
             <span class="order-row-label">Shipping</span>
-            <span class="order-row-value"><?= $shipping === 0 ? "Free" : $sym . number_format($shipping, 2) ?></span>
+            <span class="order-row-value"><?= $shipping === 0 ? "Free" : formatPrice($shipping, $sym) ?></span>
           </div>
           <?php if ($shop_tax_rate > 0): ?>
             <div class="order-row">
               <span class="order-row-label">Tax (<?= $shop_tax_rate ?>%)</span>
-              <span class="order-row-value"><?= $sym ?><?= number_format($tax, 2) ?></span>
+              <span class="order-row-value"><?= formatPrice($tax, $sym) ?></span>
             </div>
           <?php endif; ?>
           <?php if ($shop_free_ship > 0 && $subtotal < $shop_free_ship): ?>
             <p style="font-size:12px;color:#5c5f6a;margin:12px 0;padding:10px 12px;background:#f6f6f6;border-radius:4px;">
-              Add <?= $sym ?><?= number_format($shop_free_ship - $subtotal, 2) ?> more for free shipping!
+              Add <?= formatPrice($shop_free_ship - $subtotal, $sym) ?> more for free shipping!
             </p>
           <?php endif; ?>
           <div class="order-total-row">
             <span class="order-total-label">Total</span>
-            <span class="order-total-value"><?= $sym ?><?= number_format($total, 2) ?></span>
+            <span class="order-total-value"><?= formatPrice($total, $sym) ?></span>
           </div>
           <a href="<?= $baseUrl ?>/checkout" class="place-order-btn" style="text-decoration:none;display:block;text-align:center;margin-top:0;">
             Proceed to Checkout
@@ -130,13 +130,9 @@ include APP_PATH . "/views/includes/header.php";
   </div>
 </div>
 </div>
-<?php/*##cbcode_60001c##*?>
-
-<?php/*##cb1c##*/>
-</div>
 
 <script>
-var _cartBase = (typeof window.MCK_BASE_URL !== 'undefined' ? window.MCK_BASE_URL : '') || '';
+var _cartBase = (typeof window.VENORA_BASE_URL !== 'undefined' ? window.VENORA_BASE_URL : '') || '';
 function doCartUpdate(cartId, qty) {
   fetch(_cartBase + '/cart-update', {
     method: 'POST',

@@ -38,6 +38,10 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   <link rel="stylesheet" href="<?= $baseUrl ?>/assets/css/venora.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>/assets/css/custom.css">
 
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
   <!-- Pass PHP vars to JS -->
   <script>
     window.VENORA_BASE_URL = "<?= rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/') ?>";
@@ -53,14 +57,17 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
       <div class="navbar-container">
         <div class="navbar-wrapper">
 
-          <!-- Logo — from settings_shop_config -->
+          <!-- Logo — from settings_website_info -->
           <div class="nav-left">
             <a href="<?= $baseUrl ?>/" class="navbar-brand w-nav-brand" style="display:flex;align-items:center;text-decoration:none;">
-              <img alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, "UTF-8") ?>"
-                   class="nav-logo-icon"
-                   loading="lazy"
-                   src="<?= htmlspecialchars($logo_directory, ENT_QUOTES, 'UTF-8') ?>"
-                   style="max-height:40px;max-width:160px;width:auto;height:auto;object-fit:contain;display:block;">
+              <div data-admc-image="settings_website_info"
+                   data-admc-id="<?= $websiteInfoRow[0]['id'] ?? 1 ?>">
+                <img alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, "UTF-8") ?>"
+                     class="nav-logo-icon"
+                     loading="lazy"
+                     src="<?= htmlspecialchars($logo_directory, ENT_QUOTES, 'UTF-8') ?>"
+                     style="max-height:40px;max-width:160px;width:auto;height:auto;object-fit:contain;display:block;">
+              </div>
             </a>
           </div>
 
@@ -268,3 +275,9 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Page content starts below -->
+   <style>
+  a{
+    color:inherit;
+    text-decoration: none;
+  }
+</style>

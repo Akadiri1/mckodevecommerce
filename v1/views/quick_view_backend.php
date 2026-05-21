@@ -7,7 +7,6 @@ try {
         echo json_encode(['error' => 'ID required']); die;
     }
 
-    // $conn, $usdEnabled are already available from index.php
     $controller  = new ProductController($conn, $usdEnabled);
     $details     = $controller->fetchProductDetailsByHashId($productId);
 
@@ -16,21 +15,7 @@ try {
         echo json_encode(['error' => 'Product not found']); die;
     }
 
-    // Transform variants for the frontend renderQuickView
-    $formattedVariants = [];
-    if (!empty($details['variants'])) {
-        foreach ($details['variants'] as $v) {
-            $optName = !empty($v['options']) ? $v['options'][0]['option_name'] : 'Options';
-            $formattedVariants[] = [
-                'id'          => $v['id'],
-                'input_name'  => $optName,
-                'input_value' => !empty($v['options']) ? $v['options'][0]['value_name'] : 'Default',
-                'input_price' => $usdEnabled ? $v['price_usd'] : $v['price_ngn'],
-                'stock'       => $v['inventory']
-            ];
-        }
-    }
-
+    // details['variants'] already contains 'options' array with all categories/values
     $response = [
         'hash_id'             => $details['hash_id'],
         'input_title'         => $details['name'],
@@ -44,14 +29,14 @@ try {
         'text_description'    => $details['description'],
         'image_1'             => $details['primary_image'],
         'images'              => $details['images'],
-        'variants'            => $formattedVariants,
+        'variants'            => $details['variants'] ?? [],
         'in_stock'            => $details['base_inventory'] > 0
     ];
 
-    ob_clean();
+    if (ob_get_level()) ob_clean();
     echo json_encode($response);
 } catch (Exception $e) {
-    ob_clean();
+    if (ob_get_level()) ob_clean();
     http_response_code(500);
     echo json_encode(['error' => 'Server Error: ' . $e->getMessage()]);
 }

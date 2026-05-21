@@ -22,11 +22,12 @@ $aboutFaqs   = selectContentAsc($conn, "panel_about_faqs", ["visibility" => "sho
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<!-- [cbcode_20001o] -->
+<div data-cbsection="cb1">
+<?php/*##cb1o##*/?>
 
 <!-- ABOUT HERO -->
-<div data-cbsection="cb1">
-  <!-- [cbcode_20001Heroo] -->
+<?php/*##cbcode_20001Heroo##*/?>
+<div data-cbcodesection="cbcode_20001Hero">
   <section class="about-hero" data-w-id="29aa9955-28b7-3f33-84f0-dfd0b6c1b7e0">
     <div class="container home">
       <div class="about-hero-inner">
@@ -41,12 +42,13 @@ include APP_PATH . "/views/includes/header.php";
       <img alt="About Venora" class="all-img" src="<?= htmlspecialchars($aboutHero['image_1'] ?? "https://cdn.prod.website-files.com/6918bd445678e83950693c7b/691a3dd6ef0cfc88213b0455_Serene Nature Portrait 1.avif", ENT_QUOTES, 'UTF-8') ?>">
     </div>
   </section>
-  <!-- [cbcode_20001Heroc] -->
 </div>
+<?php/*##cbcode_20001Heroc##*/?>
 
 <!-- JOURNEY & MISSION -->
 <div data-cbsection="cb2">
-  <!-- [cbcode_20001Storyo] -->
+<?php/*##cbcode_20001Storyo##*/?>
+<div data-cbcodesection="cbcode_20001Story">
   <section class="content section-120-120">
     <div class="container">
       <div class="content-outer">
@@ -79,12 +81,13 @@ include APP_PATH . "/views/includes/header.php";
       </div>
     </div>
   </section>
-  <!-- [cbcode_20001Storyc] -->
 </div>
+<?php/*##cbcode_20001Storyc##*/?>
 
 <!-- VALUES TABS -->
 <div data-cbsection="cb3">
-  <!-- [cbcode_20001Valueso] -->
+<?php/*##cbcode_20001Valueso##*/?>
+<div data-cbcodesection="cbcode_20001Values">
   <section class="content section-0-120">
     <div class="container">
       <div class="content-inner-02">
@@ -95,7 +98,7 @@ include APP_PATH . "/views/includes/header.php";
           </div>
         </div>
         
-        <div class="features-tabs">
+        <div class="features-tabs" data-admc-tb="panel_about_values">
           <div class="features-tabs-menu">
             <?php foreach ($aboutValues as $vi => $val): ?>
             <div class="features-tabs-link <?= $vi === 0 ? 'active' : '' ?>" onclick="showTab(<?= $vi + 1 ?>)" data-admc-manage="panel_about_values" data-admc-id="<?= $val['id'] ?>">
@@ -120,19 +123,20 @@ include APP_PATH . "/views/includes/header.php";
       </div>
     </div>
   </section>
-  <!-- [cbcode_20001Valuesc] -->
 </div>
+<?php/*##cbcode_20001Valuesc##*/?>
 
 <!-- FAQ SECTION -->
 <div data-cbsection="cb5">
-  <!-- [cbcode_20001FAQo] -->
+<?php/*##cbcode_20001FAQo##*/?>
+<div data-cbcodesection="cbcode_20001FAQ">
   <section class="faq section-0-120">
     <div class="container">
       <div class="faq-inner">
         <div class="faq-left">
           <h2 class="heading-02">Frequently Asked Questions</h2>
         </div>
-        <div class="faq-list">
+        <div class="faq-list" data-admc-tb="panel_about_faqs">
           <?php foreach ($aboutFaqs as $faq): ?>
           <div class="faq-item" onclick="toggleFAQ(this)" data-admc-manage="panel_about_faqs" data-admc-id="<?= $faq['id'] ?>">
             <div class="faq-header">
@@ -148,12 +152,13 @@ include APP_PATH . "/views/includes/header.php";
       </div>
     </div>
   </section>
-  <!-- [cbcode_20001FAQc] -->
 </div>
+<?php/*##cbcode_20001FAQc##*/?>
 
-<!-- INSTAGRAM GALLERY -->
-<div data-cbsection="cb6">
-  <!-- [cbcode_20001Galleryo] -->
+<!-- INSTAGRAM GALLERY - Commented out as requested -->
+<!-- <div data-cbsection="cb6">
+<?php/*##cbcode_20001Galleryo##*/?>
+<div data-cbcodesection="cbcode_20001Gallery">
   <?php
   $galleryPhotos = safeAboutFetch($conn, "panel_gallery_photos", ["visibility" => "show"]);
   if (empty($galleryPhotos)) {
@@ -183,10 +188,12 @@ include APP_PATH . "/views/includes/header.php";
       <?php endfor; ?>
     </div>
   </section>
-  <!-- [cbcode_20001Galleryc] -->
 </div>
+<?php/*##cbcode_20001Galleryc##*/?>
+</div> -->
 
-<!-- [cbcode_20001c] -->
+<?php/*##cb1c##*/?>
+</div>
 
 <script>
 function toggleFAQ(el) {

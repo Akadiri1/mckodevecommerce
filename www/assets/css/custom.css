@@ -189,9 +189,9 @@
 }
 .modal-variant-btn:hover,
 .modal-variant-btn.active {
-  border-color: var(--dark-green-colour, #072708);
-  background: var(--dark-green-colour, #072708);
-  color: var(--v-white);
+  border-color: var(--dark-green-colour, #072708) !important;
+  background: var(--dark-green-colour, #072708) !important;
+  color: #fff !important;
 }
 .modal-variant-btn.out-of-stock {
   opacity: 0.4; cursor: not-allowed;
@@ -854,6 +854,10 @@
 }
 .newsletter-popup-input::placeholder { color: rgba(255,255,255,0.5); }
 .newsletter-popup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 12px 20px;
   background: var(--v-accent); color: var(--v-green);
   border: none; border-radius: 0 var(--v-radius) var(--v-radius) 0;
@@ -1048,9 +1052,10 @@
    ──────────────────────────────────────────────────────────── */
 [data-admc-manage] { position: relative; }
 
-/* ────────────────────────────────────────────────────────────
-   BASE RESETS
-   ──────────────────────────────────────────────────────────── */
+/* Force product title link color to theme's primary text color */
+.product-card-wrap .product-card .product-card-bottom .product-name-price .heading-06 a.card-title-link {
+  color: var(--text-primary) !important;
+}
 html { margin: 0; padding: 0; }
 html, body { overflow-x: hidden; }
 
@@ -1265,7 +1270,7 @@ div.home-hero,
 .nav-btn .btn-02-link .cta-text { font-size: 15px !important; font-weight: 600 !important; }
 
 /* Nav logo icon white */
-.nav-logo-icon { filter: brightness(0) invert(1); }
+.nav-logo-icon { }
 
 /* ────────────────────────────────────────────────────────────
    HERO TOP GRADIENT — removed; navbar is fully transparent
@@ -1906,7 +1911,7 @@ body.page-light-navbar .navbar-link.w--current .p-01 {
 }
 /* Logo icon: white SVG → dark on light background */
 body.page-light-navbar .nav-logo-icon {
-  filter: brightness(0) saturate(100%) invert(14%) sepia(50%) saturate(700%) hue-rotate(95deg) brightness(50%) !important;
+  /* filter removed to allow original logo colors */
 }
 body.page-light-navbar [data-open-search] svg,
 body.page-light-navbar [data-open-search] svg path,
@@ -2200,6 +2205,10 @@ body.page-light-navbar section.gallery {
 .vcf-input::placeholder { color: #aaa; }
 .vcf-textarea { resize: vertical; min-height: 140px; }
 .vcf-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 14px 32px;
   background: var(--dark-green-colour, #072708);
   color: #ffffff;

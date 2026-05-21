@@ -12,9 +12,8 @@ $catsLow  = array_map('strtolower', $cats);
 $sym      = htmlspecialchars($shop_symbol ?? '$', ENT_QUOTES, 'UTF-8');
 $baseU    = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 $addToCartIcon = "https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69767e8def202704be8ff087_Vector (1).svg";
-
 try {
-    $allProducts = selectContentAsc($conn, "panel_product", ["visibility" => "show"], "input_order", 200);
+    $allProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "input_order", 200);
 } catch (Exception $e) {
     echo json_encode(['count' => 0, 'products' => [], 'has_more' => false, 'error' => 'db']); die;
 }
@@ -40,6 +39,9 @@ foreach ($allProducts as &$_p) {
     $_p['input_price']    = $_fPriceIdx[$_p['hash_id']] ?? 0;
     $_p['_category_name'] = $_fCatById[(string)($_p['select_product_category'] ?? '')] ?? '';
     $_p['has_variants']   = isset($_fHasVariants[$_p['hash_id']]) ? 'true' : 'false';
+    $_p['image_2']        = fixImagePath($_p['image_2'] ?? '');
+    // In demo16 schema, image_2 is often used as primary. Fallback to image_1 if needed.
+    $_p['primary_image']  = $_p['image_2'] ?: fixImagePath($_p['image_1'] ?? '');
 }
 unset($_p);
 
@@ -56,7 +58,7 @@ $pageProducts = array_slice($allProducts, $offset, $perPage);
 $hasMore    = ($offset + $perPage) < $totalCount;
 
 $output = array_map(function($p) use ($sym, $baseU, $addToCartIcon) {
-    $imgSrc = htmlspecialchars($p['image_2'] ?? '', ENT_QUOTES, 'UTF-8');
+    $imgSrc = htmlspecialchars($p['primary_image'] ?? '', ENT_QUOTES, 'UTF-8');
     $url    = $baseU . '/products/' . ($p['hash_id'] ?? '') . '/' . cleans($p['input_product_name'] ?? '');
     $title  = htmlspecialchars($p['input_product_name'] ?? '', ENT_QUOTES, 'UTF-8');
     $cat    = htmlspecialchars($p['_category_name'] ?? '', ENT_QUOTES, 'UTF-8');
@@ -66,16 +68,17 @@ $output = array_map(function($p) use ($sym, $baseU, $addToCartIcon) {
     return [
         'hash_id' => $hid,
         'html'    => '
-<div class="product-card-wrap">
-  <a class="product-link w-inline-block" href="' . $url . '">
+<div class="product-card-wrap" data-admc-tb="panel_product">
     <div class="product-card">
       <div class="product-card-img">
-        <img alt="' . $title . '" class="all-img" loading="lazy" src="' . $imgSrc . '">
-        <div class="product-float">
-          <img alt="" class="all-img" src="' . $imgSrc . '">
-        </div>
-
-        <!-- Quick View commented out — Add to Cart already opens modal -->
+        <a class="product-link w-inline-block" href="' . $url . '">
+          <div data-admc-image="panel_product" data-admc-id="' . ($p['id'] ?? 0) . '" data-admc-tb="panel_product">
+            <img alt="' . $title . '" class="all-img" loading="lazy" src="' . $imgSrc . '">
+          </div>
+          <div class="product-float">
+            <img alt="" class="all-img" src="' . $imgSrc . '">
+          </div>
+        </a>
 
         <!-- Wishlist -->
         <button class="wishlist-btn-card" data-id="' . $hid . '"
@@ -94,12 +97,15 @@ $output = array_map(function($p) use ($sym, $baseU, $addToCartIcon) {
       <div class="product-card-bottom">
         <div class="color-gray"><div class="p-02 caps">' . $cat . '</div></div>
         <div class="product-name-price">
-          <div class="heading-06">' . $title . '</div>
-          <div class="heading-07">' . $price . '</div>
+          <h3 class="heading-06" data-admc-manage="panel_product" data-admc-id="' . ($p['id'] ?? 0) . '" data-admc-tb="panel_product">
+            <a href="' . $url . '" class="card-title-link">' . $title . '</a>
+          </h3>
+          <div class="heading-07" data-admc-manage="panel_product" data-admc-id="' . ($p['id'] ?? 0) . '" data-admc-tb="panel_product">
+            ' . $price . '
+          </div>
         </div>
       </div>
     </div>
-  </a>
 </div>',
     ];
 }, $pageProducts);

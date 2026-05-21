@@ -4,6 +4,7 @@ ob_start();
 //session_start();
 
 $where['table_name'] = strtolower("panel_".$uri[2]);
+$where['table_schema'] = DBNAME;
 $column_name['column_name'] = "column_name";
 $columns = selectTableContent($conn,'information_schema.columns',$column_name,$where);
 $columnsearch = selectTableContent2($conn,'information_schema.columns',$column_name,$where);
@@ -120,10 +121,10 @@ if(array_key_exists('submit', $_POST)){
 
                           <?php $select = selectContent($conn,'selection_'.$remains,[]); ?>
 
-                        <select class="form-control" name="" required>
+                        <select class="form-control" name="<?php echo $value['column_name']; ?>" required>
                           <option value="">-Select <?php echo ucwords(str_replace("_"," ",$remains));  ?>-</option>
                           <?php foreach ($select as $key => $value2){ ?>
-                            <option value="<?php echo $value2['id']; ?>"><?php echo $value2['input_name']; ?></option>
+                            <option value="<?php echo $value2['id']; ?>"><?php echo isset($value2['input_name']) ? $value2['input_name'] : ($value2['input_title'] ?? 'Option'); ?></option>
 
                           <?php } ?>
 

@@ -318,39 +318,31 @@ function previewBody($string, $count)
 function insertSafe($conn, $table, $parameters)
 {
   try {
-    // array_pop($parameters);
-    // var_dump($parameters);
     $sql = sprintf(
       'INSERT INTO %s (%s) VALUES(%s)',
       $table,
       implode(', ', array_keys($parameters)),
       ':' . implode(',:', array_keys($parameters))
     );
-    // //die(var_dump($sql));
     $stmt =  $conn->prepare($sql);
     $stmt->execute($parameters);
   } catch (PDOException $e) {
-    die($e);
-    die("Error: Try again After Some Times");
+    throw $e;
   }
 }
 function insertContent($conn, $table, $parameters)
 {
   try {
-
-    // var_dump($parameters);
     $sql = sprintf(
       'INSERT INTO %s (%s) VALUES(%s)',
       $table,
       implode(', ', array_keys($parameters)),
       ':' . implode(',:', array_keys($parameters))
     );
-    // //die(var_dump($sql));
     $stmt =  $conn->prepare($sql);
     $stmt->execute($parameters);
   } catch (PDOException $e) {
-    // die($e);
-    die("Error: Try again After Some Times");
+    throw $e;
   }
 }
 
@@ -561,10 +553,6 @@ function selectContentDesc($dbconn, $table, $columnWhere, $order, $limit)
 {
   $vall = formatWhere($columnWhere);
   try {
-
-    // $what = getVal($parameters);
-
-    // var_dump($parameters);
     $sql = sprintf(
       'SELECT * FROM %s',
       $table
@@ -575,12 +563,9 @@ function selectContentDesc($dbconn, $table, $columnWhere, $order, $limit)
     }
     $sql .= " ORDER BY " . $order . " DESC LIMIT " . $limit;
 
-    //die(var_dump($sql));
     $stmt =  $dbconn->prepare($sql);
-    $newt = $columnWhere;
-    // die(var_dump($newt));
     if (count($columnWhere) > 0) {
-      $stmt->execute($newt);
+      $stmt->execute($columnWhere);
     } else {
       $stmt->execute();
     }
@@ -592,18 +577,13 @@ function selectContentDesc($dbconn, $table, $columnWhere, $order, $limit)
 
     return $result;
   } catch (PDOException $e) {
-    die($e);
-    die($e);
+    throw $e;
   }
 }
 function selectContentAsc($dbconn, $table, $columnWhere, $order, $limit)
 {
   $vall = formatWhere($columnWhere);
   try {
-
-    // $what = getVal($parameters);
-
-    // var_dump($parameters);
     $sql = sprintf(
       'SELECT * FROM %s',
       $table
@@ -614,17 +594,13 @@ function selectContentAsc($dbconn, $table, $columnWhere, $order, $limit)
     }
     $sql .= " ORDER BY " . $order . " ASC LIMIT " . $limit;
 
-    //die(var_dump($sql));
     $stmt =  $dbconn->prepare($sql);
-    $newt = $columnWhere;
-    // die(var_dump($newt));
     if (count($columnWhere) > 0) {
-      $stmt->execute($newt);
+      $stmt->execute($columnWhere);
     } else {
       $stmt->execute();
     }
 
-    
     $result = [];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $result[] = $row;
@@ -632,8 +608,7 @@ function selectContentAsc($dbconn, $table, $columnWhere, $order, $limit)
 
     return $result;
   } catch (PDOException $e) {
-    // die($e);
-    die($e);
+    throw $e;
   }
 }
 function selectTableContent($dbconn, $table, $column, $columnWhere)
@@ -718,32 +693,21 @@ function formatPutWhere($param)
 function updateContent($dbconn, $table, $parameters, $columnWhere)
 {
   try {
-
-
-
-    // array_pop($parameters);
     $what = formatParam($parameters);
     $columnWhere2 = formatWhereParam($columnWhere);
     $vall = formatPutWhere($columnWhere);
 
-    // var_dump($parameters);
     $sql = sprintf(
       'UPDATE %s SET %s',
       $table,
       $what
     );
     $sql .= " WHERE " . $vall;
-    // var_dump($sql);
     $stmt =  $dbconn->prepare($sql);
     $newt = $parameters + $columnWhere2;
-    // die(var_dump($newt));
     $stmt->execute($newt);
   } catch (PDOException $e) {
-    if (isset($_SESSION['debug'])) {
-      die($e);
-    } else {
-      die("Error: Try again After Some Times");
-    }
+    throw $e;
   }
 }
 

@@ -302,7 +302,7 @@ class ProductController
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             if (isset($products[$row['asset_hash_id']])) {
-                $products[$row['asset_hash_id']]['images'][] = $row['image_1'];
+                $products[$row['asset_hash_id']]['images'][] = fixImagePath($row['image_1']);
             }
         }
         return $products;
@@ -339,7 +339,7 @@ class ProductController
                     'price_usd'    => $origUsd,
                     'inventory'    => (int) $row['input_inventory'],
                     'weight_in_kg' => (float) $row['input_weight_in_kg'],
-                    'image'        => $row['image_1'],
+                    'image'        => fixImagePath($row['image_1']),
                     'options'      => [],
                 ];
 
@@ -416,7 +416,7 @@ class ProductController
                 'hash_id'        => $product['hash_id'],
                 'name'           => $product['input_product_name'],
                 'description'    => $product['text_description'],
-                'primary_image'  => $product['primary_image'],
+                'primary_image'  => fixImagePath($product['primary_image']),
                 'base_inventory' => 0,
                 'images'         => [],
                 'variants'       => [],
@@ -467,7 +467,8 @@ class ProductController
     {
         $stmt = $this->pdo->prepare("SELECT image_1 FROM images WHERE asset_hash_id = ? ORDER BY id ASC");
         $stmt->execute([$hashId]);
-        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $imgs = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        return array_map('fixImagePath', $imgs);
     }
 
     private function fetchProductVariants(string $hashId): array
@@ -491,7 +492,7 @@ class ProductController
                 'price_usd'    => $origUsd,
                 'inventory'    => (int) $row['inventory'],
                 'weight_in_kg' => (float) $row['weight_kg'],
-                'image'        => $row['image'],
+                'image'        => fixImagePath($row['image']),
                 'options'      => [],
             ];
 

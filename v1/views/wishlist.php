@@ -96,7 +96,7 @@ include APP_PATH . "/views/includes/header.php";
                       <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($product['select_category'] ?? "Skincare", ENT_QUOTES, 'UTF-8') ?></div></div>
                       <div class="product-name-price">
                         <div class="heading-06"><?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?></div>
-                        <div class="heading-07"><?= $sym ?><?= number_format((float)$product['input_price'], 2) ?></div>
+                        <div class="heading-07"><?= formatPrice($product['input_price'], $sym) ?></div>
                       </div>
                     </div>
                   </a>

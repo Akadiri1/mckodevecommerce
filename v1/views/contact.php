@@ -25,11 +25,12 @@ $galleryImgs = [
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<!-- [cbcode_50001o] -->
+<div data-cbsection="cb1">
+<?php/*##cb1o##*/?>
 
 <!-- CONTACT PAGE -->
-<div data-cbsection="cb1">
-<!-- [cbcode_50001Contacto] -->
+<?php/*##cbcode_50001Contacto##*/?>
+<div data-cbcodesection="cbcode_50001Contact">
 <section class="contact section-0-120">
   <div class="container">
     <div class="venora-contact-grid">
@@ -198,7 +199,7 @@ include APP_PATH . "/views/includes/header.php";
     }
 
     var btn = form.querySelector('.vcf-submit');
-    btn.textContent = 'Sending…';
+    btn.innerHTML = '<img src="' + (window.VENORA_BASE_URL || '') + '/lg.rotating-balls-spinner.gif" alt="Loading..." style="width: 20px; height: 20px;"> Sending…';
     btn.disabled = true;
     document.getElementById('contactSuccess').style.display = 'none';
     document.getElementById('contactError').style.display = 'none';
@@ -234,8 +235,9 @@ include APP_PATH . "/views/includes/header.php";
 </section>
 
 
-<!-- [cbcode_50001Contactc] -->
+<?php/*##cbcode_50001Contactc##*/?>
 </div>
-<!-- [cbcode_50001c] -->
+<?php/*##cb1c##*/?>
+</div>
 
 <?php include APP_PATH . "/views/includes/footer.php"; ?>

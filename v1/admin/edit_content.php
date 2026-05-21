@@ -3,6 +3,7 @@ ob_start();
 //session_start();
 $level_check = ['MASTER',3,2,1];
 $where['table_name'] = $_GET['data'];
+$where['table_schema'] = DBNAME;
 $column_name['column_name'] = "column_name";
 $columns = selectTableContent($conn,'information_schema.columns',$column_name,$where);
 

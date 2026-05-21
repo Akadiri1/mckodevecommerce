@@ -44,6 +44,9 @@ $shopConfig   = selectContent($conn, "settings_shop_config", ["visibility" => "s
 $websiteStyle = selectContent($conn, "website_status",       ["visibility" => "show"]);
 $fetchFavicon = selectContent($conn, "read_favicon",         ["visibility" => "show"]);
 
+$websiteInfoRow = selectContent($conn, "settings_website_info", []);
+$usdEnabled     = isset($websiteInfoRow[0]['input_usd_toggle']) ? (int)$websiteInfoRow[0]['input_usd_toggle'] === 1 : false;
+
 $shop_name        = $shopConfig[0]["input_name"]             ?? "Venora";
 $shop_tagline     = $shopConfig[0]["input_tagline"]          ?? "Luxury Skincare";
 $shop_email       = $shopConfig[0]["input_email"]            ?? "";
@@ -54,8 +57,11 @@ $shop_symbol      = $shopConfig[0]["input_currency_symbol"]  ?? "$";
 $shop_tax_rate    = (float)($shopConfig[0]["input_tax_rate"]      ?? 0);
 $shop_ship_rate   = (float)($shopConfig[0]["input_shipping_rate"] ?? 0);
 $shop_free_ship   = (float)($shopConfig[0]["input_free_shipping"] ?? 0);
-$logo_directory   = $shopConfig[0]["image_1"]                ?? "/assets/img/brand/venora-white.svg";
-$logo_dark        = $shopConfig[0]["image_2"]                ?? "/assets/img/brand/venora-dark.svg";
+
+// Logo coming from settings_website_info image_1 as requested
+$logo_directory   = fixImagePath($websiteInfoRow[0]["image_1"] ?? "/assets/img/brand/venora-white.svg");
+$logo_dark        = fixImagePath($websiteInfoRow[0]["image_1"] ?? "/assets/img/brand/venora-dark.svg");
+
 $metaDescription  = $shopConfig[0]["text_description"]       ?? "";
 $metakeys         = $shopConfig[0]["input_seo_keywords"]     ?? "";
 $_seoProtocol     = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -68,20 +74,13 @@ $site_email_smtp_port        = $shopConfig[0]["input_email_smtp_port"]        ??
 $site_email_password         = $shopConfig[0]["input_email_password"]         ?? "";
 
 $sessionId = session_id();
-
-// User identity for cart/coupon functions (MD5 of session id for guests)
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = md5($sessionId);
-}
-$userId = $_SESSION['user_id'];
-
-$cartCount = getCartCount($userId);
+$cartUserId = getCartUserId();
+$cartCount = getCartCount($cartUserId);
 
 // ── Currency mode (driven by settings_website_info.input_usd_toggle) ──────────
 // input_usd_toggle = 1 → show USD prices with $ symbol
 // input_usd_toggle = 0 → show NGN prices with ₦ symbol
-$websiteInfoRow = selectContent($conn, "settings_website_info", []);
-$usdEnabled     = isset($websiteInfoRow[0]['input_usd_toggle']) ? (int)$websiteInfoRow[0]['input_usd_toggle'] === 1 : false;
+// (Already fetched above)
 
 // Override the shop symbol based on active currency
 // Admin sets input_currency_symbol in settings_shop_config for USD symbol

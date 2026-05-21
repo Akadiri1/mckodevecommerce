@@ -8,7 +8,7 @@ $adminDetails = selectContent($conn,"admin",$whereAdmin);
 
 
 $whereTable['TABLE_TYPE'] = "BASE TABLE";
-$whereTable['TABLE_SCHEMA'] = "mckodevc_demo";
+$whereTable['TABLE_SCHEMA'] = DBNAME;
 $table_name['table_name'] = "table_name";
 $tables = selectTableContent($conn,'information_schema.tables',$table_name,$whereTable);
 // die(var_dump($tables));

@@ -12,7 +12,7 @@ foreach ($categories as $c) { $catById[(string)$c['id']] = $c['input_title'] ?? 
 $activeTab = isset($_GET["tab"]) ? htmlspecialchars($_GET["tab"], ENT_QUOTES, "UTF-8") : "";
 
 // ── Fetch all products ────────────────────────────────────────
-$allProducts = selectContentAsc($conn, "panel_product", ["visibility" => "show"], "input_order", 100);
+$allProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "input_order", 100);
 
 // Pre-index variant prices from new variants table (ADMC: no queries inside loops)
 $allVariantRows = selectContent($conn, "variants", []);
@@ -32,6 +32,8 @@ $productsByCategory = ["" => []];
 foreach ($allProducts as &$p) {
     $p['input_price']      = $variantPriceIdx[$p['hash_id']] ?? 0;
     $p['has_variants']     = isset($variantsIndexed[$p['hash_id']]) ? "true" : "false";
+    $p['image_2']          = fixImagePath($p['image_2'] ?? '');
+    $p['image_1']          = fixImagePath($p['image_1'] ?? '');
     $catId                 = (string)($p["select_product_category"] ?? "");
     $catName               = $catById[$catId] ?? $catId; // resolve ID → name
     $p['_category_name']   = $catName;
@@ -56,11 +58,12 @@ $addToCartIcon = "https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<!-- [cbcode_30001o] -->
+<div data-cbsection="cb1">
+<?php/*##cb1o##*/?>
 
 <!-- PRODUCTS PAGE -->
-<div data-cbsection="cb1">
-<!-- [cbcode_30001Productsо] -->
+<?php/*##cbcode_30001Productso##*/?>
+<div data-cbcodesection="cbcode_30001Products">
 <section class="products hero-section">
   <div class="container">
 
@@ -158,19 +161,20 @@ include APP_PATH . "/views/includes/header.php";
                       $sym      = htmlspecialchars($shop_symbol, ENT_QUOTES, "UTF-8");
                     ?>
                       <div class="w-dyn-item" role="listitem">
-                        <a class="product-link w-inline-block" href="<?= $detailUrl ?>">
                           <div class="product-card">
-                            <div class="product-card-img"
-                                 data-admc-image="panel_product"
-                                 data-admc-id="<?= $product['id'] ?>">
-                              <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>"
-                                   class="all-img" loading="lazy"
-                                   src="<?= $imgSrc ?>">
-                              <?php if (!empty($imgHover) && $imgHover !== $imgSrc): ?>
-                                <div class="product-float">
-                                  <img alt="" class="all-img" loading="lazy" src="<?= $imgHover ?>">
+                            <div class="product-card-img">
+                              <a class="product-link w-inline-block" href="<?= $detailUrl ?>">
+                                <div data-admc-image="panel_product" data-admc-id="<?= $product['id'] ?>">
+                                  <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>"
+                                       class="all-img" loading="lazy"
+                                       src="<?= $imgSrc ?>">
+                                  <?php if (!empty($imgHover) && $imgHover !== $imgSrc): ?>
+                                    <div class="product-float">
+                                      <img alt="" class="all-img" loading="lazy" src="<?= $imgHover ?>">
+                                    </div>
+                                  <?php endif; ?>
                                 </div>
-                              <?php endif; ?>
+                              </a>
 
                               <!-- Wishlist Button -->
                               <?php $inWishlist = in_array($product['hash_id'], $wishlistIds); ?>
@@ -194,25 +198,26 @@ include APP_PATH . "/views/includes/header.php";
                                 <div class="p-02 caps"><?= htmlspecialchars($product['_category_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                               </div>
                               <div class="product-name-price">
-                                <div class="heading-06"
+                                <h3 class="heading-06"
                                      data-admc-manage="panel_product"
                                      data-admc-id="<?= $product['id'] ?>">
-                                  <?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>
-                                </div>
+                                  <a href="<?= $detailUrl ?>" class="card-title-link">
+                                    <?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>
+                                  </a>
+                                </h3>
                                 <div class="heading-07"
                                      data-admc-manage="panel_product"
                                      data-admc-id="<?= $product['id'] ?>">
                                   <?php if (!empty($product['input_compare_price'])): ?>
                                     <span style="text-decoration:line-through;color:#b5b5b5;font-size:13px;margin-right:6px;">
-                                      <?= $sym ?><?= number_format((float)$product['input_compare_price'], 2) ?>
+                                      <?= formatPrice($product['input_compare_price'], $sym) ?>
                                     </span>
                                   <?php endif; ?>
-                                  <?= $sym ?><?= number_format((float)$product['input_price'], 2) ?>
+                                  <?= formatPrice($product['input_price'], $sym) ?>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </a>
                       </div>
                     <?php endforeach; ?>
                   </div>
@@ -449,8 +454,9 @@ include APP_PATH . "/views/includes/header.php";
 })();
 </script>
 
-<!-- [cbcode_30001Productsc] -->
+<?php/*##cbcode_30001Productsc##*/?>
 </div>
-<!-- [cbcode_30001c] -->
+<?php/*##cb1c##*/?>
+</div>
 
 <?php include APP_PATH . "/views/includes/footer.php"; ?>
