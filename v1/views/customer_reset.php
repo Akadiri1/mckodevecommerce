@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $page_title = "Reset Password";
 $bodyClass  = "page-light-navbar";
 
@@ -10,19 +10,19 @@ if (empty($token)) {
     $errorMsg = 'No reset token provided.';
 } else {
     // Check token exists, is not used, and is not expired (1 hour window)
-    $resets = selectContent($conn, 'read_password_resets', [
-        'reset_token' => $token,
-        'is_used'     => '0',
-        'visibility'  => 'show',
+    // Updated to use the correct 'verify' table and 'token' column
+    $resets = selectContent($conn, 'verify', [
+        'token'      => $token,
+        'token_type' => 'password_reset',
+        'visibility' => 'show',
     ]);
 
     if (empty($resets)) {
         $errorMsg = 'This reset link is invalid or has already been used.';
     } else {
         $reset = $resets[0];
-        // Check expiry: date_created + time_created < 1 hour ago
-        $createdAt = strtotime($reset['date_created'] . ' ' . $reset['time_created']);
-        if ((time() - $createdAt) > 3600) {
+        // Check expiry: token_expiry from DB
+        if (strtotime($reset['token_expiry']) < time()) {
             $errorMsg = 'This reset link has expired. Please request a new one.';
         } else {
             $isValid = true;
@@ -99,20 +99,21 @@ include APP_PATH . "/views/includes/header.php";
                     style="width:100%;padding:14px;background:#072708;color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;">
               Reset Password
             </button>
+
           </form>
         </div>
 
-        <div id="resetSuccessWrap" style="display:none;text-align:center;">
-          <div style="width:56px;height:56px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <div id="resetSuccess" style="display:none;text-align:center;padding:12px 0;">
+          <div style="width:54px;height:54px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
           </div>
-          <h2 class="heading-03" style="margin-bottom:10px;">Password Updated!</h2>
-          <p class="p-01 color-gray" style="margin-bottom:28px;">Your password has been changed. You can now sign in.</p>
+          <h3 class="heading-06" style="margin-bottom:8px;color:#072708;">Password Reset Successfully</h3>
+          <p class="p-01 color-gray" style="margin-bottom:24px;">You can now sign in with your new password.</p>
           <a href="<?= $baseUrl ?>/customer-login"
-             style="display:inline-block;padding:14px 28px;background:#072708;color:#fff;text-decoration:none;border-radius:7px;font-weight:600;font-size:15px;font-family:inherit;">
-            Sign In
+             style="display:inline-block;padding:12px 32px;background:#072708;color:#fff;text-decoration:none;border-radius:7px;font-weight:600;font-size:15px;">
+            Sign In Now
           </a>
         </div>
 
@@ -131,28 +132,32 @@ include APP_PATH . "/views/includes/header.php";
     e.preventDefault();
     var errBox  = document.getElementById('resetError');
     var btn     = document.getElementById('resetBtn');
+    var form    = document.getElementById('resetForm');
+    var wrap    = document.getElementById('resetFormWrap');
+    var success = document.getElementById('resetSuccess');
+    
     errBox.style.display = 'none';
 
     var pass    = document.getElementById('resetPassword').value;
     var confirm = document.getElementById('resetConfirm').value;
 
-    if (pass !== confirm) {
-      errBox.textContent   = 'Passwords do not match.';
+    if (pass.length < 8) {
+      errBox.textContent = 'Password must be at least 8 characters.';
       errBox.style.display = 'block';
       return;
     }
-    if (pass.length < 8) {
-      errBox.textContent   = 'Password must be at least 8 characters.';
+    if (pass !== confirm) {
+      errBox.textContent = 'Passwords do not match.';
       errBox.style.display = 'block';
       return;
     }
 
-    btn.textContent = 'Updating…';
+    btn.textContent = 'Processing…';
     btn.disabled = true;
 
     var payload = {
-      token:            document.getElementById('resetToken').value,
-      password:         pass,
+      token:    document.getElementById('resetToken').value,
+      password: pass,
       confirm_password: confirm
     };
 
@@ -164,17 +169,17 @@ include APP_PATH . "/views/includes/header.php";
     .then(function (r) { return r.json(); })
     .then(function (res) {
       if (res.success) {
-        document.getElementById('resetFormWrap').style.display    = 'none';
-        document.getElementById('resetSuccessWrap').style.display = 'block';
+        wrap.style.display    = 'none';
+        success.style.display = 'block';
       } else {
-        errBox.textContent   = res.message || 'Reset failed. Please try again.';
+        errBox.textContent   = res.message || 'Something went wrong. Please try again.';
         errBox.style.display = 'block';
         btn.textContent = 'Reset Password';
         btn.disabled = false;
       }
     })
     .catch(function () {
-      errBox.textContent   = 'Something went wrong. Please try again.';
+      errBox.textContent   = 'Connection error. Please try again.';
       errBox.style.display = 'block';
       btn.textContent = 'Reset Password';
       btn.disabled = false;
