@@ -41,6 +41,33 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+  <?php
+  // ── ADMC Theme & Colour System ──────────────────────────────
+  $style = !empty($websiteStyle) ? $websiteStyle[0] : [];
+  $primaryColor = $style['color'] ?? '#072708';
+  // Ensure # prefix
+  if ($primaryColor && strpos($primaryColor, '#') !== 0) { $primaryColor = '#' . $primaryColor; }
+  
+  $bgDark    = $style['bgcolor_background'] ?? '#050a14';
+  $bgSurface = $style['bgcolor_surface']    ?? '#0a1128';
+  $textHead  = $style['textcolor_heading']  ?? '#072708';
+  $textBody  = $style['textcolor_body']     ?? '#5c5f6a';
+  ?>
+  <style data-admc-manage="website_status" data-admc-id="<?= $style['id'] ?? 1 ?>">
+    :root {
+      --primary: <?= htmlspecialchars($primaryColor, ENT_QUOTES, 'UTF-8') ?>;
+      --primary-rgb: <?= hexToRgb($primaryColor) ?>;
+      --dark-green-colour: var(--primary);
+      --dash-accent: var(--primary);
+    }
+    /* Theme variable overrides */
+    body {
+      --text-primary: <?= htmlspecialchars($textHead, ENT_QUOTES, 'UTF-8') ?>;
+      --text-secondary: <?= htmlspecialchars($textBody, ENT_QUOTES, 'UTF-8') ?>;
+    }
+  </style>
+
+
 
   <!-- Pass PHP vars to JS -->
   <script>
