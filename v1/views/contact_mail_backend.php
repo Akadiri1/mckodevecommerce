@@ -28,17 +28,21 @@ if (empty($firstName) || empty($email) || !filter_var($email, FILTER_VALIDATE_EM
 $siteInfo = selectContent($conn, "settings_website_info", ["visibility" => "show"]);
 $site     = !empty($siteInfo) ? $siteInfo[0] : [];
 
-$smtpHost   = $site['input_email_smtp_host']        ?? null;
-$smtpPort   = (int)($site['input_email_smtp_port']  ?? 587);
-$smtpSecure = $site['input_email_smtp_secure_type'] ?? 'tls';
-$smtpUser   = $site['input_email_from']             ?? null;
-$smtpPass   = $site['input_email_password']         ?? null;
-$fromName   = $site['input_name']                   ?? 'Venora';
-$adminEmail = $site['input_email_from']             ?? null;
+$smtpHost   = 'smtp.gmail.com'; // Force correct host
+$smtpPort   = 465;              // SWITCHED TO 465 (Confirmed working)
+$smtpSecure = 'ssl';            // SWITCHED TO SSL (Confirmed working)
+$smtpUser   = $site['input_email_from']     ?? null;
+$smtpPass   = $site['input_email_password'] ?? null;
+$fromName   = $site['input_name']           ?? 'Venora';
+$adminEmail = $site['input_email_from']     ?? null;
+
+// Remove spaces from Gmail App Password
+if ($smtpPass) {
+    $smtpPass = str_replace(' ', '', $smtpPass);
+}
 
 if (empty($smtpPass) || empty($adminEmail)) {
-    error_log("Contact form failed: SMTP or admin email is not configured in settings_website_info.");
-    echo json_encode(['success' => false, 'message' => 'The server is not configured to send emails. Please contact the site administrator.']);
+    echo json_encode(['success' => false, 'message' => 'The server is not configured to send emails.']);
     die;
 }
 
@@ -53,6 +57,15 @@ try {
     $mail->SMTPSecure = $smtpSecure;
     $mail->Port       = $smtpPort;
     $mail->CharSet    = 'UTF-8';
+
+    // Local server compatibility
+    $mail->SMTPOptions = array(
+        'ssl' => array(
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'allow_self_signed' => true
+        )
+    );
 
     // Prepare variables for email bodies
     $name_h = htmlspecialchars($name);
@@ -133,5 +146,5 @@ HTML;
 
 } catch (Exception $e) {
     error_log("Contact form mailer failed: " . $mail->ErrorInfo);
-    echo json_encode(['success' => false, 'message' => 'A server error occurred. We could not send your message.']);
+    echo json_encode(['success' => false, 'message' => 'Email sending failed. Please check SMTP configuration.']);
 }

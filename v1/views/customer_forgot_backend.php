@@ -45,20 +45,41 @@ insertContent($conn, 'read_password_resets', [
 // Send reset email
 $resetLink = $baseUrl . '/customer-reset-password?token=' . urlencode($token);
 
-if (!empty($site_email_from) && !empty($site_email_password)) {
+// Use Correct settings from DB
+$siteInfo = selectContent($conn, "settings_website_info", ["visibility" => "show"]);
+$site     = !empty($siteInfo) ? $siteInfo[0] : [];
+
+$smtpHost   = 'smtp.gmail.com';
+$smtpPort   = 465;              // SWITCHED TO 465
+$smtpSecure = 'ssl';            // SWITCHED TO SSL
+$smtpUser   = $site['input_email_from']     ?? null;
+$smtpPass   = $site['input_email_password'] ?? null;
+
+if (!empty($smtpPass)) {
+    $smtpPass = str_replace(' ', '', $smtpPass);
+
     try {
         require_once APP_PATH . '/phpm/PHPMailerAutoload.php';
         $mail = new PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host       = $site_email_smtp_host;
+        $mail->Host       = $smtpHost;
         $mail->SMTPAuth   = true;
-        $mail->Username   = $site_email_from;
-        $mail->Password   = $site_email_password;
-        $mail->SMTPSecure = $site_email_smtp_secure_type;
-        $mail->Port       = (int)$site_email_smtp_port;
+        $mail->Username   = $smtpUser;
+        $mail->Password   = $smtpPass;
+        $mail->SMTPSecure = $smtpSecure;
+        $mail->Port       = $smtpPort;
         $mail->CharSet    = 'UTF-8';
 
-        $mail->setFrom($site_email_from, $shop_name);
+        // Local server compatibility
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+
+        $mail->setFrom($smtpUser, $shop_name);
         $mail->addAddress($email, htmlspecialchars($user['input_firstname'] . ' ' . $user['input_lastname']));
         $mail->isHTML(true);
         $mail->Subject = 'Reset your password — ' . $shop_name;

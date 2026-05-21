@@ -29,15 +29,17 @@ insertSafe($conn, "read_newsletter", [
 $siteInfo = selectContent($conn, "settings_website_info", ["visibility" => "show"]);
 $site     = !empty($siteInfo) ? $siteInfo[0] : [];
 
-$smtpHost     = $site['input_email_smtp_host']        ?? 'smtp.gmail.com';
-$smtpPort     = (int)($site['input_email_smtp_port']  ?? 587);
-$smtpSecure   = $site['input_email_smtp_secure_type'] ?? 'tls';
-$smtpUser     = $site['input_email_from']             ?? '';
-$smtpPass     = $site['input_email_password']         ?? '';
-$fromName     = $site['input_name']                   ?? 'Venora';
-$fromEmail    = $site['input_email_from']             ?? 'hello@venora.com';
+$smtpHost     = 'smtp.gmail.com';
+$smtpPort     = 465;              // SWITCHED TO 465
+$smtpSecure   = 'ssl';            // SWITCHED TO SSL
+$smtpUser     = $site['input_email_from']     ?? '';
+$smtpPass     = $site['input_email_password'] ?? '';
+$fromName     = $site['input_name']           ?? 'Venora';
+$fromEmail    = $site['input_email_from']     ?? 'hello@venora.com';
 
 if (!empty($smtpPass)) {
+    $smtpPass = str_replace(' ', '', $smtpPass); // Remove spaces
+
     try {
         require_once APP_PATH . '/phpm/PHPMailerAutoload.php';
         $mail = new PHPMailer(true);
@@ -49,6 +51,15 @@ if (!empty($smtpPass)) {
         $mail->SMTPSecure = $smtpSecure;
         $mail->Port       = $smtpPort;
         $mail->CharSet    = 'UTF-8';
+
+        // Local server compatibility
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
 
         $mail->setFrom($fromEmail, $fromName);
         $mail->addAddress($email);
@@ -81,7 +92,7 @@ if (!empty($smtpPass)) {
 HTML;
         $mail->send();
     } catch (Exception $e) {
-        error_log("Newsletter welcome email failed: " . $e->getMessage());
+        error_log("Newsletter welcome email failed: " . $mail->ErrorInfo);
     }
 }
 
