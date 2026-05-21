@@ -44,12 +44,11 @@ insertContent($conn, 'read_password_resets', [
 
 // Send reset email
 $resetLink = $baseUrl . '/customer-reset-password?token=' . urlencode($token);
-$firstname = htmlspecialchars($user['input_firstname'] ?? 'there', ENT_QUOTES, 'UTF-8');
 
 if (!empty($site_email_from) && !empty($site_email_password)) {
     try {
-        require APP_PATH . '/phpm/PHPMailerAutoload.php';
-        $mail = new PHPMailer;
+        require_once APP_PATH . '/phpm/PHPMailerAutoload.php';
+        $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host       = $site_email_smtp_host;
         $mail->SMTPAuth   = true;
@@ -57,21 +56,52 @@ if (!empty($site_email_from) && !empty($site_email_password)) {
         $mail->Password   = $site_email_password;
         $mail->SMTPSecure = $site_email_smtp_secure_type;
         $mail->Port       = (int)$site_email_smtp_port;
+        $mail->CharSet    = 'UTF-8';
+
         $mail->setFrom($site_email_from, $shop_name);
-        $mail->addAddress($email, $firstname);
+        $mail->addAddress($email, htmlspecialchars($user['input_firstname'] . ' ' . $user['input_lastname']));
         $mail->isHTML(true);
         $mail->Subject = 'Reset your password — ' . $shop_name;
-        $mail->Body    = "<div style='font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;'>"
-            . "<h2 style='color:#072708;'>Reset Your Password</h2>"
-            . "<p style='color:#444;'>Hi " . $firstname . ", we received a request to reset your password.</p>"
-            . "<p style='color:#444;'>Click the button below to choose a new password. This link will expire in 1 hour.</p>"
-            . "<a href='" . htmlspecialchars($resetLink, ENT_QUOTES, 'UTF-8') . "' style='display:inline-block;margin:20px 0;padding:14px 28px;background:#072708;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:15px;'>Reset Password</a>"
-            . "<p style='color:#888;font-size:13px;'>Or copy and paste: " . htmlspecialchars($resetLink, ENT_QUOTES, 'UTF-8') . "</p>"
-            . "<p style='color:#888;font-size:13px;'>If you did not request a password reset, please ignore this email.</p>"
-            . "</div>";
+
+        $fromName_h  = htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8');
+        $firstName_h = htmlspecialchars($user['input_firstname'], ENT_QUOTES, 'UTF-8');
+        $resetLink_h = htmlspecialchars($resetLink, ENT_QUOTES, 'UTF-8');
+        $year = date('Y');
+
+        $mail->Body = <<<HTML
+            <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                <div style="background-color: #072708; color: #ffffff; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px;">{$fromName_h}</h1>
+                </div>
+                <div style="padding: 30px;">
+                    <h2 style="color: #072708;">Reset Your Password</h2>
+                    <p>Hi {$firstName_h},</p>
+                    <p>We received a request to reset the password for your account. No changes have been made yet.</p>
+                    <p>You can reset your password by clicking the button below. This link is only valid for **1 hour**.</p>
+                    
+                    <div style="text-align: center; margin: 32px 0;">
+                        <a href="{$resetLink_h}" style="display:inline-block; padding:16px 36px; background:#072708; color:#ffffff; text-decoration:none; border-radius:8px; font-weight:700; font-size:15px;">
+                          Reset My Password
+                        </a>
+                    </div>
+                    
+                    <p style="font-size: 12px; color: #777;">
+                        If you're having trouble clicking the button, copy and paste the link below into your web browser:<br>
+                        <a href="{$resetLink_h}" style="color:#072708;">{$resetLink_h}</a>
+                    </p>
+                    
+                    <p style="margin-top: 24px;">If you did not request a password reset, you can safely ignore this email.</p>
+                    <p>Sincerely,<br>The {$fromName_h} Team</p>
+                </div>
+                <div style="background-color: #f4f4f4; color: #777; padding: 15px; text-align: center; font-size: 12px;">
+                    &copy; {$year} {$fromName_h}. All Rights Reserved.
+                </div>
+            </div>
+HTML;
+
         $mail->send();
     } catch (Exception $e) {
-        // Silent
+        error_log("Password reset email failed: " . $mail->ErrorInfo);
     }
 }
 

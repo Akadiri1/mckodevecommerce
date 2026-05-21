@@ -67,11 +67,11 @@ $metakeys         = $shopConfig[0]["input_seo_keywords"]     ?? "";
 $_seoProtocol     = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $metaImage        = $_seoProtocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/screenshot.png';
 
-$site_email_from             = $shopConfig[0]["input_email_from"]             ?? "";
-$site_email_smtp_host        = $shopConfig[0]["input_email_smtp_host"]        ?? "smtp.gmail.com";
-$site_email_smtp_secure_type = $shopConfig[0]["input_email_smtp_secure_type"] ?? "tls";
-$site_email_smtp_port        = $shopConfig[0]["input_email_smtp_port"]        ?? "587";
-$site_email_password         = $shopConfig[0]["input_email_password"]         ?? "";
+$site_email_from             = $websiteInfoRow[0]["input_email_from"]             ?? "";
+$site_email_smtp_host        = $websiteInfoRow[0]["input_email_smtp_host"]        ?? "smtp.gmail.com";
+$site_email_smtp_secure_type = $websiteInfoRow[0]["input_email_smtp_secure_type"] ?? "tls";
+$site_email_smtp_port        = $websiteInfoRow[0]["input_email_smtp_port"]        ?? "587";
+$site_email_password         = $websiteInfoRow[0]["input_email_password"]         ?? "";
 
 $sessionId = session_id();
 $cartUserId = getCartUserId();

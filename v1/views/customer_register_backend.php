@@ -69,7 +69,7 @@ insertContent($conn, 'read_users', [
 // Generate 6-char OTP token
 $verifyToken = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
 
-// Insert into verify table (matches patch SQL columns)
+// Insert into verify table
 insertContent($conn, 'verify', [
     'hash_id'      => uniqid('vrf_', true),
     'input_email'  => $email,
@@ -86,8 +86,8 @@ $verifyLink = $baseUrl . '/customer-verify?token=' . urlencode($verifyToken);
 
 if (!empty($site_email_from) && !empty($site_email_password)) {
     try {
-        require APP_PATH . '/phpm/PHPMailerAutoload.php';
-        $mail = new PHPMailer;
+        require_once APP_PATH . '/phpm/PHPMailerAutoload.php';
+        $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host       = $site_email_smtp_host;
         $mail->SMTPAuth   = true;
@@ -95,21 +95,52 @@ if (!empty($site_email_from) && !empty($site_email_password)) {
         $mail->Password   = $site_email_password;
         $mail->SMTPSecure = $site_email_smtp_secure_type;
         $mail->Port       = (int)$site_email_smtp_port;
+        $mail->CharSet    = 'UTF-8';
+
         $mail->setFrom($site_email_from, $shop_name);
         $mail->addAddress($email, $firstname . ' ' . $lastname);
         $mail->isHTML(true);
         $mail->Subject = 'Verify your email — ' . $shop_name;
-        $mail->Body    = "<div style='font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;'>"
-            . "<h2 style='color:#072708;'>Welcome to " . htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') . "!</h2>"
-            . "<p style='color:#444;'>Hi " . htmlspecialchars($firstname, ENT_QUOTES, 'UTF-8') . ", thanks for creating an account.</p>"
-            . "<p style='color:#444;'>Please verify your email address by clicking the button below:</p>"
-            . "<a href='" . htmlspecialchars($verifyLink, ENT_QUOTES, 'UTF-8') . "' style='display:inline-block;margin:20px 0;padding:14px 28px;background:#072708;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:15px;'>Verify Email</a>"
-            . "<p style='color:#888;font-size:13px;'>Or copy and paste this link: " . htmlspecialchars($verifyLink, ENT_QUOTES, 'UTF-8') . "</p>"
-            . "<p style='color:#888;font-size:13px;'>If you did not create this account, you can safely ignore this email.</p>"
-            . "</div>";
+
+        $fromName_h = htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8');
+        $firstName_h = htmlspecialchars($firstname, ENT_QUOTES, 'UTF-8');
+        $verifyLink_h = htmlspecialchars($verifyLink, ENT_QUOTES, 'UTF-8');
+        $year = date('Y');
+
+        $mail->Body = <<<HTML
+            <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                <div style="background-color: #072708; color: #ffffff; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px;">{$fromName_h}</h1>
+                </div>
+                <div style="padding: 30px;">
+                    <h2 style="color: #072708;">Welcome to {$fromName_h}!</h2>
+                    <p>Hi {$firstName_h},</p>
+                    <p>Thank you for creating an account with us. We're excited to have you as part of our community!</p>
+                    <p>Before you can start shopping, please verify your email address by clicking the button below:</p>
+                    
+                    <div style="text-align: center; margin: 32px 0;">
+                        <a href="{$verifyLink_h}" style="display:inline-block; padding:16px 36px; background:#072708; color:#ffffff; text-decoration:none; border-radius:8px; font-weight:700; font-size:15px;">
+                          Verify My Account
+                        </a>
+                    </div>
+                    
+                    <p style="font-size: 12px; color: #777;">
+                        If you're having trouble clicking the button, copy and paste the link below into your web browser:<br>
+                        <a href="{$verifyLink_h}" style="color:#072708;">{$verifyLink_h}</a>
+                    </p>
+                    
+                    <p>Sincerely,<br>The {$fromName_h} Team</p>
+                </div>
+                <div style="background-color: #f4f4f4; color: #777; padding: 15px; text-align: center; font-size: 12px;">
+                    <p style="margin:0;">If you did not create this account, you can safely ignore this email.</p>
+                    <p style="margin:5px 0;">&copy; {$year} {$fromName_h}. All Rights Reserved.</p>
+                </div>
+            </div>
+HTML;
+
         $mail->send();
     } catch (Exception $e) {
-        // Silent - do not expose SMTP errors to client
+        error_log("Signup verification email failed: " . $mail->ErrorInfo);
     }
 }
 
