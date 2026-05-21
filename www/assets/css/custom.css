@@ -2674,3 +2674,23 @@ body.page-light-navbar .navbar.scrolled {
   .cart-item-row > div:last-child { text-align: left !important; }
   .order-summary-card { position: static !important; }
 }
+
+/* ── Homepage Features Section Fix ───────────────────────── */
+.content-grid {
+  grid-column: span 2 !important;
+}
+.happy-client-card {
+  width: 100% !important;
+}
+.happy-client-img-wrap, .happy-client-img, .content-float-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+@media (max-width: 991px) {
+  .content-grid {
+    grid-column: span 1 !important;
+  }
+}
+
