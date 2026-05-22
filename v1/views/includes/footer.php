@@ -10,9 +10,13 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
     .footer-inner { background-color: var(--primary, #202c22) !important; }
     .footer-section .cta {
       background-image: none !important;
-      background-color: var(--primary, #202c22) !important;
-      color: #ffffff !important;
+      background-color: #ffffff !important;
+      color: var(--primary, #202c22) !important;
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 24px;
+      margin-bottom: 40px;
     }
+    .footer-section .cta h1 { color: var(--primary, #202c22) !important; }
   </style>
   <section class="footer-section">
 
