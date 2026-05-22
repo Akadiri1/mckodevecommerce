@@ -291,7 +291,6 @@
     var starsHtml = '';
     for (var s = 1; s <= 5; s++) { starsHtml += '<img src="' + baseUrl + '/assets/img/icons/star.svg" class="star" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:2px;' + (s > Math.round(rating) ? 'opacity:0.3;' : '') + '" alt="">'; }
     
-    // Fallback to min price if price is zero or not set
     var priceNgn = p.price_range_ngn ? (p.price_range_ngn.price || p.price_range_ngn.min || 0) : 0;
     var priceUsd = p.price_range_usd ? (p.price_range_usd.price || p.price_range_usd.min || 0) : 0;
     var isRangeNgn = p.price_range_ngn && p.price_range_ngn.min && p.price_range_ngn.min != p.price_range_ngn.max;
@@ -369,6 +368,39 @@
     }
   }
 
+  function openSearch() { var s = $('#searchOverlay'); if(s) { s.classList.add('active'); showOverlay(); setTimeout(() => $('#searchInput').focus(), 100); } }
+  function closeSearch() { var s = $('#searchOverlay'); if(s) { s.classList.remove('active'); hideOverlay(); } }
+
+  // ── Live Search ─────────────────────────────────────────────
+  var searchInput = $('#searchInput');
+  var searchGrid  = $('#searchResultsGrid');
+  if (searchInput && searchGrid) {
+    on(searchInput, 'input', function() {
+      var query = this.value.trim();
+      if (query.length < 2) { searchGrid.innerHTML = ''; return; }
+      fetch(baseUrl + '/search-backend?q=' + encodeURIComponent(query))
+      .then(r => r.json()).then(data => {
+        if (!data.products || !data.products.length) { searchGrid.innerHTML = '<div style="grid-column:span 3;text-align:center;padding:40px;color:#888;">No products found.</div>'; return; }
+        
+        var html = data.products.map(function(p) {
+            var url = baseUrl + '/products/' + p.hash_id + '/' + (p.input_slug || '');
+            var img = p.image_1 || '';
+            var name = p.input_title || 'Unnamed Product';
+            var price = formatPrice(p.input_price || 0);
+
+            return '<a href="' + url + '" class="search-result-item">' +
+                     '<img src="' + img + '" class="search-result-img" alt="">' +
+                     '<div class="search-result-info">' +
+                       '<div class="search-result-name">' + name + '</div>' +
+                       '<div class="search-result-price">' + price + '</div>' +
+                     '</div>' +
+                   '</a>';
+        }).join('');
+        searchGrid.innerHTML = html;
+      });
+    });
+  }
+
   function closeQuickView() { if (qvModal) qvModal.classList.remove('active'); }
 
   function toggleWishlist(id, btn) {
@@ -386,6 +418,10 @@
     if (qvBtn) { e.preventDefault(); e.stopPropagation(); openQuickView(qvBtn.dataset.id); return; }
     var cartToggle = e.target.closest('[data-open-cart]');
     if (cartToggle) { e.preventDefault(); openCartDrawer(); return; }
+    var searchOpen = e.target.closest('[data-open-search]');
+    if (searchOpen) { e.preventDefault(); openSearch(); return; }
+    var searchClose = e.target.closest('.search-close');
+    if (searchClose) { e.preventDefault(); closeSearch(); return; }
   });
 
   window.Venora = {

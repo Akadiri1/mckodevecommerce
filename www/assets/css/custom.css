@@ -2741,8 +2741,40 @@ body.page-light-navbar .navbar.scrolled {
   }
 }
 
-
-
-
-
-
+/* ── Live Search Compact Design ──────────── */
+.search-result-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 12px 0 !important;
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+.search-result-item:hover {
+  background: rgba(0,0,0,0.02) !important;
+  padding-left: 8px !important;
+}
+.search-result-img {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 8px !important;
+  object-fit: cover !important;
+  background: #f8f8f8 !important;
+  flex-shrink: 0 !important;
+}
+.search-result-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+.search-result-name {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+}
+.search-result-price {
+  font-size: 12px !important;
+  color: #888 !important;
+  font-weight: 500 !important;
+}

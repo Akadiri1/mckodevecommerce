@@ -106,6 +106,7 @@ switch ($s1) {
     case "newsletter-subscribe":
         include APP_PATH . "/views/newsletter_backend.php"; $is404 = false; die;
     case "search":
+    case "search-backend":
         include APP_PATH . "/views/search_backend.php"; $is404 = false; die;
     case "products-filter":
         include APP_PATH . "/views/products_filter_backend.php"; $is404 = false; die;
