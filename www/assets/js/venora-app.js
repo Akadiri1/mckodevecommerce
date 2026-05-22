@@ -304,8 +304,17 @@
       headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
       body: JSON.stringify({ cart_id: cartId, quantity: qty })
     })
-    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
-    .then(function(data) { if (data.success) { updateCartBadge(data.cart_count); refreshCartDrawer(); } });
+    .then(function(r) { return r.json(); })
+    .then(function(data) { 
+        if (data.success) { 
+            updateCartBadge(data.cart_count); 
+            refreshCartDrawer(); 
+        } else {
+            showToast(data.error || 'Could not update quantity', 'error');
+            refreshCartDrawer(); // Reset input to current server state
+        }
+    })
+    .catch(function() { showToast('Update failed', 'error'); });
   }
 
   // ── Quick View Modal ─────────────────────────────────────────

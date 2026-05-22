@@ -228,6 +228,10 @@ include APP_PATH . "/views/includes/header.php";
       </div>
 
       <div class="product-collection" id="productCollection">
+      <?php
+        $totalProductCount = count(selectContent($conn, "panel_product", ["visibility" => "show"]));
+        $initialHasMore = $totalProductCount > 6;
+      ?>
         <div class="product-grid w-dyn-items" id="homeProductGrid" data-admc-tb="panel_product" role="list">
           <?php foreach ($featuredProducts as $product):
              $detailUrl = $baseUrl . "/products/" . $product['hash_id'] . "/" . ($product['input_slug'] ?? cleans($product['input_product_name']));
@@ -269,17 +273,26 @@ include APP_PATH . "/views/includes/header.php";
                   <div class="product-card-bottom">
                     <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($product['_category_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div></div>
                     <div class="product-name-price">
-                      <h3 class="heading-06" data-admc-manage="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product"><a href="<?= $detailUrl ?>" class="card-title-link"><?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?></a></h3>
-                      <div class="heading-07" data-admc-manage="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product"><?= formatPrice($product['input_price'], $shop_symbol) ?></div>
+                      <h3 class="heading-06" data-admc-manage="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product">
+                        <a href="<?= $detailUrl ?>" class="card-title-link"><?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?></a>
+                      </h3>
+                      <div class="heading-07" data-admc-manage="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product">
+                        <?= formatPrice($product['input_price'], $shop_symbol) ?>
+                      </div>
                     </div>
                   </div>
                 </div>
             </div>
           <?php endforeach; ?>
         </div>
-        <div id="loadMoreWrap" style="text-align:center;margin-top:40px;display:none;">
-          <button id="loadMoreBtn" data-admc-manage="settings_shop_ui_labels" data-admc-id="<?= $uiLabels['id'] ?? 1 ?>" style="padding:14px 40px;border:1.5px solid #072708;background:none;color:#072708;font-family:inherit;font-size:15px;font-weight:600;border-radius:7px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#072708';this.style.color='#fff';" onmouseout="this.style.background='none';this.style.color='#072708';"><?= htmlspecialchars($loadMoreTxt, ENT_QUOTES, 'UTF-8') ?></button>
+        <div id="loadMoreWrap" style="text-align:center;margin-top:40px;<?= $initialHasMore ? 'display:block;' : 'display:none;' ?>">
+          <button id="loadMoreBtn" data-admc-manage="settings_shop_ui_labels" data-admc-id="<?= $uiLabels['id'] ?? 1 ?>"
+                  style="padding:14px 40px;border:1.5px solid #202c22;background:none;color:#202c22;font-family:inherit;font-size:15px;font-weight:600;border-radius:7px;cursor:pointer;transition:all 0.2s;"
+                  onmouseover="this.style.background='#202c22';this.style.color='#fff';" onmouseout="this.style.background='none';this.style.color='#202c22';">
+            <?= htmlspecialchars($loadMoreTxt, ENT_QUOTES, 'UTF-8') ?>
+          </button>
         </div>
+      </div>
       </div>
     </div>
   </section>

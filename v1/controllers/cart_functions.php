@@ -235,12 +235,44 @@ function updateCartQuantity($data) {
     $cartId = $data['cart_id'] ?? null;
     $qty    = (int)($data['quantity'] ?? 0);
     $userId = getCartUserId();
+    
     if (!$cartId || $qty < 0) jsonResponse(['success' => false, 'error' => 'Invalid data']);
-    
-    $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ? AND (user_id COLLATE utf8mb4_unicode_ci) = ?")->execute([$qty, $cartId, $userId]);
-    if ($qty === 0) $conn->prepare("DELETE FROM cart WHERE id = ? AND (user_id COLLATE utf8mb4_unicode_ci) = ?")->execute([$cartId, $userId]);
-    
-    jsonResponse(['success' => true, 'cart_count' => getCartCount($userId)]);
+
+    try {
+        // 1. Fetch variant_id and product_id for this cart record
+        $stmt = $conn->prepare("SELECT product_id, variant_id FROM cart WHERE id = ? AND (user_id COLLATE utf8mb4_unicode_ci) = ?");
+        $stmt->execute([$cartId, $userId]);
+        $cartRec = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$cartRec) jsonResponse(['success' => false, 'error' => 'Cart item not found.']);
+
+        // 2. Resolve stock
+        $vIds = array_filter(explode(',', $cartRec['variant_id'] ?? ''));
+        $minStock = 999;
+
+        if (!empty($vIds)) {
+            $placeholders = implode(',', array_fill(0, count($vIds), '?'));
+            $vStmt = $conn->prepare("SELECT MIN(input_inventory) FROM variants WHERE id IN ($placeholders)");
+            $vStmt->execute($vIds);
+            $minStock = (int)$vStmt->fetchColumn();
+        } else {
+            // Base product fallback
+            $fbStmt = $conn->prepare("SELECT input_inventory FROM variants WHERE (product_hash_id COLLATE utf8mb4_unicode_ci) = ? LIMIT 1");
+            $fbStmt->execute([$cartRec['product_id']]);
+            $minStock = (int)$fbStmt->fetchColumn();
+        }
+
+        if ($qty > $minStock) {
+            jsonResponse(['success' => false, 'error' => "Only $minStock items left in stock."]);
+        }
+
+        $conn->prepare("UPDATE cart SET quantity = ? WHERE id = ? AND (user_id COLLATE utf8mb4_unicode_ci) = ?")->execute([$qty, $cartId, $userId]);
+        if ($qty === 0) $conn->prepare("DELETE FROM cart WHERE id = ? AND (user_id COLLATE utf8mb4_unicode_ci) = ?")->execute([$cartId, $userId]);
+        
+        jsonResponse(['success' => true, 'cart_count' => getCartCount($userId)]);
+    } catch (Exception $e) {
+        jsonResponse(['success' => false, 'error' => 'Database error during update.']);
+    }
 }
 
 function removeCartItem($data) {

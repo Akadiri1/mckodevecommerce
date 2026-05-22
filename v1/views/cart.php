@@ -725,7 +725,18 @@ function doCartUpdate(cartId, qty) {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({cart_id: cartId, quantity: parseInt(qty)})
-  }).then(function(r){ return r.json(); }).then(function(){ location.reload(); });
+  }).then(function(r){ return r.json(); }).then(function(res){ 
+      if (res.success) {
+          location.reload(); 
+      } else if (window.Venora) {
+          window.Venora.showToast(res.error || 'Update failed', 'error');
+          // Optional: slight delay before reload to let user read toast
+          setTimeout(function() { location.reload(); }, 2000);
+      } else {
+          alert(res.error || 'Update failed');
+          location.reload();
+      }
+  });
 }
 function doCartRemove(cartId) {
   fetch(_cartBase + '/cart-remove', {
