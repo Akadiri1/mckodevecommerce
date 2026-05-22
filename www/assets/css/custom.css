@@ -1,4 +1,4 @@
-﻿/* =============================================================
+/* =============================================================
    Venora E-Commerce — Custom CSS
    Extends venora.css with: quick-view modal, cart drawer,
    toast notifications, filters sidebar, badges, wishlist,
@@ -1586,12 +1586,12 @@ section.products.hero-section {
 .home-hero-inner {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* push content toward bottom */
+  justify-content: center; /* center content vertically */
   flex: 1;
   min-height: inherit;
-  padding-top: 160px;   /* clear navbar */
-  padding-bottom: 60px; /* breathing room above bottom edge */
-  gap: 48px;            /* space between content and trust badges */
+  padding-top: 100px;   /* clear navbar */
+  padding-bottom: 40px; /* breathing room above bottom edge */
+  gap: 40px;            /* space between content and trust badges */
 }
 /* Remove the empty spacer div from layout */
 .home-hero-inner > div:first-child:empty {
@@ -2564,10 +2564,10 @@ body.page-light-navbar .hamburger-line {
 /* ── Hero inner layout — mobile ─────────────────────────────── */
 @media (max-width: 991px) {
   .home-hero-inner {
-    justify-content: flex-start !important;
-    padding-top: calc(38vh - 35px) !important;
-    padding-bottom: 40px !important;
-    gap: 0 !important; /* control spacing per-element below */
+    justify-content: center !important;
+    padding-top: 90px !important;
+    padding-bottom: 30px !important;
+    gap: 24px !important;
   }
   .home-hero-top .heading-01 {
     font-size: clamp(1.9rem, 7.5vw, 3rem) !important;
@@ -2730,10 +2730,10 @@ body.page-light-navbar .navbar.scrolled {
 
 /* ── Homepage Hero Layout Adjustments ───────────────────── */
 .hero-bottom {
-  margin-top: 60px !important;
+  margin-top: 24px !important;
 }
 .home-hero-top {
-  margin-top: -135px !important;
+  margin-top: 0 !important;
 }
 @media (max-width: 991px) {
   .home-hero-top {
