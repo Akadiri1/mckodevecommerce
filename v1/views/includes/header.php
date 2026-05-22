@@ -87,7 +87,7 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
     .btn-text-wrap .cta-text, .submit-button-02 span,
     .happy-client-card .heading-05, .product-card .add-to-card-02 .p-01,
     .nav-icon-btn span[style*='background:#16a34a'],
-    .stock-badge, .place-order-btn, .newsletter-popup-btn,
+    .place-order-btn, .newsletter-popup-btn,
     .cart-drawer-count {
       color: #ffffff !important;
     }
