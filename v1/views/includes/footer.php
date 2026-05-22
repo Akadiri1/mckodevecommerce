@@ -6,11 +6,12 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
 
   <!-- ── Footer ──────────────────────────────────────────────── -->
   <style>
-    .footer-section { background-color: var(--surface-colour, #ffffff) !important; }
+    .footer-section { background-color: transparent !important; }
+    .footer-inner { background-color: var(--primary, #202c22) !important; }
     .footer-section .cta {
       background-image: none !important;
-      background-color: var(--surface-colour, #ffffff) !important;
-      color: var(--primary) !important;
+      background-color: var(--primary, #202c22) !important;
+      color: #ffffff !important;
     }
   </style>
   <section class="footer-section">

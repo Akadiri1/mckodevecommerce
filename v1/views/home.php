@@ -145,12 +145,12 @@ include APP_PATH . "/views/includes/header.php";
           </div>
           <div class="scroll-text-wrap" data-w-id="b84d2d52-ab61-6c00-c526-8f2d9cdc5053"
                style="opacity:0;-webkit-transform:translate3d(0, 20%, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-moz-transform:translate3d(0, 20%, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);-ms-transform:translate3d(0, 20%, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);transform:translate3d(0, 20%, 0) scale3d(1, 1, 1) rotateX(0) rotateY(0) rotateZ(0) skew(0, 0)">
-            <div class="scroll-icon-wrap" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>">
-              <svg class="scroll-icon _01" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:100%; height:100%;">
-                <path d="M6 9l6 6 6-6"/>
-              </svg>
+            <div class="mouse-scroll-indicator" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>">
+              <div class="mouse-wheel"></div>
             </div>
-            <div class="heading-06" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>">
+            <div class="heading-06"
+                 data-admc-manage="settings_home_hero"
+                 data-admc-id="<?= $hero['id'] ?? 1 ?>">
               <?= htmlspecialchars($hero['input_scroll_text'] ?? 'Scroll Down', ENT_QUOTES, 'UTF-8') ?>
             </div>
           </div>

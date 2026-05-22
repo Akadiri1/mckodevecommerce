@@ -2733,8 +2733,14 @@ body.page-light-navbar .navbar.scrolled {
   margin-top: 60px !important;
 }
 .home-hero-top {
-  margin-top: -74px !important;
+  margin-top: -135px !important;
 }
+@media (max-width: 991px) {
+  .home-hero-top {
+    margin-top: 0 !important;
+  }
+}
+
 
 
 

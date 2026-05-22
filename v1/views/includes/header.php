@@ -45,35 +45,35 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   // ── ADMC Theme & Colour System ──────────────────────────────
   $style = !empty($websiteStyle) ? $websiteStyle[0] : [];
   
-  // Refactor: use 'color' for text and 'secondary_color' for background
-  $textColor      = $style['color'] ?? '#072708';
-  $primaryColor   = $textColor; // Link primary brand color to the text color picker
-  if ($textColor && strpos($textColor, '#') !== 0) { $textColor = '#' . $textColor; $primaryColor = $textColor; }
+  // Refactor: Use 'color' for Primary Text/Brand and 'secondary_color' for Backgrounds
+  $primaryColor = $style['color'] ?? '#072708';
+  if ($primaryColor && strpos($primaryColor, '#') !== 0) { $primaryColor = '#' . $primaryColor; }
   
-  $bgColor        = $style['secondary_color'] ?? '#f9f9f7';
+  $bgColor = $style['secondary_color'] ?? '#f9f9f7';
   if ($bgColor && strpos($bgColor, '#') !== 0) { $bgColor = '#' . $bgColor; }
 
-  // Fallbacks for other specific tokens
-  $surfaceColor   = $style['bgcolor_surface'] ?? '#ffffff';
-  $textBody       = $style['textcolor_body']  ?? '#5c5f6a';
-  $textMuted      = $style['textcolor_muted'] ?? '#9ca3af';
+  // Mapped tokens for internal consistency
+  $textHead  = $primaryColor;
+  $textBody  = '#5c5f6a';
+  $textMuted = '#9ca3af';
   ?>
-  <style data-admc-manage="website_status" data-admc-id="<?= $style['id'] ?? 1 ?>">
+  <style>
     :root {
-      --primary: <?= htmlspecialchars($primaryColor, ENT_QUOTES, 'UTF-8') ?>;
-      --primary-rgb: <?= hexToRgb($primaryColor) ?>;
+      /* Hardcoded Template Defaults */
+      --primary: #202c22;
+      --primary-rgb: 32, 44, 34;
       --dark-green-colour: var(--primary);
       --dash-accent: var(--primary);
       
-      --bg-colour: <?= htmlspecialchars($bgColor, ENT_QUOTES, 'UTF-8') ?>;
-      --v-bg-dark: var(--bg-colour);
+      --bg-colour: #ffffff;
+      --v-bg-dark: #202c22;
       
-      --surface-colour: <?= htmlspecialchars($surfaceColor, ENT_QUOTES, 'UTF-8') ?>;
-      --v-white: var(--surface-colour);
+      --surface-colour: #ffffff;
+      --v-white: #ffffff;
       
-      --text-primary: <?= htmlspecialchars($textColor, ENT_QUOTES, 'UTF-8') ?>;
-      --text-secondary: <?= htmlspecialchars($textBody, ENT_QUOTES, 'UTF-8') ?>;
-      --v-gray: <?= htmlspecialchars($textMuted, ENT_QUOTES, 'UTF-8') ?>;
+      --text-primary: #202c22;
+      --text-secondary: #5c5f6a;
+      --v-gray: #9ca3af;
     }
     
     body {
@@ -81,37 +81,42 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
       color: var(--text-secondary);
     }
     
-    /* Cart Sidebar Theme Integration */
-    .cart-drawer { background: var(--surface-colour) !important; }
-    .cart-drawer-header { border-bottom-color: rgba(var(--primary-rgb), 0.1); }
-    .cart-item { border-bottom-color: rgba(var(--primary-rgb), 0.05); }
-    .cart-item h4 { color: var(--text-primary); }
-    
-    /* Professional Contrast Enforcement */
-    /* These elements MUST always have white text to look professional on primary backgrounds */
+    /* Professional Contrast Enforcement — Must STAY White on Primary Buttons */
     .btn-02-link, .submit-button-02, .modal-add-to-cart, 
     .v-badge, .add-to-card-02, .cart-checkout-btn, .cart-badge,
     .btn-text-wrap .cta-text, .submit-button-02 span,
     .happy-client-card .heading-05, .product-card .add-to-card-02 .p-01,
     .nav-icon-btn span[style*='background:#16a34a'],
-    .stock-badge, .place-order-btn, .newsletter-popup-btn {
+    .stock-badge, .place-order-btn, .newsletter-popup-btn,
+    .cart-drawer-count {
       color: #ffffff !important;
     }
     
-    /* Force white icons in these primary elements */
+    /* Footer strictly stays dark with white text */
+    .footer-section h1, .footer-section h2, .footer-section h3, 
+    .footer-section .p-01, .footer-section .p-02, .footer-section a {
+      color: #ffffff !important;
+    }
+    
+    /* Force white icons in primary brand elements */
     .btn-02-link svg, .submit-button-02 svg, .modal-add-to-cart svg,
     .add-to-card-02 img { 
       filter: brightness(0) invert(1) !important;
       stroke: #ffffff !important; 
     }
     
-    /* Ensure the cart count bubble stays white */
-    .cart-drawer-count { color: #ffffff !important; background-color: var(--primary) !important; }
+    /* Components */
+    .cart-drawer { background: #ffffff !important; border-left: 1px solid #eee; }
+    .cart-drawer-header { border-bottom-color: #eee; }
+    .cart-drawer-title { color: var(--text-primary) !important; }
+    .cart-item { border-bottom-color: #f5f5f5; }
+    .cart-item h4 { color: var(--text-primary) !important; }
+    .cart-item-variant { color: var(--text-secondary) !important; }
+    .cart-item-price { color: var(--primary) !important; }
+    .cart-subtotal-label, .cart-subtotal-value { color: var(--text-primary) !important; }
+    .cart-subtotal-note { color: var(--text-secondary) !important; }
     
-    /* Global specific overrides */
     .product-name-price .heading-06 a { color: var(--text-primary) !important; }
-    .footer-section h1, .footer-section h2, .footer-section h3 { color: var(--text-primary) !important; }
-    .p-01, .p-02 { color: var(--text-secondary); }
   </style>
 
 

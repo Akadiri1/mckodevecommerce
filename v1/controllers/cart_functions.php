@@ -73,6 +73,7 @@ function getCartItems() {
             ORDER BY c.date_created DESC, c.time_created DESC
         ");
         $stmt->execute([':user_id' => $userId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $totalNgn = 0;
         $totalUsd = 0;
