@@ -39,7 +39,12 @@ foreach ($variants as $v) {
     }
 }
 
-$basePrice = $usdToggle === 1 ? ($details['price_range_usd']['price'] ?? $details['price_range_usd']['min'] ?? 0) : ($details['price_range_ngn']['price'] ?? $details['price_range_ngn']['min'] ?? 0);
+// Correctly resolve initial prices
+$initialNgn = ($details['price_range_ngn']['price'] ?? $details['price_range_ngn']['min'] ?? 0);
+$initialUsd = ($details['price_range_usd']['price'] ?? $details['price_range_usd']['min'] ?? 0);
+$isRangeNgn = isset($details['price_range_ngn']['min']) && $details['price_range_ngn']['min'] != $details['price_range_ngn']['max'];
+$isRangeUsd = isset($details['price_range_usd']['min']) && $details['price_range_usd']['min'] != $details['price_range_usd']['max'];
+
 $reviews = $details['reviews'] ?? []; 
 $avgRating = $details['input_rating'] ?? 4.5;
 
@@ -104,12 +109,15 @@ include APP_PATH . "/views/includes/header.php";
             <?php if (!empty($productCategoryName)): ?>
               <div class="tagline caps color-gray" style="margin-bottom:8px;"><?= htmlspecialchars($productCategoryName, ENT_QUOTES, "UTF-8") ?></div>
             <?php endif; ?>
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-              <div class="heading-04" id="detailPrice"><?= formatPrice($basePrice, $sym) ?></div>
-            </div>
           </div>
 
           <p class="p-01 color-gray" style="margin-bottom:24px;" data-admc-manage="panel_product" data-admc-id="<?= $details["id"] ?>"><?= previewBody($details["description"] ?? "", 40) ?></p>
+
+          <!-- Price Display (Moved Up to match Modal) -->
+          <div style="display:flex !important; flex-direction:column !important; gap:4px !important; margin-bottom:24px !important; align-items: flex-start !important; text-align: left !important;">
+            <div class="heading-04" id="detailPrice" style="text-align: left !important;"><?= ($isRangeNgn ? 'From ' : '') . formatPrice($initialNgn, "₦") ?></div>
+            <div style="font-size:16px; color:#888; font-weight:500; text-align: left !important;" id="detailPriceUSD"><?= ($isRangeUsd ? 'From ' : '') . formatPrice($initialUsd, "$") ?></div>
+          </div>
 
           <div class="add-to-cart-section" id="addToCartSection">
             <?php if (!empty($allOptions)): ?>
@@ -131,32 +139,30 @@ include APP_PATH . "/views/includes/header.php";
 
             <div class="quantity-outer" style="margin-bottom:20px;">
               <label class="p-02 caps" style="display:block;margin-bottom:8px;">Quantity</label>
-              <div class="quantity-wrap" style="display:flex;align-items:center;gap:16px;">
+              <div class="quantity-wrap" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                 <div class="qty-control">
                   <button type="button" class="qty-btn" data-action="decrease">−</button>
                   <input class="qty-input" id="detailQty" type="number" value="1" min="1">
                   <button type="button" class="qty-btn" data-action="increase">+</button>
                 </div>
-                <div class="heading-04" id="detailPriceDisplay"><?= formatPrice($basePrice, $sym) ?></div>
+                
+                <button type="button" id="detailAddToCart" class="btn-add-to-cart-main" 
+                        style="flex:1; min-width:160px; height:48px; border:none; border-radius:10px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;"
+                        data-product-id="<?= $details["hash_id"] ?>">
+                  Add to Cart
+                </button>
+                
+                <button type="button" class="modal-wishlist-btn" id="detailWishlist" data-id="<?= $details["hash_id"] ?>" style="width:48px; height:48px; display:flex; align-items:center; justify-content:center; border:1.5px solid #eee; border-radius:10px; background:#fff; cursor:pointer;">
+                  <img src="<?= $baseUrl ?>/assets/img/icons/heart-outline.svg" alt="Wishlist" id="detailWishlistImg" style="width:20px; height:20px;">
+                </button>
               </div>
             </div>
 
             <?php $stock = $details['base_inventory'] ?? 0; ?>
-            <div class="product-stock-status" id="stockStatus" style="margin-bottom:16px;">
+            <div class="product-stock-status" id="stockStatus" style="margin-bottom:24px;">
                <?php if ($stock <= 0): ?><span class="stock-badge stock-out">Out of stock</span>
                <?php elseif ($stock <= 5): ?><span class="stock-badge stock-low">Only <?= $stock ?> left</span>
                <?php else: ?><span class="stock-badge stock-high">In stock</span><?php endif; ?>
-            </div>
-
-            <div class="add-cart-btn" style="display:flex;gap:12px;align-items:center;margin-bottom:20px;">
-              <button type="button" id="detailAddToCart" class="btn-add-to-cart-main" 
-                      data-product-id="<?= $details["hash_id"] ?>"
-                      <?= $stock <= 0 ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : '' ?>>
-                <?= $stock <= 0 ? 'Out of Stock' : 'Add to Cart' ?>
-              </button>
-              <button type="button" class="modal-wishlist-btn" id="detailWishlist" data-id="<?= $details["hash_id"] ?>">
-                <img src="<?= $baseUrl ?>/assets/img/icons/heart-outline.svg" alt="Wishlist" id="detailWishlistImg">
-              </button>
             </div>
           </div>
         </div>
@@ -169,9 +175,9 @@ include APP_PATH . "/views/includes/header.php";
 (function() {
   const base = window.VENORA_BASE_URL || '';
   const productHash = "<?= $details['hash_id'] ?>";
-  const allVariants = <?= json_encode($variants) ?>;
-  const initialBasePrice = parseFloat("<?= $basePrice ?>");
-  const currencySym = "<?= $sym ?>";
+  const allVariants = <?= json_encode(array_values($variants)) ?>;
+  const initialBaseNgn = parseFloat("<?= $initialNgn ?>");
+  const initialBaseUsd = parseFloat("<?= $initialUsd ?>");
 
   window.currentVariantId = "";
 
@@ -186,62 +192,70 @@ include APP_PATH . "/views/includes/header.php";
   });
 
   function resolveVariant() {
-    const selectedValueIds = Array.from(document.querySelectorAll(".variant-btn.active")).map(b => parseInt(b.dataset.valueId));
+    const activeBtns = Array.from(document.querySelectorAll(".variant-btn.active"));
+    const selectedValueIds = activeBtns.map(b => parseInt(b.dataset.valueId));
     const totalGroups = document.querySelectorAll(".modal-variant-options").length;
     
-    if (selectedValueIds.length > 0) {
-      let totalNgn = 0;
-      let totalUsd = 0;
-      let matchedVids = [];
-      let minStock = 999;
+    // 1. Filter variants based on selection
+    let possibleVariants = allVariants.filter(v => {
+      const vValIds = v.options.map(o => o.value_id);
+      return selectedValueIds.every(id => vValIds.includes(id));
+    });
 
-      // In this system, each selected option (value_id) matches a record in the 'variants' table.
-      // We need to find the variant ID for each selected value and sum their prices.
-      selectedValueIds.forEach(valId => {
-        // Find the variant record that contains this value_id
-        const vMatch = Object.values(allVariants).find(v => 
-          v.options.some(opt => opt.value_id === valId)
-        );
+    // 2. Dynamic attribute filtering
+    document.querySelectorAll(".modal-variant-options").forEach(group => {
+      group.querySelectorAll(".variant-btn").forEach(btn => {
+        const valId = parseInt(btn.dataset.valueId);
+        const otherSelections = activeBtns
+          .filter(b => b.closest(".modal-variant-options") !== group)
+          .map(b => parseInt(b.dataset.valueId));
+        
+        const isPossible = allVariants.some(v => {
+          const vValIds = v.options.map(o => o.value_id);
+          return [...otherSelections, valId].every(id => vValIds.includes(id));
+        });
 
-        if (vMatch) {
-          totalNgn += parseFloat(vMatch.price_ngn) || 0;
-          totalUsd += parseFloat(vMatch.price_usd) || 0;
-          matchedVids.push(vMatch.id);
-          minStock = Math.min(minStock, vMatch.inventory);
-        }
+        btn.style.opacity = isPossible ? "1" : "0.2";
+        btn.style.pointerEvents = isPossible ? "auto" : "none";
       });
+    });
 
-      if (matchedVids.length > 0) {
-        const displayPrice = "<?= $usdToggle ?>" === "1" ? totalUsd : totalNgn;
-        document.getElementById("detailPrice").textContent = currencySym + parseFloat(displayPrice).toLocaleString(undefined, {minimumFractionDigits: 2});
-        updateStock(minStock);
-        window.currentVariantId = matchedVids.join(',');
-        updateQuantityPrice();
+    // 3. Update Price and Stock
+    const priceEl = document.getElementById("detailPrice");
+    const priceUsdEl = document.getElementById("detailPriceUSD");
+    const addBtn = document.getElementById("detailAddToCart");
+    const stockEl = document.getElementById("stockStatus");
 
-        // Update button state based on stock
-        const btn = document.getElementById("detailAddToCart");
-        if (minStock <= 0) {
-          btn.disabled = true;
-          btn.textContent = "Out of Stock";
-          btn.style.opacity = "0.6";
-          btn.style.cursor = "not-allowed";
+    if (possibleVariants.length > 0) {
+      if (selectedValueIds.length === totalGroups) {
+        const match = possibleVariants[0];
+        priceEl.textContent = "₦" + parseFloat(match.price_ngn).toLocaleString(undefined, {minimumFractionDigits: 2});
+        priceUsdEl.textContent = "$" + parseFloat(match.price_usd).toLocaleString(undefined, {minimumFractionDigits: 2});
+        
+        updateStock(match.inventory);
+        window.currentVariantId = match.id;
+
+        if (match.inventory <= 0) {
+          addBtn.disabled = true; addBtn.textContent = "Out of Stock"; addBtn.style.opacity = "0.6";
         } else {
-          btn.disabled = false;
-          btn.textContent = "Add to Cart";
-          btn.style.opacity = "1";
-          btn.style.cursor = "pointer";
+          addBtn.disabled = false; addBtn.textContent = "Add to Cart"; addBtn.style.opacity = "1";
         }
+      } else {
+        const pricesNgn = possibleVariants.map(v => parseFloat(v.price_ngn));
+        const pricesUsd = possibleVariants.map(v => parseFloat(v.price_usd));
+        const minNgn = Math.min(...pricesNgn);
+        const minUsd = Math.min(...pricesUsd);
+        
+        priceEl.textContent = (pricesNgn.length > 1 ? "From ₦" : "₦") + minNgn.toLocaleString(undefined, {minimumFractionDigits: 2});
+        priceUsdEl.textContent = (pricesUsd.length > 1 ? "From $" : "$") + minUsd.toLocaleString(undefined, {minimumFractionDigits: 2});
+        
+        window.currentVariantId = "";
+        addBtn.disabled = false; addBtn.textContent = "Add to Cart"; addBtn.style.opacity = "1";
       }
     } else {
+        priceEl.textContent = "From ₦" + initialBaseNgn.toLocaleString(undefined, {minimumFractionDigits: 2});
+        priceUsdEl.textContent = "From $" + initialBaseUsd.toLocaleString(undefined, {minimumFractionDigits: 2});
         window.currentVariantId = "";
-        document.getElementById("detailPrice").textContent = currencySym + initialBasePrice.toLocaleString(undefined, {minimumFractionDigits: 2});
-        updateQuantityPrice();
-
-        // Reset button if options cleared
-        const btn = document.getElementById("detailAddToCart");
-        btn.disabled = false;
-        btn.textContent = "Add to Cart";
-        btn.style.opacity = "1";
     }
   }
 
@@ -252,13 +266,6 @@ include APP_PATH . "/views/includes/header.php";
     else el.innerHTML = '<span class="stock-badge stock-high">In stock</span>';
   }
 
-  function updateQuantityPrice() {
-    const qty = parseInt(document.getElementById("detailQty").value) || 1;
-    const currentPriceText = document.getElementById("detailPrice").textContent.replace(currencySym, "").replace(/,/g, '');
-    const currentPrice = parseFloat(currentPriceText) || 0;
-    document.getElementById("detailPriceDisplay").textContent = currencySym + (currentPrice * qty).toLocaleString(undefined, {minimumFractionDigits: 2});
-  }
-
   // Helper for venora-app.js
   window.getSelectedVariantIds = function() {
     const totalGroups = document.querySelectorAll(".modal-variant-options").length;
@@ -267,7 +274,6 @@ include APP_PATH . "/views/includes/header.php";
       window.Venora.showToast("Please select all options", "error");
       return false;
     }
-    // Now returns the correctly mapped variant IDs (not value IDs)
     return window.currentVariantId;
   };
 
@@ -278,14 +284,49 @@ include APP_PATH . "/views/includes/header.php";
       if (btn.dataset.action === "increase") val++;
       else if (val > 1) val--;
       input.value = val;
-      updateQuantityPrice();
     });
   });
+
+  const cartAddBtn = document.getElementById("detailAddToCart");
+  if (cartAddBtn) {
+    cartAddBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      const vId = window.getSelectedVariantIds();
+      if (vId === false) return;
+      const qty = parseInt(document.getElementById("detailQty").value) || 1;
+      const originalText = cartAddBtn.textContent;
+      cartAddBtn.disabled = true; cartAddBtn.textContent = "Adding...";
+      if (window.Venora) {
+        window.Venora.cartAddItem(productHash, vId, qty, function() {
+          cartAddBtn.disabled = false;
+          cartAddBtn.textContent = originalText;
+        }, cartAddBtn);
+      }
+    });
+  }
+
+  const wishlistBtn = document.getElementById("detailWishlist");
+  if (wishlistBtn) {
+    wishlistBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      if (window.Venora) {
+        window.Venora.toggleWishlist(productHash, wishlistBtn);
+      }
+    });
+  }
+
+  // Auto-select first available combination
+  document.querySelectorAll(".modal-variant-options").forEach(group => {
+    const firstBtn = group.querySelector(".variant-btn");
+    if (firstBtn) firstBtn.classList.add("active");
+  });
+
+  resolveVariant();
 })();
 </script>
 
 <style>
-  :root { --dash-accent: #072708; }
+  :root { --dash-accent: #202c22; }
   .variant-btn { padding: 10px 18px; border: 1.5px solid #eee; background: #fff; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; margin: 4px; color: #333; }
   .variant-btn:hover { border-color: var(--dash-accent); }
   .variant-btn.active { background: var(--dash-accent) !important; color: #fff !important; border-color: var(--dash-accent) !important; }

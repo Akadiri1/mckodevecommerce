@@ -61,21 +61,19 @@ try {
         $baseUsd = $prod['usd'];
         $baseSku = $prod['sku'];
 
-        // Option Value Mappings for 6 variants per product:
-        // Variant 1: Size - 30ml (value_id: 1)
-        // Variant 2: Size - 50ml (value_id: 2)
-        // Variant 3: Skin Type - Normal (value_id: 3)
-        // Variant 4: Skin Type - Oily (value_id: 4)
-        // Variant 5: Skin Type - Dry (value_id: 5)
-        // Variant 6: Skin Type - Sensitive (value_id: 6)
+        // Option Value Mappings for 8 combinations per product:
+        // Size: 30ml (1), 50ml (2)
+        // Skin Type: Normal (3), Oily (4), Dry (5), Sensitive (6)
         
         $variantsConfig = [
-            ['val_id' => 1, 'suffix' => 'SZ-30ML',  'price_scale' => 0.8,  'weight' => '0.1'],
-            ['val_id' => 2, 'suffix' => 'SZ-50ML',  'price_scale' => 1.0,  'weight' => '0.15'],
-            ['val_id' => 3, 'suffix' => 'SK-NORMAL','price_scale' => 1.0,  'weight' => '0.15'],
-            ['val_id' => 4, 'suffix' => 'SK-OILY',  'price_scale' => 1.0,  'weight' => '0.15'],
-            ['val_id' => 5, 'suffix' => 'SK-DRY',   'price_scale' => 1.0,  'weight' => '0.15'],
-            ['val_id' => 6, 'suffix' => 'SK-SENSIT','price_scale' => 1.0,  'weight' => '0.15'],
+            ['val_ids' => [1, 3], 'suffix' => '30ML-NORM', 'price_scale' => 0.8, 'weight' => '0.1'],
+            ['val_ids' => [1, 4], 'suffix' => '30ML-OILY', 'price_scale' => 0.8, 'weight' => '0.1'],
+            ['val_ids' => [1, 5], 'suffix' => '30ML-DRY',  'price_scale' => 0.8, 'weight' => '0.1'],
+            ['val_ids' => [1, 6], 'suffix' => '30ML-SENS', 'price_scale' => 0.8, 'weight' => '0.1'],
+            ['val_ids' => [2, 3], 'suffix' => '50ML-NORM', 'price_scale' => 1.0, 'weight' => '0.15'],
+            ['val_ids' => [2, 4], 'suffix' => '50ML-OILY', 'price_scale' => 1.0, 'weight' => '0.15'],
+            ['val_ids' => [2, 5], 'suffix' => '50ML-DRY',  'price_scale' => 1.0, 'weight' => '0.15'],
+            ['val_ids' => [2, 6], 'suffix' => '50ML-SENS', 'price_scale' => 1.0, 'weight' => '0.15'],
         ];
 
         foreach ($variantsConfig as $conf) {
@@ -93,11 +91,13 @@ try {
             ]);
             $vCount++;
 
-            $insertLink->execute([
-                ':variant_id' => $variantId,
-                ':value_id' => $conf['val_id']
-            ]);
-            $lCount++;
+            foreach ($conf['val_ids'] as $valId) {
+                $insertLink->execute([
+                    ':variant_id' => $variantId,
+                    ':value_id' => $valId
+                ]);
+                $lCount++;
+            }
 
             $variantId++;
         }

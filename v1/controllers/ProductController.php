@@ -332,7 +332,7 @@ class ProductController
 
             if (!isset($variantsData[$hashId][$variantId])) {
                 $origNgn      = (float) $row['input_price_ngn'];
-                $origUsd      = $this->usdEnabled ? (float) $row['input_price_usd'] : 0.0;
+                $origUsd      = (float) $row['input_price_usd'];
                 $variantEntry = [
                     'id'           => (int) $variantId,
                     'price_ngn'    => $origNgn,
@@ -378,7 +378,7 @@ class ProductController
                 $pricesUsd = array_column($variants, 'price_usd');
 
                 $products[$hashId]['price_range_ngn'] = $this->buildRange($pricesNgn);
-                $products[$hashId]['price_range_usd'] = ($this->usdEnabled && !empty($pricesUsd))
+                $products[$hashId]['price_range_usd'] = !empty($pricesUsd)
                     ? $this->buildRange($pricesUsd)
                     : ['price' => 0];
             } else {
@@ -437,7 +437,7 @@ class ProductController
                 $inventories = array_column($result['variants'], 'inventory');
 
                 $result['price_range_ngn']  = $this->buildRange($pricesNgn);
-                $result['price_range_usd']  = ($this->usdEnabled && !empty($pricesUsd))
+                $result['price_range_usd']  = !empty($pricesUsd)
                     ? $this->buildRange($pricesUsd)
                     : ['price' => 0];
                 $result['base_inventory']   = array_sum($inventories);
@@ -446,7 +446,7 @@ class ProductController
                     $baseNgn = array_column($result['variants'], 'base_price_ngn');
                     $baseUsd = array_column($result['variants'], 'base_price_usd');
                     $result['base_price_range_ngn'] = !empty($baseNgn) ? $this->buildRange($baseNgn) : null;
-                    $result['base_price_range_usd'] = ($this->usdEnabled && !empty($baseUsd))
+                    $result['base_price_range_usd'] = !empty($baseUsd)
                         ? $this->buildRange($baseUsd)
                         : null;
                 }
@@ -484,7 +484,7 @@ class ProductController
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $vid     = $row['id'];
             $origNgn = (float) $row['price_ngn'];
-            $origUsd = $this->usdEnabled ? (float) $row['price_usd'] : 0.0;
+            $origUsd = (float) $row['price_usd'];
 
             $entry = [
                 'id'           => (int) $vid,

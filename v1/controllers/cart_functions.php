@@ -95,13 +95,15 @@ function getCartItems() {
             ];
             $totalQty += $item['quantity'];
 
-            // 1. Resolve Variant IDs
+            // 1. Resolve Variant IDs (comma separated or single)
             $vIds = array_filter(explode(',', $row['variant_id'] ?? ''));
             
             if (!empty($vIds)) {
                 $placeholders = implode(',', array_fill(0, count($vIds), '?'));
                 
-                // Fetch UNIQUE variant prices and details first
+                // Fetch variant prices and details
+                // If there are multiple IDs, we sum them (Additive). 
+                // If there is one ID, it represents the full combination.
                 $vStmt = $conn->prepare("SELECT id, input_price_ngn, input_price_usd, input_inventory, image_1 FROM variants WHERE id IN ($placeholders)");
                 $vStmt->execute($vIds);
                 $variantsFound = $vStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -109,6 +111,9 @@ function getCartItems() {
                 if (!empty($variantsFound)) {
                     $firstImg = true;
                     foreach ($variantsFound as $vf) {
+                        // Logic: If it's a combination (1 record linked to many values), 
+                        // we just use that record's price.
+                        // If it's additive (multiple records), we sum them.
                         $item['price_ngn'] += (float)$vf['input_price_ngn'];
                         $item['price_usd'] += (float)$vf['input_price_usd'];
                         $item['inventory'] = min($item['inventory'], (int)$vf['input_inventory']);
@@ -118,7 +123,8 @@ function getCartItems() {
                         }
                     }
 
-                    // 2. Fetch descriptive option names separately
+                    // 2. Fetch descriptive option names
+                    // We join using the provided IDs to see ALL linked values
                     $oStmt = $conn->prepare("
                         SELECT po.option_name, pov.value_name
                         FROM variant_values_link vvl
@@ -130,9 +136,11 @@ function getCartItems() {
                     $oStmt->execute($vIds);
                     $opts = [];
                     while ($oRow = $oStmt->fetch(PDO::FETCH_ASSOC)) {
-                        $opts[] = $oRow['option_name'] . ': ' . $oRow['value_name'];
+                        $label = !empty($oRow['option_name']) ? $oRow['option_name'] . ': ' : '';
+                        $opts[] = $label . $oRow['value_name'];
                     }
-                    $item['variant_options'] = implode(', ', $opts);
+                    // Remove duplicates if multiple links exist to same value
+                    $item['variant_options'] = implode(', ', array_unique($opts));
                 }
             } else {
                 // Fallback to first available variant if no specific variant_id list is stored
@@ -145,26 +153,29 @@ function getCartItems() {
                 }
             }
 
-            $item['total_ngn']       = $item['price_ngn'] * $item['quantity'];
-            $item['total_usd']       = $item['price_usd'] * $item['quantity'];
-            $item['formatted_price'] = formatPrice($usdEnabled ? $item['price_usd'] : $item['price_ngn']);
+            $item['total_ngn']       = (float)($item['price_ngn'] * $item['quantity']);
+            $item['total_usd']       = (float)($item['price_usd'] * $item['quantity']);
+            $item['formatted_price_ngn'] = formatPrice($item['price_ngn'], "₦");
+            $item['formatted_price_usd'] = formatPrice($item['price_usd'], "$");
 
             $cartItems[] = $item;
             $totalNgn   += $item['total_ngn'];
             $totalUsd   += $item['total_usd'];
-        }
+            }
 
-        return [
+            return [
             'success'        => true,
             'items'          => $cartItems,
-            'cart_items'     => $cartItems,
+            'cart_items'     => $cartItems, // compatibility
             'total_ngn'      => round($totalNgn, 2),
             'total_usd'      => round($totalUsd, 2),
+            'formatted_total_ngn' => formatPrice($totalNgn, "₦"),
+            'formatted_total_usd' => formatPrice($totalUsd, "$"),
             'subtotal'       => round($usdEnabled ? $totalUsd : $totalNgn, 2),
             'count'          => count($cartItems),
             'cart_count'     => count($cartItems),
             'total_quantity' => $totalQty
-        ];
+            ];
     } catch (PDOException $e) {
         return ['success' => false, 'error' => $e->getMessage(), 'items' => []];
     }

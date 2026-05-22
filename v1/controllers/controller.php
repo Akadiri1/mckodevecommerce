@@ -879,7 +879,9 @@ if (!function_exists('stringStartWith')) {
       return false;
     }
   }
+}
 
+if (!function_exists('fixImagePath')) {
   function fixImagePath($path) {
       global $baseUrl;
       if (empty($path)) return '';
@@ -890,5 +892,4 @@ if (!function_exists('stringStartWith')) {
       }
       return $path;
   }
-
 }

@@ -30,6 +30,8 @@ try {
         'image_1'             => $details['primary_image'],
         'images'              => $details['images'],
         'variants'            => $details['variants'] ?? [],
+        'price_range_ngn'     => $details['price_range_ngn'] ?? ['price' => 0],
+        'price_range_usd'     => $details['price_range_usd'] ?? ['price' => 0],
         'in_stock'            => $details['base_inventory'] > 0
     ];
 
