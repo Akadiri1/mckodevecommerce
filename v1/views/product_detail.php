@@ -152,8 +152,9 @@ include APP_PATH . "/views/includes/header.php";
                   Add to Cart
                 </button>
                 
-                <button type="button" class="modal-wishlist-btn" id="detailWishlist" data-id="<?= $details["hash_id"] ?>" style="width:48px; height:48px; display:flex; align-items:center; justify-content:center; border:1.5px solid #eee; border-radius:10px; background:#fff; cursor:pointer;">
-                  <img src="<?= $baseUrl ?>/assets/img/icons/heart-outline.svg" alt="Wishlist" id="detailWishlistImg" style="width:20px; height:20px;">
+                <?php $inWishlist = in_array($details['hash_id'], $wishlistIds); ?>
+                <button type="button" class="modal-wishlist-btn <?= $inWishlist ? 'active' : '' ?>" id="detailWishlist" data-id="<?= $details["hash_id"] ?>" style="width:48px; height:48px; display:flex; align-items:center; justify-content:center; border:1.5px solid #eee; border-radius:10px; cursor:pointer;">
+                  <img src="<?= $baseUrl ?>/assets/img/icons/<?= $inWishlist ? 'heart-filled.svg' : 'heart-outline.svg' ?>" alt="Wishlist" id="detailWishlistImg" style="width:20px; height:20px;">
                 </button>
               </div>
             </div>
@@ -330,6 +331,9 @@ include APP_PATH . "/views/includes/header.php";
   .variant-btn { padding: 10px 18px; border: 1.5px solid #eee; background: #fff; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; margin: 4px; color: #333; }
   .variant-btn:hover { border-color: var(--dash-accent); }
   .variant-btn.active { background: var(--dash-accent) !important; color: #fff !important; border-color: var(--dash-accent) !important; }
+  .modal-wishlist-btn { background: #fff; transition: all 0.3s ease; }
+  .modal-wishlist-btn.active { background: var(--primary) !important; border-color: var(--primary) !important; }
+  .modal-wishlist-btn.active img { filter: brightness(0) invert(1) !important; }
   .stock-badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
   .stock-out { background: #fee2e2; color: #b91c1c; }
   .stock-low { background: #fff7ed; color: #c2410c; }

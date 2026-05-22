@@ -296,12 +296,14 @@
     var isRangeNgn = p.price_range_ngn && p.price_range_ngn.min && p.price_range_ngn.min != p.price_range_ngn.max;
     var isRangeUsd = p.price_range_usd && p.price_range_usd.min && p.price_range_usd.min != p.price_range_usd.max;
 
-    content.innerHTML = '<div class="modal-gallery"><img src="' + (currentGallery[0] || '') + '" class="modal-main-img" id="qvMainImg" alt="' + p.input_title + '">' + (currentGallery.length > 1 ? '<div class="modal-thumbs">' + thumbsHtml + '</div>' : '') + '</div><div class="modal-details"><div class="modal-category">' + (p.select_category || '') + '</div><h2 class="modal-title">' + p.input_title + '</h2><div class="modal-rating"><div class="modal-stars">' + starsHtml + '</div><span class="modal-rating-text">(' + (p.input_reviews_count || 0) + ' Reviews)</span></div><p class="modal-short-desc">' + previewBody(p.text_description || '', 30) + '</p><div class="modal-price" style="display:flex !important; flex-direction:column !important; gap:4px !important; align-items: flex-start !important; text-align: left !important; margin-bottom: 20px;"><span class="modal-price-current" id="qvPrice" style="text-align: left !important;">' + (isRangeNgn ? "From " : "") + formatPrice(priceNgn, "₦") + '</span><span style="font-size:14px; color:#888; font-weight:500; text-align: left !important;" id="qvPriceUSD">' + (isRangeUsd ? "From " : "") + formatPrice(priceUsd, "$") + '</span></div>' + variantsHtml + '<div class="modal-qty-row" style="margin-top:20px;"><span class="modal-qty-label">Qty</span><div class="qty-control"><button class="qty-btn" id="qvQtyMinus">−</button><input class="qty-input" id="qvQtyInput" type="number" value="1" min="1"><button class="qty-btn" id="qvQtyPlus">+</button></div></div><div class="product-stock-status" style="margin:16px 0;"></div><div class="modal-actions"><button class="modal-add-to-cart" id="qvAddToCart" data-product-id="' + p.hash_id + '"><img src="' + window.VENORA_BASE_URL + '/assets/img/icons/cart-white.svg" style="width:18px;height:18px;" alt=""> Add to Cart</button><button class="modal-wishlist-btn" id="qvWishlist" data-id="' + p.hash_id + '"><img src="' + window.VENORA_BASE_URL + '/assets/img/icons/heart-outline.svg" alt="Wishlist" id="qvWishlistImg"></button></div></div>';
+    content.innerHTML = '<div class="modal-gallery"><img src="' + (currentGallery[0] || '') + '" class="modal-main-img" id="qvMainImg" alt="' + p.input_title + '">' + (currentGallery.length > 1 ? '<div class="modal-thumbs">' + thumbsHtml + '</div>' : '') + '</div><div class="modal-details"><div class="modal-category">' + (p.select_category || '') + '</div><h2 class="modal-title">' + p.input_title + '</h2><div class="modal-rating"><div class="modal-stars">' + starsHtml + '</div><span class="modal-rating-text">(' + (p.input_reviews_count || 0) + ' Reviews)</span></div><p class="modal-short-desc">' + previewBody(p.text_description || '', 30) + '</p><div class="modal-price" style="display:flex !important; flex-direction:column !important; gap:4px !important; align-items: flex-start !important; text-align: left !important; margin-bottom: 20px;"><span class="modal-price-current" id="qvPrice" style="text-align: left !important;">' + (isRangeNgn ? "From " : "") + formatPrice(priceNgn, "₦") + '</span><span style="font-size:14px; color:#888; font-weight:500; text-align: left !important;" id="qvPriceUSD">' + (isRangeUsd ? "From " : "") + formatPrice(priceUsd, "$") + '</span></div>' + variantsHtml + '<div class="modal-qty-row" style="margin-top:20px;"><span class="modal-qty-label">Qty</span><div class="qty-control"><button class="qty-btn" id="qvQtyMinus">−</button><input class="qty-input" id="qvQtyInput" type="number" value="1" min="1"><button class="qty-btn" id="qvQtyPlus">+</button></div></div><div class="product-stock-status" style="margin:16px 0;"></div><div class="modal-actions" style="display:flex; gap:12px; align-items:center;"><button class="modal-add-to-cart" id="qvAddToCart" data-product-id="' + p.hash_id + '" style="flex:1;"><img src="' + window.VENORA_BASE_URL + '/assets/img/icons/cart-white.svg" style="width:18px;height:18px;" alt=""> Add to Cart</button><button class="modal-wishlist-btn' + (p.is_wishlisted ? ' active' : '') + '" id="qvWishlist" data-id="' + p.hash_id + '" style="width:48px; height:48px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border:1.5px solid #eee; border-radius:10px; cursor:pointer;"><img src="' + window.VENORA_BASE_URL + '/assets/img/icons/' + (p.is_wishlisted ? 'heart-filled.svg' : 'heart-outline.svg') + '" alt="Wishlist" id="qvWishlistImg" style="width:20px; height:20px;"></button></div></div>';
 
-    // Auto-select first options in modal
+    // Auto-select first value in each option group so price shows immediately
     $$('.modal-variant-options', qvModal).forEach(function(group) {
-        var firstBtn = $('.modal-variant-btn', group);
-        if (firstBtn) firstBtn.classList.add('active');
+        var firstBtn = group.querySelector('.modal-variant-btn');
+        if (firstBtn && !group.querySelector('.modal-variant-btn.active')) {
+          firstBtn.classList.add('active');
+        }
     });
 
     resolveVariantInModal();
@@ -321,15 +323,6 @@
       cartAddItem(p.hash_id, match.id, qty, function() { btn.disabled = false; btn.innerHTML = '<img src="' + window.VENORA_BASE_URL + '/assets/img/icons/cart-white.svg" style="width:18px;height:18px;" alt=""> Add to Cart'; closeQuickView(); hideOverlay(); }, btn);
     });
     on($('#qvWishlist', qvModal), 'click', function() { toggleWishlist(p.hash_id, this); });
-
-    // Auto-select first value in each option group so price shows immediately
-    $$('.modal-variant-options', qvModal).forEach(function(group) {
-      var firstBtn = group.querySelector('.modal-variant-btn');
-      if (firstBtn && !group.querySelector('.modal-variant-btn.active')) {
-        firstBtn.classList.add('active');
-      }
-    });
-    resolveVariantInModal();
   }
 
   function resolveVariantInModal() {
@@ -408,7 +401,13 @@
     .then(r => r.json()).then(data => {
       if (data.login_required) { showToast('Please login first', 'error'); setTimeout(() => { window.location.href = baseUrl + '/customer-login'; }, 1200); return; }
       showToast(data.added ? 'Added to wishlist!' : 'Removed from wishlist');
-      if (btn) { btn.classList.toggle('active', data.added); var img = btn.querySelector('img'); if (img) img.src = baseUrl + (data.added ? '/assets/img/icons/heart-filled.svg' : '/assets/img/icons/heart-outline.svg'); }
+      if (btn) { 
+        btn.classList.toggle('active', data.added); 
+        var img = btn.querySelector('img'); 
+        if (img) {
+            img.src = baseUrl + '/assets/img/icons/' + (data.added ? 'heart-filled.svg' : 'heart-outline.svg');
+        } 
+      }
     });
   }
 

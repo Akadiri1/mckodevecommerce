@@ -32,7 +32,8 @@ try {
         'variants'            => $details['variants'] ?? [],
         'price_range_ngn'     => $details['price_range_ngn'] ?? ['price' => 0],
         'price_range_usd'     => $details['price_range_usd'] ?? ['price' => 0],
-        'in_stock'            => $details['base_inventory'] > 0
+        'in_stock'            => $details['base_inventory'] > 0,
+        'is_wishlisted'       => in_array($details['hash_id'], $_SESSION['wishlist'] ?? [])
     ];
 
     if (ob_get_level()) ob_clean();
