@@ -30,7 +30,7 @@ if (!empty($hero)) {
 }
 
 // Load first page of products for initial render (6 per page)
-$featuredProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "input_order", 6);
+$featuredProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "id", 6);
 
 // Simple pre-indexing for initial PHP render
 $categories = selectContentAsc($conn, "selection_product_category", ["visibility" => "show"], "id", 4);
@@ -56,6 +56,12 @@ include APP_PATH . "/views/includes/header.php";
 <?php/*##cb1o##*/?>
 
 <!-- HERO SECTION -->
+ <style>
+  .heading-01 {
+    font-size: 35px;
+    line-height: 56px;
+  }
+ </style>
 <?php/*##cbcode_10001Heroo##*/?>
 <div data-cbcodesection="cbcode_10001Hero">
   <section class="home-hero" data-w-id="29aa9955-28b7-3f33-84f0-dfd0b6c1b7e0"

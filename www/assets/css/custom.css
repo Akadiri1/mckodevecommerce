@@ -2694,3 +2694,49 @@ body.page-light-navbar .navbar.scrolled {
   }
 }
 
+/* ── Checkout Page Responsiveness ───────────────────────── */
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+}
+.checkout-input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.checkout-input-grid.no-margin {
+  margin-bottom: 0;
+}
+
+@media (max-width: 991px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .checkout-grid > div:last-child {
+    order: -1; /* Show order summary on top on mobile */
+  }
+  .checkout-grid div[style*='sticky'] {
+    position: static !important;
+  }
+}
+@media (max-width: 480px) {
+  .checkout-input-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Homepage Hero Layout Adjustments ───────────────────── */
+.hero-bottom {
+  margin-top: 60px !important;
+}
+.home-hero-top {
+  margin-top: -74px !important;
+}
+
+
+
+
+

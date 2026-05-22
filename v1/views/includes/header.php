@@ -45,23 +45,18 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   // ── ADMC Theme & Colour System ──────────────────────────────
   $style = !empty($websiteStyle) ? $websiteStyle[0] : [];
   
-  $primaryColor = $style['color'] ?? '#072708';
-  if ($primaryColor && strpos($primaryColor, '#') !== 0) { $primaryColor = '#' . $primaryColor; }
+  // Refactor: use 'color' for text and 'secondary_color' for background
+  $textColor      = $style['color'] ?? '#072708';
+  $primaryColor   = $textColor; // Link primary brand color to the text color picker
+  if ($textColor && strpos($textColor, '#') !== 0) { $textColor = '#' . $textColor; $primaryColor = $textColor; }
   
-  $bgColor    = $style['bgcolor_background'] ?? '#f9f9f7';
+  $bgColor        = $style['secondary_color'] ?? '#f9f9f7';
   if ($bgColor && strpos($bgColor, '#') !== 0) { $bgColor = '#' . $bgColor; }
 
-  $surfaceColor = $style['bgcolor_surface'] ?? '#ffffff';
-  if ($surfaceColor && strpos($surfaceColor, '#') !== 0) { $surfaceColor = '#' . $surfaceColor; }
-
-  $textHead  = $style['textcolor_heading']  ?? '#072708';
-  if ($textHead && strpos($textHead, '#') !== 0) { $textHead = '#' . $textHead; }
-
-  $textBody  = $style['textcolor_body']     ?? '#5c5f6a';
-  if ($textBody && strpos($textBody, '#') !== 0) { $textBody = '#' . $textBody; }
-
-  $textMuted = $style['textcolor_muted']    ?? '#9ca3af';
-  if ($textMuted && strpos($textMuted, '#') !== 0) { $textMuted = '#' . $textMuted; }
+  // Fallbacks for other specific tokens
+  $surfaceColor   = $style['bgcolor_surface'] ?? '#ffffff';
+  $textBody       = $style['textcolor_body']  ?? '#5c5f6a';
+  $textMuted      = $style['textcolor_muted'] ?? '#9ca3af';
   ?>
   <style data-admc-manage="website_status" data-admc-id="<?= $style['id'] ?? 1 ?>">
     :root {
@@ -74,9 +69,9 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
       --v-bg-dark: var(--bg-colour);
       
       --surface-colour: <?= htmlspecialchars($surfaceColor, ENT_QUOTES, 'UTF-8') ?>;
-      --v-white: var(--surface-colour); /* For cards, sidebar, etc */
+      --v-white: var(--surface-colour);
       
-      --text-primary: <?= htmlspecialchars($textHead, ENT_QUOTES, 'UTF-8') ?>;
+      --text-primary: <?= htmlspecialchars($textColor, ENT_QUOTES, 'UTF-8') ?>;
       --text-secondary: <?= htmlspecialchars($textBody, ENT_QUOTES, 'UTF-8') ?>;
       --v-gray: <?= htmlspecialchars($textMuted, ENT_QUOTES, 'UTF-8') ?>;
     }
@@ -92,17 +87,26 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
     .cart-item { border-bottom-color: rgba(var(--primary-rgb), 0.05); }
     .cart-item h4 { color: var(--text-primary); }
     
-    /* Button & Element Contrast Protection */
+    /* Professional Contrast Enforcement */
+    /* These elements MUST always have white text to look professional on primary backgrounds */
     .btn-02-link, .submit-button-02, .modal-add-to-cart, 
-    .v-badge, .add-to-card-02, .cart-checkout-btn, .cart-badge {
+    .v-badge, .add-to-card-02, .cart-checkout-btn, .cart-badge,
+    .btn-text-wrap .cta-text, .submit-button-02 span,
+    .happy-client-card .heading-05, .product-card .add-to-card-02 .p-01,
+    .nav-icon-btn span[style*='background:#16a34a'],
+    .stock-badge, .place-order-btn, .newsletter-popup-btn {
       color: #ffffff !important;
     }
-    .btn-02-link .cta-text, .submit-button-02 span { color: #ffffff !important; }
     
-    /* Ensure icons in primary buttons are visible */
-    .btn-02-link svg, .submit-button-02 svg, .modal-add-to-cart svg { 
+    /* Force white icons in these primary elements */
+    .btn-02-link svg, .submit-button-02 svg, .modal-add-to-cart svg,
+    .add-to-card-02 img { 
+      filter: brightness(0) invert(1) !important;
       stroke: #ffffff !important; 
     }
+    
+    /* Ensure the cart count bubble stays white */
+    .cart-drawer-count { color: #ffffff !important; background-color: var(--primary) !important; }
     
     /* Global specific overrides */
     .product-name-price .heading-06 a { color: var(--text-primary) !important; }
@@ -305,6 +309,10 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
       </div>
     </div>
     <div class="cart-drawer-footer">
+      <div class="cart-subtotal-row" style="margin-bottom:8px;">
+        <span class="cart-subtotal-label">Total Items</span>
+        <span class="cart-subtotal-value" id="cartTotalQty">0</span>
+      </div>
       <div class="cart-subtotal-row">
         <span class="cart-subtotal-label">Subtotal</span>
         <span class="cart-subtotal-value" id="cartSubtotal"><?= htmlspecialchars($shop_symbol, ENT_QUOTES, "UTF-8") ?>0.00</span>

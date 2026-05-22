@@ -113,10 +113,12 @@ include APP_PATH . "/views/includes/header.php";
 
           <div class="add-to-cart-section" id="addToCartSection">
             <?php if (!empty($allOptions)): ?>
-              <div class="modal-variants-label" style="text-transform:uppercase; font-weight:bold; margin-bottom:12px; font-size:12px; letter-spacing:1px; color:#000;">VARIANTS:</div>
               <?php foreach ($allOptions as $optId => $opt): ?>
-                <div class="modal-variants" style="margin-bottom:12px;">
-                  <div class="modal-variant-options" data-option-id="<?= $optId ?>">
+                <div class="modal-variants" style="margin-bottom:20px;">
+                  <div class="p-02 caps" style="font-weight:700; margin-bottom:8px; color:var(--text-primary);">
+                    <?= htmlspecialchars($opt['name'], ENT_QUOTES, 'UTF-8') ?>:
+                  </div>
+                  <div class="modal-variant-options" data-option-id="<?= $optId ?>" style="display:flex; flex-wrap:wrap; gap:8px;">
                     <?php foreach ($opt['values'] as $val): ?>
                       <button type="button" class="variant-btn" data-value-id="<?= $val['id'] ?>">
                         <?= htmlspecialchars($val['name'], ENT_QUOTES, 'UTF-8') ?>

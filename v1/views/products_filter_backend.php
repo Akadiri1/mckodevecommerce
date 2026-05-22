@@ -13,7 +13,7 @@ $sym      = htmlspecialchars($shop_symbol ?? '$', ENT_QUOTES, 'UTF-8');
 $baseU    = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 $addToCartIcon = "https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69767e8def202704be8ff087_Vector (1).svg";
 try {
-    $allProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "input_order", 200);
+    $allProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "id", 200);
 } catch (Exception $e) {
     echo json_encode(['count' => 0, 'products' => [], 'has_more' => false, 'error' => 'db']); die;
 }

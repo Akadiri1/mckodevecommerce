@@ -104,7 +104,7 @@ include APP_PATH . "/views/includes/header.php";
   </div>
 
   <form method="POST" action="" id="checkoutForm">
-  <div style="display:grid;grid-template-columns:1fr 380px;gap:32px;" class="checkout-grid">
+  <div class="checkout-grid">
 
     <!-- LEFT: Shipping -->
     <div>
@@ -129,7 +129,7 @@ include APP_PATH . "/views/includes/header.php";
 
       <div style="background:#fff;border-radius:12px;padding:28px;margin-bottom:20px;box-shadow:0 1px 8px rgba(0,0,0,0.04);">
         <h3 class="heading-05" style="margin-bottom:20px;">Contact & Shipping</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="checkout-input-grid">
           <input type="text" name="firstname" id="f_first" placeholder="First Name *" value="<?= htmlspecialchars($customerData['input_firstname'] ?? '') ?>" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:8px;" required>
           <input type="text" name="lastname" id="f_last" placeholder="Last Name *" value="<?= htmlspecialchars($customerData['input_lastname'] ?? '') ?>" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:8px;" required>
         </div>
@@ -142,11 +142,11 @@ include APP_PATH . "/views/includes/header.php";
         <div style="margin-bottom:16px;">
           <input type="text" name="street-address-1" id="f_addr" placeholder="Street Address *" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:8px;" required>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div class="checkout-input-grid">
           <input type="text" name="city" id="f_city" placeholder="City *" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:8px;" required>
           <input type="text" name="state" id="f_state" placeholder="State / Province *" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:8px;" required>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="checkout-input-grid no-margin">
           <input type="text" name="country" id="f_country" placeholder="Country *" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:8px;" required>
           <input type="text" name="zip_code" id="f_zip" placeholder="Postcode" style="width:100%;padding:12px;border:1.5px solid #eee;border-radius:8px;">
         </div>

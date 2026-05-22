@@ -74,11 +74,12 @@ function getCartItems() {
         ");
         $stmt->execute([':user_id' => $userId]);
 
+        $totalNgn = 0;
+        $totalUsd = 0;
+        $totalQty = 0;
         $cartItems = [];
-        $totalNgn  = 0;
-        $totalUsd  = 0;
 
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        foreach ($rows as $row) {
             $item = [
                 'cart_id'        => (int) $row['cart_id'],
                 'product_id'     => $row['product_id'],
@@ -90,7 +91,7 @@ function getCartItems() {
                 'price_usd'      => 0,
                 'inventory'      => 999,
             ];
-
+            $totalQty += $item['quantity'];
             // 1. Resolve all selected variant IDs (comma separated)
             $vIds = array_filter(explode(',', $row['variant_id'] ?? ''));
             $optionsArray = [];
@@ -98,14 +99,15 @@ function getCartItems() {
             if (!empty($vIds)) {
                 $placeholders = implode(',', array_fill(0, count($vIds), '?'));
                 $vStmt = $conn->prepare("
-                    SELECT v.input_price_ngn, v.input_price_usd, v.input_inventory, v.image_1, pov.value_name
+                    SELECT v.input_price_ngn, v.input_price_usd, v.input_inventory, v.image_1, po.option_name, pov.value_name
                     FROM variants v
                     LEFT JOIN variant_values_link vvl ON v.id = vvl.variant_id
                     LEFT JOIN product_option_values pov ON vvl.value_id = pov.id
+                    LEFT JOIN product_options po ON pov.option_id = po.id
                     WHERE v.id IN ($placeholders)
                 ");
                 $vStmt->execute($vIds);
-                
+
                 $first = true;
                 while ($vRow = $vStmt->fetch(PDO::FETCH_ASSOC)) {
                     $item['price_ngn'] += (float)$vRow['input_price_ngn'];
@@ -116,10 +118,11 @@ function getCartItems() {
                         $first = false;
                     }
                     if (!empty($vRow['value_name'])) {
-                        $optionsArray[] = $vRow['value_name']; // Show only the value (e.g. 30ml)
+                        $label = !empty($vRow['option_name']) ? $vRow['option_name'] . ': ' : '';
+                        $optionsArray[] = $label . $vRow['value_name']; 
                     }
                 }
-            } else {
+                } else {
                 // Base price fallback if no variants selected
                 $fbStmt = $conn->prepare("SELECT input_price_ngn, input_price_usd FROM variants WHERE (product_hash_id COLLATE utf8mb4_unicode_ci) = ? LIMIT 1");
                 $fbStmt->execute([$row['product_id']]);
@@ -128,10 +131,9 @@ function getCartItems() {
                     $item['price_ngn'] = (float)$fb['input_price_ngn'];
                     $item['price_usd'] = (float)$fb['input_price_usd'];
                 }
-            }
+                }
 
-            $item['variant_options']    = !empty($optionsArray) ? 'Variants: ' . implode(', ', $optionsArray) : '';
-            $item['total_ngn']          = $item['price_ngn'] * $item['quantity'];
+                $item['variant_options']    = !empty($optionsArray) ? implode(', ', $optionsArray) : '';            $item['total_ngn']          = $item['price_ngn'] * $item['quantity'];
             $item['total_usd']          = $item['price_usd'] * $item['quantity'];
             $item['formatted_price']    = formatPrice($item['price_ngn'] ?: $item['price_usd']);
 
@@ -148,7 +150,8 @@ function getCartItems() {
             'total_usd'  => round($totalUsd, 2),
             'subtotal'   => round($totalNgn ?: $totalUsd, 2),
             'count'      => count($cartItems),
-            'cart_count' => count($cartItems)
+            'cart_count' => count($cartItems),
+            'total_quantity' => $totalQty
         ];
     } catch (PDOException $e) {
         return ['success' => false, 'error' => $e->getMessage(), 'items' => []];

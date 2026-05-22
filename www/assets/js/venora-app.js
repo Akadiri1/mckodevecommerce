@@ -88,11 +88,17 @@
     clone.style.position = 'fixed';
     clone.style.top = rect.top + 'px';
     clone.style.left = rect.left + 'px';
-    clone.style.width = rect.width + 'px';
-    clone.style.height = rect.height + 'px';
+    
+    // Limit starting size so it doesn't look too big
+    var startSize = Math.min(rect.width, 120);
+    var ratio = startSize / rect.width;
+    clone.style.width = startSize + 'px';
+    clone.style.height = (rect.height * ratio) + 'px';
+    
     clone.style.zIndex = '999999';
-    clone.style.transition = 'all 1.25s cubic-bezier(0.19, 1, 0.22, 1)';
+    clone.style.transition = 'all 1.5s cubic-bezier(0.19, 1, 0.22, 1)';
     clone.style.pointerEvents = 'none';
+    clone.style.borderRadius = '8px';
     
     document.body.appendChild(clone);
     clone.offsetWidth;
@@ -101,14 +107,14 @@
     clone.style.width = '20px';
     clone.style.height = '20px';
     clone.style.opacity = '0.05';
-    clone.style.transform = 'scale(0.05) rotate(720deg)';
+    clone.style.transform = 'scale(0.05) rotate(1080deg)';
     
     setTimeout(function() {
       clone.remove();
       var parentIcon = target.closest('[data-open-cart]') || target;
       parentIcon.classList.add('cart-wiggle');
       setTimeout(function() { parentIcon.classList.remove('cart-wiggle'); }, 600);
-    }, 1250);
+    }, 1500);
   }
 
   // ── Toast notifications ──────────────────────────────────────
@@ -218,7 +224,12 @@
         var footerEl = $('.cart-drawer-footer');
         if (footerEl) {
           var subtotalText = formatPrice(data.total_ngn || data.total_usd);
-          footerEl.innerHTML = '<div class="cart-subtotal-row">' +
+          var totalQty = data.total_quantity || 0;
+          footerEl.innerHTML = '<div class="cart-subtotal-row" style="margin-bottom:8px;">' +
+              '<span class="cart-subtotal-label">Total Items</span>' +
+              '<span class="cart-subtotal-value" id="cartTotalQty">' + totalQty + '</span>' +
+            '</div>' +
+            '<div class="cart-subtotal-row">' +
               '<span class="cart-subtotal-label">Subtotal</span>' +
               '<span class="cart-subtotal-value" id="cartSubtotal">' + subtotalText + '</span>' +
             '</div>' +
@@ -372,12 +383,11 @@
         });
       });
 
-      variantsHtml += '<div class="modal-variants-label" style="text-transform:uppercase; font-weight:bold; margin-bottom:12px; font-size:12px; letter-spacing:1px; color:#000;">VARIANTS:</div>';
-
       Object.keys(allOptions).forEach(function(oid) {
         var opt = allOptions[oid];
-        variantsHtml += '<div class="modal-variants" style="margin-bottom:12px;">' +
-          '<div class="modal-variant-options" data-option-id="' + oid + '" style="display:flex; flex-wrap:wrap; gap:10px;">' +
+        variantsHtml += '<div class="modal-variants" style="margin-bottom:16px;">' +
+          '<div class="modal-variant-label" style="font-weight:700; margin-bottom:8px; font-size:13px; color:var(--text-primary); text-transform:uppercase;">' + opt.name + ':</div>' +
+          '<div class="modal-variant-options" data-option-id="' + oid + '" style="display:flex; flex-wrap:wrap; gap:8px;">' +
           Object.keys(opt.values).map(function(vid) {
             return '<button type="button" class="modal-variant-btn" data-value-id="' + vid + '">' + opt.values[vid] + '</button>';
           }).join('') +

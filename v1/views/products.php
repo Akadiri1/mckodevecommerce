@@ -12,7 +12,7 @@ foreach ($categories as $c) { $catById[(string)$c['id']] = $c['input_title'] ?? 
 $activeTab = isset($_GET["tab"]) ? htmlspecialchars($_GET["tab"], ENT_QUOTES, "UTF-8") : "";
 
 // ── Fetch all products ────────────────────────────────────────
-$allProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "input_order", 100);
+$allProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "id", 100);
 
 // Pre-index variant prices from new variants table (ADMC: no queries inside loops)
 $allVariantRows = selectContent($conn, "variants", []);
