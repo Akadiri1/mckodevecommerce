@@ -53,7 +53,7 @@ function getCartUserId() {
  * Returns cart items with full product and variant details for the current user.
  */
 function getCartItems() {
-    global $conn;
+    global $conn, $usdEnabled;
     $userId = getCartUserId();
 
     try {
@@ -91,40 +91,51 @@ function getCartItems() {
                 'price_ngn'      => 0,
                 'price_usd'      => 0,
                 'inventory'      => 999,
+                'variant_options'=> '',
             ];
             $totalQty += $item['quantity'];
-            // 1. Resolve all selected variant IDs (comma separated)
+
+            // 1. Resolve Variant IDs
             $vIds = array_filter(explode(',', $row['variant_id'] ?? ''));
-            $optionsArray = [];
             
             if (!empty($vIds)) {
                 $placeholders = implode(',', array_fill(0, count($vIds), '?'));
-                $vStmt = $conn->prepare("
-                    SELECT v.input_price_ngn, v.input_price_usd, v.input_inventory, v.image_1, po.option_name, pov.value_name
-                    FROM variants v
-                    LEFT JOIN variant_values_link vvl ON v.id = vvl.variant_id
-                    LEFT JOIN product_option_values pov ON vvl.value_id = pov.id
-                    LEFT JOIN product_options po ON pov.option_id = po.id
-                    WHERE v.id IN ($placeholders)
-                ");
+                
+                // Fetch UNIQUE variant prices and details first
+                $vStmt = $conn->prepare("SELECT id, input_price_ngn, input_price_usd, input_inventory, image_1 FROM variants WHERE id IN ($placeholders)");
                 $vStmt->execute($vIds);
+                $variantsFound = $vStmt->fetchAll(PDO::FETCH_ASSOC);
 
-                $first = true;
-                while ($vRow = $vStmt->fetch(PDO::FETCH_ASSOC)) {
-                    $item['price_ngn'] += (float)$vRow['input_price_ngn'];
-                    $item['price_usd'] += (float)$vRow['input_price_usd'];
-                    $item['inventory'] = min($item['inventory'], (int)$vRow['input_inventory']);
-                    if (!empty($vRow['image_1']) && $first) {
-                        $item['image'] = fixImagePath($vRow['image_1']);
-                        $first = false;
+                if (!empty($variantsFound)) {
+                    $firstImg = true;
+                    foreach ($variantsFound as $vf) {
+                        $item['price_ngn'] += (float)$vf['input_price_ngn'];
+                        $item['price_usd'] += (float)$vf['input_price_usd'];
+                        $item['inventory'] = min($item['inventory'], (int)$vf['input_inventory']);
+                        if (!empty($vf['image_1']) && $firstImg) {
+                            $item['image'] = fixImagePath($vf['image_1']);
+                            $firstImg = false;
+                        }
                     }
-                    if (!empty($vRow['value_name'])) {
-                        $label = !empty($vRow['option_name']) ? $vRow['option_name'] . ': ' : '';
-                        $optionsArray[] = $label . $vRow['value_name']; 
+
+                    // 2. Fetch descriptive option names separately
+                    $oStmt = $conn->prepare("
+                        SELECT po.option_name, pov.value_name
+                        FROM variant_values_link vvl
+                        JOIN product_option_values pov ON vvl.value_id = pov.id
+                        JOIN product_options po ON pov.option_id = po.id
+                        WHERE vvl.variant_id IN ($placeholders)
+                        ORDER BY po.id ASC
+                    ");
+                    $oStmt->execute($vIds);
+                    $opts = [];
+                    while ($oRow = $oStmt->fetch(PDO::FETCH_ASSOC)) {
+                        $opts[] = $oRow['option_name'] . ': ' . $oRow['value_name'];
                     }
+                    $item['variant_options'] = implode(', ', $opts);
                 }
-                } else {
-                // Base price fallback if no variants selected
+            } else {
+                // Fallback to first available variant if no specific variant_id list is stored
                 $fbStmt = $conn->prepare("SELECT input_price_ngn, input_price_usd FROM variants WHERE (product_hash_id COLLATE utf8mb4_unicode_ci) = ? LIMIT 1");
                 $fbStmt->execute([$row['product_id']]);
                 $fb = $fbStmt->fetch(PDO::FETCH_ASSOC);
@@ -132,11 +143,11 @@ function getCartItems() {
                     $item['price_ngn'] = (float)$fb['input_price_ngn'];
                     $item['price_usd'] = (float)$fb['input_price_usd'];
                 }
-                }
+            }
 
-                $item['variant_options']    = !empty($optionsArray) ? implode(', ', $optionsArray) : '';            $item['total_ngn']          = $item['price_ngn'] * $item['quantity'];
-            $item['total_usd']          = $item['price_usd'] * $item['quantity'];
-            $item['formatted_price']    = formatPrice($item['price_ngn'] ?: $item['price_usd']);
+            $item['total_ngn']       = $item['price_ngn'] * $item['quantity'];
+            $item['total_usd']       = $item['price_usd'] * $item['quantity'];
+            $item['formatted_price'] = formatPrice($usdEnabled ? $item['price_usd'] : $item['price_ngn']);
 
             $cartItems[] = $item;
             $totalNgn   += $item['total_ngn'];
@@ -144,14 +155,14 @@ function getCartItems() {
         }
 
         return [
-            'success'    => true,
-            'items'      => $cartItems,
-            'cart_items' => $cartItems, // compatibility
-            'total_ngn'  => round($totalNgn, 2),
-            'total_usd'  => round($totalUsd, 2),
-            'subtotal'   => round($totalNgn ?: $totalUsd, 2),
-            'count'      => count($cartItems),
-            'cart_count' => count($cartItems),
+            'success'        => true,
+            'items'          => $cartItems,
+            'cart_items'     => $cartItems,
+            'total_ngn'      => round($totalNgn, 2),
+            'total_usd'      => round($totalUsd, 2),
+            'subtotal'       => round($usdEnabled ? $totalUsd : $totalNgn, 2),
+            'count'          => count($cartItems),
+            'cart_count'     => count($cartItems),
             'total_quantity' => $totalQty
         ];
     } catch (PDOException $e) {
@@ -183,23 +194,31 @@ function addToCart($data) {
 
         // 1. Resolve Variant ID if empty (fallback to first available)
         if (empty($variantId)) {
-            $stmt = $conn->prepare("SELECT id FROM variants WHERE (product_hash_id COLLATE utf8mb4_unicode_ci) = ? LIMIT 1");
+            $stmt = $conn->prepare("SELECT id, input_inventory FROM variants WHERE (product_hash_id COLLATE utf8mb4_unicode_ci) = ? AND input_inventory > 0 LIMIT 1");
             $stmt->execute([$productHashId]);
-            $variantId = $stmt->fetchColumn() ?: null;
+            $res = $stmt->fetch(PDO::FETCH_ASSOC);
+            $variantId = $res['id'] ?? null;
+            $stock = (int)($res['input_inventory'] ?? 0);
+        } else {
+            // Check stock for specific variant
+            $stmt = $conn->prepare("SELECT input_inventory FROM variants WHERE id = ?");
+            $stmt->execute([$variantId]);
+            $stock = (int)$stmt->fetchColumn();
         }
 
-        if (!$variantId) jsonResponse(['success' => false, 'error' => 'Product variant not found']);
+        if (!$variantId) jsonResponse(['success' => false, 'error' => 'This product is currently out of stock.']);
+        if ($stock < $quantity) jsonResponse(['success' => false, 'error' => "Only $stock items left in stock."]);
 
         // 2. Check existing using NULL-safe equality and collation fix
         $checkStmt = $conn->prepare("SELECT id, quantity FROM cart WHERE (user_id COLLATE utf8mb4_unicode_ci) = ? AND (product_id COLLATE utf8mb4_unicode_ci) = ? AND (variant_id COLLATE utf8mb4_unicode_ci) <=> ? LIMIT 1");
-        $checkStmt->execute([$userId, $productHashId, $variantId]);
+        $checkStmt->execute([$userId, $productHashId, (string)$variantId]);
         $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
         if ($existing) {
             $conn->prepare("UPDATE cart SET quantity = quantity + ? WHERE id = ?")->execute([$quantity, $existing['id']]);
         } else {
             $conn->prepare("INSERT INTO cart (hash_id, user_id, product_id, variant_id, quantity, date_created, time_created) VALUES (?,?,?,?,?,CURDATE(),CURTIME())")
-                 ->execute(['cart_'.bin2hex(random_bytes(8)), $userId, $productHashId, $variantId, $quantity]);
+                 ->execute(['cart_'.bin2hex(random_bytes(8)), $userId, $productHashId, (string)$variantId, $quantity]);
         }
 
         $count = getCartCount($userId);

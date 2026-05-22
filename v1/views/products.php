@@ -14,13 +14,17 @@ $activeTab = isset($_GET["tab"]) ? htmlspecialchars($_GET["tab"], ENT_QUOTES, "U
 // ── Fetch all products ────────────────────────────────────────
 $allProducts = selectContentDesc($conn, "panel_product", ["visibility" => "show"], "id", 100);
 
-// Pre-index variant prices from new variants table (ADMC: no queries inside loops)
+// Pre-index variant prices and inventory
 $allVariantRows = selectContent($conn, "variants", []);
 $variantPriceIdx = [];
+$variantStockIdx = [];
 foreach ($allVariantRows as $v) {
     $h = $v['product_hash_id'];
     $p = $usdEnabled ? (float)$v['input_price_usd'] : (float)$v['input_price_ngn'];
     if (!isset($variantPriceIdx[$h]) || $p < $variantPriceIdx[$h]) $variantPriceIdx[$h] = $p;
+    
+    if (!isset($variantStockIdx[$h])) $variantStockIdx[$h] = 0;
+    $variantStockIdx[$h] += (int)$v['input_inventory'];
 }
 
 // Pre-index variants (for has_variants flag)
@@ -31,6 +35,7 @@ foreach ($allVariantRows as $av) { $variantsIndexed[$av['product_hash_id']] = tr
 $productsByCategory = ["" => []];
 foreach ($allProducts as &$p) {
     $p['input_price']      = $variantPriceIdx[$p['hash_id']] ?? 0;
+    $p['total_stock']      = $variantStockIdx[$p['hash_id']] ?? 0;
     $p['has_variants']     = isset($variantsIndexed[$p['hash_id']]) ? "true" : "false";
     $p['image_2']          = fixImagePath($p['image_2'] ?? '');
     $p['image_1']          = fixImagePath($p['image_1'] ?? '');
@@ -57,6 +62,31 @@ $addToCartIcon = "https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69
 
 include APP_PATH . "/views/includes/header.php";
 ?>
+
+<style>
+  .stock-badge-main {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .badge-in-stock { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .badge-out-stock { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  
+  .btn-add-disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    background: #eee !important;
+    color: #888 !important;
+  }
+</style>
 
 <div data-cbsection="cb1">
 <?php/*##cb1o##*/?>
@@ -163,6 +193,13 @@ include APP_PATH . "/views/includes/header.php";
                       <div class="w-dyn-item" role="listitem">
                           <div class="product-card">
                             <div class="product-card-img">
+                              <!-- Stock Badge -->
+                              <?php if ($product['total_stock'] <= 0): ?>
+                                <div class="stock-badge-main badge-out-stock">Out of Stock</div>
+                              <?php else: ?>
+                                <div class="stock-badge-main badge-in-stock">In Stock</div>
+                              <?php endif; ?>
+
                               <a class="product-link w-inline-block" href="<?= $detailUrl ?>">
                                 <div data-admc-image="panel_product" data-admc-id="<?= $product['id'] ?>">
                                   <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>"
@@ -185,12 +222,12 @@ include APP_PATH . "/views/includes/header.php";
                                 <img src="<?= $baseUrl ?>/assets/img/icons/<?= $inWishlist ? 'heart-filled.svg' : 'heart-outline.svg' ?>" style="width:18px; height:18px;" alt="Wishlist">
                               </button>
 
-                              <div class="add-to-card-02" 
+                              <div class="add-to-card-02 <?= ($product['total_stock'] <= 0) ? 'btn-add-disabled' : '' ?>" 
                                    data-product-id="<?= $product['hash_id'] ?>"
                                    data-has-variants="<?= $product['has_variants'] ?>"
-                                   onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.cartAddItem('<?= $product['hash_id'] ?>', '', 1, null, this);">
+                                   onclick="event.preventDefault(); event.stopPropagation(); if(<?= ($product['total_stock'] <= 0 ? 'false' : 'true') ?> && window.Venora) window.Venora.cartAddItem('<?= $product['hash_id'] ?>', '', 1, null, this);">
                                 <img alt="" class="add-to-card-icon" loading="lazy" src="<?= $addToCartIcon ?>">
-                                <div class="p-01">Add to cart</div>
+                                <div class="p-01"><?= ($product['total_stock'] <= 0) ? 'Unavailable' : 'Add to cart' ?></div>
                               </div>
                             </div>
                             <div class="product-card-bottom">

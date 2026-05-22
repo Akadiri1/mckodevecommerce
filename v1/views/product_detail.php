@@ -149,7 +149,11 @@ include APP_PATH . "/views/includes/header.php";
             </div>
 
             <div class="add-cart-btn" style="display:flex;gap:12px;align-items:center;margin-bottom:20px;">
-              <button type="button" id="detailAddToCart" class="btn-add-to-cart-main" data-product-id="<?= $details["hash_id"] ?>">Add to Cart</button>
+              <button type="button" id="detailAddToCart" class="btn-add-to-cart-main" 
+                      data-product-id="<?= $details["hash_id"] ?>"
+                      <?= $stock <= 0 ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : '' ?>>
+                <?= $stock <= 0 ? 'Out of Stock' : 'Add to Cart' ?>
+              </button>
               <button type="button" class="modal-wishlist-btn" id="detailWishlist" data-id="<?= $details["hash_id"] ?>">
                 <img src="<?= $baseUrl ?>/assets/img/icons/heart-outline.svg" alt="Wishlist" id="detailWishlistImg">
               </button>
@@ -182,24 +186,62 @@ include APP_PATH . "/views/includes/header.php";
   });
 
   function resolveVariant() {
-    const selected = Array.from(document.querySelectorAll(".variant-btn.active")).map(b => parseInt(b.dataset.valueId));
+    const selectedValueIds = Array.from(document.querySelectorAll(".variant-btn.active")).map(b => parseInt(b.dataset.valueId));
     const totalGroups = document.querySelectorAll(".modal-variant-options").length;
-    if (selected.length === totalGroups) {
-      const match = allVariants.find(v => {
-        const vOptionIds = v.options.map(o => o.value_id);
-        return selected.every(id => vOptionIds.includes(id));
+    
+    if (selectedValueIds.length > 0) {
+      let totalNgn = 0;
+      let totalUsd = 0;
+      let matchedVids = [];
+      let minStock = 999;
+
+      // In this system, each selected option (value_id) matches a record in the 'variants' table.
+      // We need to find the variant ID for each selected value and sum their prices.
+      selectedValueIds.forEach(valId => {
+        // Find the variant record that contains this value_id
+        const vMatch = Object.values(allVariants).find(v => 
+          v.options.some(opt => opt.value_id === valId)
+        );
+
+        if (vMatch) {
+          totalNgn += parseFloat(vMatch.price_ngn) || 0;
+          totalUsd += parseFloat(vMatch.price_usd) || 0;
+          matchedVids.push(vMatch.id);
+          minStock = Math.min(minStock, vMatch.inventory);
+        }
       });
-      if (match) {
-        const price = "<?= $usdToggle ?>" === "1" ? match.price_usd : match.price_ngn;
-        document.getElementById("detailPrice").textContent = currencySym + parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2});
-        updateStock(match.inventory);
-        window.currentVariantId = match.id;
+
+      if (matchedVids.length > 0) {
+        const displayPrice = "<?= $usdToggle ?>" === "1" ? totalUsd : totalNgn;
+        document.getElementById("detailPrice").textContent = currencySym + parseFloat(displayPrice).toLocaleString(undefined, {minimumFractionDigits: 2});
+        updateStock(minStock);
+        window.currentVariantId = matchedVids.join(',');
         updateQuantityPrice();
+
+        // Update button state based on stock
+        const btn = document.getElementById("detailAddToCart");
+        if (minStock <= 0) {
+          btn.disabled = true;
+          btn.textContent = "Out of Stock";
+          btn.style.opacity = "0.6";
+          btn.style.cursor = "not-allowed";
+        } else {
+          btn.disabled = false;
+          btn.textContent = "Add to Cart";
+          btn.style.opacity = "1";
+          btn.style.cursor = "pointer";
+        }
       }
     } else {
         window.currentVariantId = "";
         document.getElementById("detailPrice").textContent = currencySym + initialBasePrice.toLocaleString(undefined, {minimumFractionDigits: 2});
         updateQuantityPrice();
+
+        // Reset button if options cleared
+        const btn = document.getElementById("detailAddToCart");
+        btn.disabled = false;
+        btn.textContent = "Add to Cart";
+        btn.style.opacity = "1";
     }
   }
 
@@ -212,20 +254,22 @@ include APP_PATH . "/views/includes/header.php";
 
   function updateQuantityPrice() {
     const qty = parseInt(document.getElementById("detailQty").value) || 1;
-    const currentPrice = parseFloat(document.getElementById("detailPrice").textContent.replace(currencySym, "").replace(/,/g, ''));
+    const currentPriceText = document.getElementById("detailPrice").textContent.replace(currencySym, "").replace(/,/g, '');
+    const currentPrice = parseFloat(currentPriceText) || 0;
     document.getElementById("detailPriceDisplay").textContent = currencySym + (currentPrice * qty).toLocaleString(undefined, {minimumFractionDigits: 2});
   }
-// Helper for venora-app.js
-window.getSelectedVariantIds = function() {
-  const totalGroups = document.querySelectorAll(".modal-variant-options").length;
-  const active = document.querySelectorAll(".variant-btn.active");
-  if (totalGroups > 0 && active.length < totalGroups) {
-    window.Venora.showToast("Please select all options", "error");
-    return false;
-  }
-  // Return all selected value IDs as a comma-separated string
-  return Array.from(active).map(b => b.dataset.valueId).join(',');
-};
+
+  // Helper for venora-app.js
+  window.getSelectedVariantIds = function() {
+    const totalGroups = document.querySelectorAll(".modal-variant-options").length;
+    const active = document.querySelectorAll(".variant-btn.active");
+    if (totalGroups > 0 && active.length < totalGroups) {
+      window.Venora.showToast("Please select all options", "error");
+      return false;
+    }
+    // Now returns the correctly mapped variant IDs (not value IDs)
+    return window.currentVariantId;
+  };
 
   document.querySelectorAll(".qty-btn").forEach(btn => {
     btn.addEventListener("click", function() {

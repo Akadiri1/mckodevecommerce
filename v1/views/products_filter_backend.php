@@ -18,12 +18,16 @@ try {
     echo json_encode(['count' => 0, 'products' => [], 'has_more' => false, 'error' => 'db']); die;
 }
 
-// Pre-index variant prices
+// Pre-index variant prices and inventory
 $_fVars = selectContent($conn, "variants", []);
 $_fPriceIdx = [];
+$_fStockIdx = [];
 foreach ($_fVars as $_v) {
     $h = $_v['product_hash_id'];
     if (!isset($_fPriceIdx[$h])) $_fPriceIdx[$h] = $usdEnabled ? (float)$_v['input_price_usd'] : (float)$_v['input_price_ngn'];
+    
+    if (!isset($_fStockIdx[$h])) $_fStockIdx[$h] = 0;
+    $_fStockIdx[$h] += (int)$_v['input_inventory'];
 }
 
 // Pre-index category ID → name for filtering
@@ -37,10 +41,10 @@ foreach ($_fVars as $_fv) { $_fHasVariants[$_fv['product_hash_id']] = true; }
 
 foreach ($allProducts as &$_p) {
     $_p['input_price']    = $_fPriceIdx[$_p['hash_id']] ?? 0;
+    $_p['total_stock']    = $_fStockIdx[$_p['hash_id']] ?? 0;
     $_p['_category_name'] = $_fCatById[(string)($_p['select_product_category'] ?? '')] ?? '';
     $_p['has_variants']   = isset($_fHasVariants[$_p['hash_id']]) ? 'true' : 'false';
     $_p['image_2']        = fixImagePath($_p['image_2'] ?? '');
-    // In demo16 schema, image_2 is often used as primary. Fallback to image_1 if needed.
     $_p['primary_image']  = $_p['image_2'] ?: fixImagePath($_p['image_1'] ?? '');
 }
 unset($_p);
@@ -63,14 +67,24 @@ $output = array_map(function($p) use ($sym, $baseU, $addToCartIcon) {
     $title  = htmlspecialchars($p['input_product_name'] ?? '', ENT_QUOTES, 'UTF-8');
     $cat    = htmlspecialchars($p['_category_name'] ?? '', ENT_QUOTES, 'UTF-8');
     $price  = $sym . number_format((float)($p['input_price'] ?? 0), 2);
-
+    $totalStock = (int)($p['total_stock'] ?? 0);
     $hid = $p['hash_id'] ?? '';
+
+    $stockBadge = $totalStock <= 0 
+        ? '<div class="stock-badge-main badge-out-stock">Out of Stock</div>'
+        : '<div class="stock-badge-main badge-in-stock">In Stock</div>';
+    
+    $btnClass = $totalStock <= 0 ? 'add-to-card-02 btn-add-disabled' : 'add-to-card-02';
+    $btnLabel = $totalStock <= 0 ? 'Unavailable' : 'Add to cart';
+    $btnClick = $totalStock <= 0 ? 'false' : 'true';
+
     return [
         'hash_id' => $hid,
         'html'    => '
 <div class="product-card-wrap" data-admc-tb="panel_product">
     <div class="product-card">
       <div class="product-card-img">
+        ' . $stockBadge . '
         <a class="product-link w-inline-block" href="' . $url . '">
           <div data-admc-image="panel_product" data-admc-id="' . ($p['id'] ?? 0) . '" data-admc-tb="panel_product">
             <img alt="' . $title . '" class="all-img" loading="lazy" src="' . $imgSrc . '">
@@ -88,10 +102,10 @@ $output = array_map(function($p) use ($sym, $baseU, $addToCartIcon) {
         </button>
 
         <!-- Add to Cart overlay -->
-        <div class="add-to-card-02" data-product-id="' . $hid . '" data-has-variants="' . ($p['has_variants'] ?? 'false') . '"
-             onclick="event.preventDefault();event.stopPropagation();if(window.Venora)window.Venora.cartAddItem(\'' . $hid . '\',\'\',1,null,this);">
+        <div class="' . $btnClass . '" data-product-id="' . $hid . '" data-has-variants="' . ($p['has_variants'] ?? 'false') . '"
+             onclick="event.preventDefault();event.stopPropagation();if(' . $btnClick . ' && window.Venora)window.Venora.cartAddItem(\'' . $hid . '\',\'\',1,null,this);">
           <img alt="" class="add-to-card-icon" src="' . $addToCartIcon . '">
-          <div class="p-01">Add to cart</div>
+          <div class="p-01">' . $btnLabel . '</div>
         </div>
       </div>
       <div class="product-card-bottom">

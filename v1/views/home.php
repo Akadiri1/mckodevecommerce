@@ -41,16 +41,42 @@ foreach ($featuredProducts as &$fp) {
     $fp['_category_name'] = $_catById[(string)($fp['select_product_category'] ?? '')] ?? '';
     $fp['image_2']        = fixImagePath($fp['image_2'] ?? '');
     $fp['image_1']        = fixImagePath($fp['image_1'] ?? '');
-    // Actual price and variant logic is handled by ProductController via AJAX later,
-    // but we fetch a base price for the static HTML state
-    $vBase = selectContent($conn, "variants", ["product_hash_id" => $fp['hash_id']]);
-    $fp['input_price'] = !empty($vBase) ? ($usdEnabled ? $vBase[0]['input_price_usd'] : $vBase[0]['input_price_ngn']) : 0;
-    $fp['has_variants'] = !empty($vBase) ? "true" : "false";
+    
+    // Fetch variants to calculate base price and total inventory
+    $variants = selectContent($conn, "variants", ["product_hash_id" => $fp['hash_id']]);
+    $fp['input_price']  = !empty($variants) ? ($usdEnabled ? $variants[0]['input_price_usd'] : $variants[0]['input_price_ngn']) : 0;
+    $fp['has_variants'] = !empty($variants) ? "true" : "false";
+    $fp['total_stock']  = array_sum(array_column($variants, 'input_inventory'));
 }
 unset($fp);
 
 include APP_PATH . "/views/includes/header.php";
 ?>
+
+<style>
+  .stock-badge-main {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .badge-in-stock { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .badge-out-stock { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  
+  .btn-add-disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    background: #eee !important;
+    color: #888 !important;
+  }
+</style>
 
 <div data-cbsection="cb1">
 <?php/*##cb1o##*/?>
@@ -209,15 +235,36 @@ include APP_PATH . "/views/includes/header.php";
             <div class="product-card-wrap" data-admc-tb="panel_product">
                 <div class="product-card">
                   <div class="product-card-img">
+                    <!-- Stock Badge -->
+                    <?php if ($product['total_stock'] <= 0): ?>
+                      <div class="stock-badge-main badge-out-stock">Out of Stock</div>
+                    <?php else: ?>
+                      <div class="stock-badge-main badge-in-stock">In Stock</div>
+                    <?php endif; ?>
+
                     <a class="product-link w-inline-block" href="<?= $detailUrl ?>">
                       <div data-admc-image="panel_product" data-admc-id="<?= $product['id'] ?>" data-admc-tb="panel_product">
-                        <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>" class="all-img" loading="lazy" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        <img alt="<?= htmlspecialchars($product['input_product_name'], ENT_QUOTES, 'UTF-8') ?>" 
+                             class="all-img" loading="lazy" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                       </div>
-                      <div class="product-float"><img alt="" class="all-img" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'], ENT_QUOTES, 'UTF-8') ?>"></div>
+                      <div class="product-float">
+                        <img alt="" class="all-img" src="<?= htmlspecialchars($product['image_2'] ?? $product['image_1'], ENT_QUOTES, 'UTF-8') ?>">
+                      </div>
                     </a>
                     <?php $inWishlist = in_array($product['hash_id'], $wishlistIds); ?>
-                    <button class="wishlist-btn-card <?= $inWishlist ? 'active' : '' ?>" data-id="<?= $product['hash_id'] ?>" onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.toggleWishlist('<?= $product['hash_id'] ?>', this);" style="position:absolute; top:12px; left:12px; z-index:15; background:white; border:none; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.1); opacity:0; transition:opacity 0.3s ease;"><img src="<?= $baseUrl ?>/assets/img/icons/<?= $inWishlist ? 'heart-filled.svg' : 'heart-outline.svg' ?>" style="width:18px; height:18px;" alt="Wishlist"></button>
-                    <div class="add-to-card-02" data-product-id="<?= $product['hash_id'] ?>" data-has-variants="<?= $product['has_variants'] ?>" onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.cartAddItem('<?= $product['hash_id'] ?>', '', 1, null, this);"><img alt="" class="add-to-card-icon" src="https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69767e8def202704be8ff087_Vector (1).svg"><div class="p-01">Add to cart</div></div>
+                    <button class="wishlist-btn-card <?= $inWishlist ? 'active' : '' ?>" 
+                            data-id="<?= $product['hash_id'] ?>" 
+                            onclick="event.preventDefault(); event.stopPropagation(); if(window.Venora) window.Venora.toggleWishlist('<?= $product['hash_id'] ?>', this);"
+                            style="position:absolute; top:12px; left:12px; z-index:15; background:white; border:none; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.1); opacity:0; transition:opacity 0.3s ease;">
+                      <img src="<?= $baseUrl ?>/assets/img/icons/<?= $inWishlist ? 'heart-filled.svg' : 'heart-outline.svg' ?>" style="width:18px; height:18px;" alt="Wishlist">
+                    </button>
+                    <div class="add-to-card-02 <?= ($product['total_stock'] <= 0) ? 'btn-add-disabled' : '' ?>" 
+                         data-product-id="<?= $product['hash_id'] ?>" 
+                         data-has-variants="<?= $product['has_variants'] ?>"
+                         onclick="event.preventDefault(); event.stopPropagation(); if(<?= ($product['total_stock'] <= 0 ? 'false' : 'true') ?> && window.Venora) window.Venora.cartAddItem('<?= $product['hash_id'] ?>', '', 1, null, this);">
+                      <img alt="" class="add-to-card-icon" src="https://cdn.prod.website-files.com/6918bd445678e83950693c7b/69767e8def202704be8ff087_Vector (1).svg">
+                      <div class="p-01"><?= ($product['total_stock'] <= 0) ? 'Unavailable' : 'Add to cart' ?></div>
+                    </div>
                   </div>
                   <div class="product-card-bottom">
                     <div class="color-gray"><div class="p-02 caps"><?= htmlspecialchars($product['_category_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div></div>

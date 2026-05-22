@@ -421,6 +421,7 @@
             '<button class="qty-btn" id="qvQtyPlus">+</button>' +
           '</div>' +
         '</div>' +
+        '<div class="product-stock-status" style="margin:16px 0;"></div>' +
         '<div class="modal-actions">' +
           '<button class="modal-add-to-cart" id="qvAddToCart" data-product-id="' + p.hash_id + '">' +
             '<img src="' + window.VENORA_BASE_URL + '/assets/img/icons/cart-white.svg" style="width:18px;height:18px;" alt=""> Add to Cart' +
@@ -428,9 +429,19 @@
           '<button class="modal-wishlist-btn" id="qvWishlist" data-id="' + p.hash_id + '">' +
             '<img src="' + window.VENORA_BASE_URL + '/assets/img/icons/heart-outline.svg" alt="Wishlist" id="qvWishlistImg">' +
           '</button>' +
-        '</div>' +
-        '<a href="' + baseUrl + '/products/' + p.hash_id + '/' + p.input_slug + '" class="modal-view-full">View full details →</a>' +
-      '</div>';
+        '</div>';
+
+    // Set initial stock
+    var initialStock = p.variants ? p.variants.reduce((acc, v) => acc + (v.inventory || 0), 0) : 0;
+    var stockEl = $('.product-stock-status', qvModal);
+    var addBtn = $('#qvAddToCart', qvModal);
+    if (initialStock <= 0) {
+      stockEl.innerHTML = '<span class="stock-badge stock-out">Out of stock</span>';
+      addBtn.disabled = true; addBtn.textContent = 'Out of Stock'; addBtn.style.opacity = '0.6';
+    } else {
+      stockEl.innerHTML = (initialStock <= 5) ? '<span class="stock-badge stock-low">Only ' + initialStock + ' left</span>' : '<span class="stock-badge stock-high">In stock</span>';
+    }
+
 
     // Bindings
     $$('.modal-thumb', qvModal).forEach(function(thumb) {
@@ -465,14 +476,29 @@
       var btn = this;
       var totalGroups = $$('.modal-variant-options', qvModal).length;
       var activeVariants = $$('.modal-variant-btn.active', qvModal);
+      
       if (activeVariants.length < totalGroups) {
           showToast('Please select all options', 'error');
           return;
       }
-      var variantIds = Array.from(activeVariants).map(v => v.dataset.valueId).join(',');
+
+      // In this additive system, we need to map EACH selected value_id back to its corresponding variant ID
+      var selectedValueIds = Array.from(activeVariants).map(v => parseInt(v.dataset.valueId));
+      var matchedVariantIds = [];
+
+      selectedValueIds.forEach(function(valId) {
+        if (!currentProduct.variants) return;
+        var vMatch = currentProduct.variants.find(function(v) {
+          return v.options.some(function(opt) { return opt.value_id === valId; });
+        });
+        if (vMatch) matchedVariantIds.push(vMatch.id);
+      });
+
+      var variantIdStr = matchedVariantIds.join(',');
       var qty = parseInt($('#qvQtyInput', qvModal).value) || 1;
+      
       btn.disabled = true; btn.textContent = 'Adding...';
-      cartAddItem(p.hash_id, variantIds, qty, function() {
+      cartAddItem(p.hash_id, variantIdStr, qty, function() {
         btn.disabled = false;
         btn.innerHTML = '<img src="' + window.VENORA_BASE_URL + '/assets/img/icons/cart-white.svg" style="width:18px;height:18px;" alt=""> Add to Cart';
         closeQuickView();
@@ -485,21 +511,53 @@
 
   function resolveVariantInModal() {
     if (!currentProduct) return;
-    const selected = Array.from($$('.modal-variant-btn.active', qvModal)).map(b => parseInt(b.dataset.valueId));
-    const totalGroups = $$('.modal-variant-options', qvModal).length;
-    const priceEl = $('#qvPrice', qvModal);
+    var activeBtns = Array.from($$('.modal-variant-btn.active', qvModal));
+    var selectedValueIds = activeBtns.map(b => parseInt(b.dataset.valueId));
+    var priceEl = $('#qvPrice', qvModal);
+    var stockEl = $('.product-stock-status', qvModal);
+    var addBtn = $('#qvAddToCart', qvModal);
 
-    if (selected.length === totalGroups) {
-      // Logic for multi-variant resolution
-      const match = currentProduct.variants.find(v => {
-        const vOptionIds = v.options.map(o => o.value_id);
-        return selected.every(id => vOptionIds.includes(id));
+    if (selectedValueIds.length > 0) {
+      let totalNgn = 0;
+      let totalUsd = 0;
+      let matchedCount = 0;
+      let minStock = 999;
+
+      selectedValueIds.forEach(function(valId) {
+        if (!currentProduct.variants) return;
+        var vMatch = currentProduct.variants.find(function(v) {
+          return v.options.some(function(opt) { return opt.value_id === valId; });
+        });
+        if (vMatch) {
+          totalNgn += parseFloat(vMatch.price_ngn) || 0;
+          totalUsd += parseFloat(vMatch.price_usd) || 0;
+          minStock = Math.min(minStock, vMatch.inventory);
+          matchedCount++;
+        }
       });
-      if (match) {
-        priceEl.textContent = formatPrice(match.price_ngn || match.price_usd);
+
+      if (matchedCount > 0) {
+        priceEl.textContent = formatPrice(totalNgn || totalUsd);
+        
+        if (minStock <= 0) {
+          stockEl.innerHTML = '<span class="stock-badge stock-out">Out of stock</span>';
+          addBtn.disabled = true; addBtn.textContent = 'Out of Stock'; addBtn.style.opacity = '0.6';
+        } else {
+          stockEl.innerHTML = (minStock <= 5) ? '<span class="stock-badge stock-low">Only ' + minStock + ' left</span>' : '<span class="stock-badge stock-high">In stock</span>';
+          addBtn.disabled = false; addBtn.innerHTML = '<img src="' + window.VENORA_BASE_URL + '/assets/img/icons/cart-white.svg" style="width:18px;height:18px;" alt=""> Add to Cart'; addBtn.style.opacity = '1';
+        }
       }
     } else {
       priceEl.textContent = formatPrice(currentProduct.input_price);
+      // Reset to total initial stock
+      var initialStock = currentProduct.variants ? currentProduct.variants.reduce((acc, v) => acc + (v.inventory || 0), 0) : 0;
+      if (initialStock <= 0) {
+        stockEl.innerHTML = '<span class="stock-badge stock-out">Out of stock</span>';
+        addBtn.disabled = true; addBtn.textContent = 'Out of Stock';
+      } else {
+        stockEl.innerHTML = (initialStock <= 5) ? '<span class="stock-badge stock-low">Only ' + initialStock + ' left</span>' : '<span class="stock-badge stock-high">In stock</span>';
+        addBtn.disabled = false; addBtn.innerHTML = '<img src="' + window.VENORA_BASE_URL + '/assets/img/icons/cart-white.svg" style="width:18px;height:18px;" alt=""> Add to Cart';
+      }
     }
   }
 
