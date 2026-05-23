@@ -1,6 +1,6 @@
 <?php
 $page_title = "Privacy Policy";
-$bodyClass  = "";
+$bodyClass  = "page-light-navbar";
 
 function safePrivacyFetch($conn, $table, $where = []) {
     try {
@@ -15,9 +15,9 @@ $privacy = !empty($privacyData) ? $privacyData[0] : [];
 include APP_PATH . "/views/includes/header.php";
 ?>
 
-<div class="page-wrapper">
+<div class="page-wrapper" style="background-color: #ffffff !important;">
   <!-- HEADER SPACER -->
-  <div style="height: 120px; background-color: var(--bg-colour, #202c22);"></div>
+  <div style="height: 120px; background-color: #ffffff !important;"></div>
 
   <section class="section-120-120" style="background-color: #ffffff;">
     <div class="container">
