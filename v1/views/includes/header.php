@@ -56,24 +56,36 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
   $textHead  = $primaryColor;
   $textBody  = '#5c5f6a';
   $textMuted = '#9ca3af';
+  // Hex to RGB for primary colour
+  $hex = ltrim($primaryColor, '#');
+  if (strlen($hex) == 3) {
+      $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+      $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+      $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+  } else {
+      $r = hexdec(substr($hex, 0, 2));
+      $g = hexdec(substr($hex, 2, 2));
+      $b = hexdec(substr($hex, 4, 2));
+  }
+  $primaryRgb = "$r, $g, $b";
   ?>
-  <style>
+  <style data-admc-manage="website_status" data-admc-id="<?= htmlspecialchars($style['id'] ?? '1', ENT_QUOTES, 'UTF-8') ?>">
     :root {
-      /* Hardcoded Template Defaults */
-      --primary: #202c22;
-      --primary-rgb: 32, 44, 34;
+      /* Dynamic Template Defaults from ADMC */
+      --primary: <?= htmlspecialchars($primaryColor, ENT_QUOTES, 'UTF-8') ?>;
+      --primary-rgb: <?= htmlspecialchars($primaryRgb, ENT_QUOTES, 'UTF-8') ?>;
       --dark-green-colour: var(--primary);
       --dash-accent: var(--primary);
       
-      --bg-colour: #ffffff;
-      --v-bg-dark: #202c22;
+      --bg-colour: <?= htmlspecialchars($bgColor, ENT_QUOTES, 'UTF-8') ?>;
+      --v-bg-dark: var(--primary);
       
-      --surface-colour: #ffffff;
+      --surface-colour: <?= htmlspecialchars($bgColor, ENT_QUOTES, 'UTF-8') ?>;
       --v-white: #ffffff;
       
-      --text-primary: #202c22;
-      --text-secondary: #5c5f6a;
-      --v-gray: #9ca3af;
+      --text-primary: <?= htmlspecialchars($textHead, ENT_QUOTES, 'UTF-8') ?>;
+      --text-secondary: <?= htmlspecialchars($textBody, ENT_QUOTES, 'UTF-8') ?>;
+      --v-gray: <?= htmlspecialchars($textMuted, ENT_QUOTES, 'UTF-8') ?>;
     }
     
     body {
