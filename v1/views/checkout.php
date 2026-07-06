@@ -111,7 +111,7 @@ include APP_PATH . "/views/includes/header.php";
       
       <?php if (!empty($savedAddresses)): ?>
       <div style="background:#f0f3f1;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid rgba(7,39,8,0.1);">
-        <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#072708;">Quick Fill: Use a Saved Address</h4>
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--primary);">Quick Fill: Use a Saved Address</h4>
         <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;">
           <?php foreach ($savedAddresses as $addr): ?>
             <div class="address-pick-card" 
@@ -167,12 +167,12 @@ include APP_PATH . "/views/includes/header.php";
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 8px rgba(0,0,0,0.04);">
         <h3 class="heading-05" style="margin-bottom:20px;">Payment Method</h3>
         <div style="display:flex;flex-direction:column;gap:12px;">
-          <label style="display:flex;align-items:center;gap:12px;padding:16px;border:1.5px solid #eee;border-radius:10px;cursor:pointer;">
-            <input type="radio" name="payment_method" value="Paystack" checked style="accent-color:#072708;">
-            <span style="font-weight:600;">Paystack (Card, Transfer, USSD)</span>
+          <label style="display:flex;align-items:center;gap:12px;padding:16px;border:1px solid #e5e7eb;border-radius:12px;cursor:pointer;">
+            <input type="radio" name="payment_method" value="Paystack" checked style="accent-color:var(--primary);">
+            <span style="font-weight:600;">Paystack (Card/Bank)</span>
           </label>
-          <label style="display:flex;align-items:center;gap:12px;padding:16px;border:1.5px solid #eee;border-radius:10px;cursor:pointer;">
-            <input type="radio" name="payment_method" value="Direct Bank Transfer" style="accent-color:#072708;">
+          <label style="display:flex;align-items:center;gap:12px;padding:16px;border:1px solid #e5e7eb;border-radius:12px;cursor:pointer;margin-top:12px;">
+            <input type="radio" name="payment_method" value="Direct Bank Transfer" style="accent-color:var(--primary);">
             <span style="font-weight:600;">Direct Bank Transfer</span>
           </label>
         </div>
@@ -209,14 +209,14 @@ include APP_PATH . "/views/includes/header.php";
               <span>Shipping</span>
               <span id="shipDisplay">Select location</span>
             </div>
-            <div style="display:flex;justify-content:space-between;padding-top:12px;margin-top:12px;border-top:2px solid #072708;font-size:18px;font-weight:800;color:#072708;">
+            <div style="display:flex;justify-content:space-between;padding-top:12px;margin-top:12px;border-top:2px solid var(--primary);font-size:18px;font-weight:800;color:var(--primary);">
               <span>Total</span>
               <span id="totalDisplay"><?= formatPrice($usdEnabled ? $totalUsd : $totalNgn, $sym) ?></span>
             </div>
           </div>
         </div>
         
-        <button type="submit" name="submit" style="width:100%;margin-top:16px;padding:18px;background:#072708;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;">
+        <button type="submit" name="submit" class="place-order-btn" style="width:100%;margin-top:16px;padding:18px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;transition:all 0.2s;">
           Place Order
         </button>
       </div>
@@ -239,7 +239,7 @@ function fillAddress(addr) {
   document.getElementById('f_zip').value = addr.input_postcode || '';
   
   document.querySelectorAll('.address-pick-card').forEach(c => c.style.borderColor = '#ddd');
-  event.currentTarget.style.borderColor = '#072708';
+  event.currentTarget.style.borderColor = 'var(--primary)';
   window.Venora.showToast('Address filled!');
 }
 
@@ -259,7 +259,7 @@ function updateTotals() {
   @media (max-width: 991px) {
     .checkout-grid { grid-template-columns: 1fr; }
   }
-  .address-pick-card:hover { border-color: #072708 !important; background: #f4f6f4 !important; }
+  .address-pick-card:hover { border-color: var(--primary) !important; background: #f4f6f4 !important; }
 </style>
 
 <?php include APP_PATH . "/views/includes/footer.php"; ?>

@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Auth guard — wishlist requires sign-in
 if (empty($_SESSION['customer_id'])) {
-    echo json_encode(['success' => false, 'auth' => false, 'message' => 'Sign in to save items to your wishlist.']);
+    echo json_encode(['success' => false, 'login_required' => true, 'message' => 'Sign in to save items to your wishlist.']);
     exit;
 }
 

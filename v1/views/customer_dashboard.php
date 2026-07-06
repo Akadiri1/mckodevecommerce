@@ -59,7 +59,7 @@ include APP_PATH . "/views/includes/header.php";
   :root {
     --dash-sidebar-w: 280px;
     --dash-bg: #f9f9f7;
-    --dash-accent: var(--dark-green-colour, #072708);
+    --dash-accent: var(--primary);
     --dash-card-shadow: 0 4px 20px rgba(0,0,0,0.03);
   }
   .dash-wrapper {

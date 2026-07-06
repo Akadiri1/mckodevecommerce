@@ -216,7 +216,7 @@ include APP_PATH . "/views/includes/header.php";
           <h2 class="heading-02" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>"><?= htmlspecialchars($hero['input_products_intro_heading'] ?? 'We believe skincare is a ritual, not a routine', ENT_QUOTES, 'UTF-8') ?></h2>
         </div>
         <div class="header-right">
-          <div class="p-01" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>"><?= htmlspecialchars($hero['text_products_intro_description'] ?? 'Discover our selection.', ENT_QUOTES, 'UTF-8') ?></div>
+          <div class="p-01" style="color: var(--primary);" data-admc-manage="settings_home_hero" data-admc-id="<?= $hero['id'] ?? 1 ?>"><?= htmlspecialchars($hero['text_products_intro_description'] ?? 'Discover our selection.', ENT_QUOTES, 'UTF-8') ?></div>
         </div>
       </div>
 
@@ -445,7 +445,9 @@ include APP_PATH . "/views/includes/header.php";
             <h3 class="heading-03"><?= htmlspecialchars($homeQuote['text_quote'] ?? 'Beauty is how you feel in your own skin.', ENT_QUOTES, 'UTF-8') ?></h3>
           </div>
           <div class="author-name" data-admc-manage="settings_home_quote" data-admc-id="<?= $homeQuote['id'] ?? 1 ?>">
-            <img alt="Author" class="author-img" src="<?= fixImagePath($homeQuote['image_author_signature'] ?? $dummyImg) ?>">
+            <?php if (!empty($homeQuote['image_author_signature'])): ?>
+              <img alt="Author" class="author-img" src="<?= fixImagePath($homeQuote['image_author_signature']) ?>">
+            <?php endif; ?>
           </div>
         </div>
         <div class="testimonial-img-wrap" data-admc-tb="images" data-admc-tbadd="settings_home_quote" data-admc-tblink="hq001">

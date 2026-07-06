@@ -6,8 +6,15 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
 
   <!-- ── Footer ──────────────────────────────────────────────── -->
   <style>
-    .footer-section { background-color: transparent !important; }
-    .footer-inner { background-color: var(--primary, #202c22) !important; }
+    .footer-section { 
+      background-color: transparent !important; 
+      padding-bottom: 0 !important;
+    }
+    .footer-inner { 
+      background-color: var(--primary, #202c22) !important; 
+      border-bottom-left-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+    }
     .footer-section .cta {
       background-image: none !important;
       background-color: #ffffff !important;
@@ -55,6 +62,44 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
     <!-- Main footer -->
     <div class="footer">
       <div class="footer-inner">
+        
+        <!-- Logo and Social block -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+          <!-- Logo — pulled from settings_shop_config (editable via ADMC) -->
+          <a class="footer-logo w-inline-block" href="<?= $baseUrl ?>/" style="margin-top: 0;">
+            <div data-admc-image="settings_shop_config"
+                 data-admc-id="<?= $shopConfig[0]['id'] ?? 1 ?>">
+              <img alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>"
+                   class="footer-logo-img"
+                   style="max-width:140px;max-height:52px;width:auto;height:auto;object-fit:contain;"
+                   src="<?= htmlspecialchars($logo_directory ?: $logo_dark ?: '', ENT_QUOTES, 'UTF-8') ?>">
+            </div>
+          </a>
+
+          <!-- Social icons -->
+          <div class="footer-bottom" style="margin-top: 0;">
+            <div class="social-block">
+              <a class="footer-social-link-02 w-inline-block"
+                 href="<?= htmlspecialchars($footerConfig['input_instagram'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
+                 target="_blank" rel="noopener"
+                 data-admc-manage="settings_shop_footer"
+                 data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
+                <div class="icon-16"><img alt="Instagram" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/instagram.svg"></div>
+              </a>
+              <a class="footer-social-link-02 w-inline-block"
+                 href="<?= htmlspecialchars($footerConfig['input_facebook'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
+                 target="_blank" rel="noopener">
+                <div class="icon-16"><img alt="Facebook" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/facebook.svg"></div>
+              </a>
+              <a class="footer-social-link-02 w-inline-block"
+                 href="<?= htmlspecialchars($footerConfig['input_linkedin'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
+                 target="_blank" rel="noopener">
+                <div class="icon-16"><img alt="LinkedIn" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/linkedin.svg"></div>
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div class="footer-top">
 
           <!-- Left: newsletter -->
@@ -98,8 +143,9 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
 
         </div>
 
+
         <!-- Footer bottom bar -->
-        <div class="footer-center">
+        <div class="footer-center" style="margin-top: 2rem;">
           <div class="footer-center-inner left">
             <div class="p-02" style="color:#ffffff;"
                  data-admc-manage="settings_shop_footer"
@@ -118,42 +164,6 @@ $footerConfig = !empty($footerConfig) ? $footerConfig[0] : [];
                  data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
               &copy; <?= date('Y') ?> <?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>. All Rights Reserved.
             </div>
-          </div>
-        </div>
-
-        <!-- Logo — pulled from settings_shop_config (editable via ADMC) -->
-        <a class="footer-logo w-inline-block" href="<?= $baseUrl ?>/">
-          <div data-admc-image="settings_shop_config"
-               data-admc-id="<?= $shopConfig[0]['id'] ?? 1 ?>">
-            <img alt="<?= htmlspecialchars($shop_name, ENT_QUOTES, 'UTF-8') ?>"
-                 class="footer-logo-img"
-                 style="max-width:140px;max-height:52px;width:auto;height:auto;object-fit:contain;"
-                 src="<?= htmlspecialchars($logo_directory ?: $logo_dark ?: '', ENT_QUOTES, 'UTF-8') ?>">
-          </div>
-        </a>
-
-        <!-- Social icons -->
-        <div class="footer-bottom">
-          <div class="social-block">
-          </div>
-          <div class="social-block">
-            <a class="footer-social-link-02 w-inline-block"
-               href="<?= htmlspecialchars($footerConfig['input_instagram'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
-               target="_blank" rel="noopener"
-               data-admc-manage="settings_shop_footer"
-               data-admc-id="<?= $footerConfig['id'] ?? 1 ?>">
-              <div class="icon-16"><img alt="Instagram" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/instagram.svg"></div>
-            </a>
-            <a class="footer-social-link-02 w-inline-block"
-               href="<?= htmlspecialchars($footerConfig['input_facebook'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
-               target="_blank" rel="noopener">
-              <div class="icon-16"><img alt="Facebook" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/facebook.svg"></div>
-            </a>
-            <a class="footer-social-link-02 w-inline-block"
-               href="<?= htmlspecialchars($footerConfig['input_linkedin'] ?? '#', ENT_QUOTES, 'UTF-8') ?>"
-               target="_blank" rel="noopener">
-              <div class="icon-16"><img alt="LinkedIn" class="social-icon" src="<?= $baseUrl ?>/assets/img/icons/linkedin.svg"></div>
-            </a>
           </div>
         </div>
 

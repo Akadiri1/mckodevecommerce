@@ -25,7 +25,7 @@ include APP_PATH . "/views/includes/header.php";
     <div style="display:flex;border-bottom:2px solid #e8e8e3;margin-bottom:32px;">
       <button id="tabLoginBtn"
               onclick="switchTab('login')"
-              style="flex:1;padding:12px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;color:#072708;border-bottom:2px solid #072708;margin-bottom:-2px;transition:all 0.2s;">
+              style="flex:1;padding:12px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;transition:all 0.2s;">
         Sign In
       </button>
       <button id="tabRegisterBtn"
@@ -56,7 +56,7 @@ include APP_PATH . "/views/includes/header.php";
 
         <div style="text-align:right;margin-bottom:24px;">
           <a href="<?= $baseUrl ?>/customer-forgot-password" class="p-01"
-             style="color:#072708;font-size:13px;text-decoration:underline;">Forgot password?</a>
+             style="color:var(--primary);font-size:13px;text-decoration:underline;">Forgot password?</a>
         </div>
 
         <div id="loginError"
@@ -64,7 +64,7 @@ include APP_PATH . "/views/includes/header.php";
         </div>
 
         <button type="submit" id="loginBtn"
-                style="width:100%;padding:14px;background:#072708;color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
+                style="width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
           Sign In
         </button>
 
@@ -117,7 +117,7 @@ include APP_PATH . "/views/includes/header.php";
         </div>
 
         <button type="submit" id="registerBtn"
-                style="width:100%;padding:14px;background:#072708;color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
+                style="width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
           Create Account
         </button>
 
@@ -129,8 +129,8 @@ include APP_PATH . "/views/includes/header.php";
         <div style="font-size:32px;margin-bottom:10px;">✉️</div>
         <div id="registerSuccessText">Please check your email to verify your account.</div>
         <a href="<?= $baseUrl ?>/customer-login"
-           style="display:inline-block;margin-top:16px;color:#072708;font-weight:600;font-size:14px;text-decoration:underline;">
-          Back to Sign In
+           style="display:inline-block;margin-top:16px;color:var(--primary);font-weight:600;font-size:14px;text-decoration:underline;">
+          Continue to Login
         </a>
       </div>
     </div>
@@ -150,10 +150,11 @@ include APP_PATH . "/views/includes/header.php";
 
     var loginBtn    = document.getElementById('tabLoginBtn');
     var registerBtn = document.getElementById('tabRegisterBtn');
-    loginBtn.style.color        = isLogin ? '#072708' : '#888';
-    loginBtn.style.borderBottom = isLogin ? '2px solid #072708' : '2px solid transparent';
-    registerBtn.style.color        = isLogin ? '#888'  : '#072708';
-    registerBtn.style.borderBottom = isLogin ? '2px solid transparent' : '2px solid #072708';
+
+    loginBtn.style.color        = isLogin ? 'var(--primary)' : '#888';
+    loginBtn.style.borderBottom = isLogin ? '2px solid var(--primary)' : '2px solid transparent';
+    registerBtn.style.color        = isLogin ? '#888'  : 'var(--primary)';
+    registerBtn.style.borderBottom = isLogin ? '2px solid transparent' : '2px solid var(--primary)';
   };
 
   // ── Login handler ────────────────────────────────────────────

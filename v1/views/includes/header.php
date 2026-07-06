@@ -77,15 +77,164 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
       --dark-green-colour: var(--primary);
       --dash-accent: var(--primary);
       
-      --bg-colour: <?= htmlspecialchars($bgColor, ENT_QUOTES, 'UTF-8') ?>;
+      --bg-colour: #f9f9f7;
       --v-bg-dark: var(--primary);
       
-      --surface-colour: <?= htmlspecialchars($bgColor, ENT_QUOTES, 'UTF-8') ?>;
+      --surface-colour: #ffffff;
       --v-white: #ffffff;
       
       --text-primary: <?= htmlspecialchars($textHead, ENT_QUOTES, 'UTF-8') ?>;
       --text-secondary: <?= htmlspecialchars($textBody, ENT_QUOTES, 'UTF-8') ?>;
       --v-gray: <?= htmlspecialchars($textMuted, ENT_QUOTES, 'UTF-8') ?>;
+    }
+    
+    /* Dynamic Color Overrides for Elements Not Previously Using ADMC Variables */
+    h1:not(.white), h2:not(.white), h3:not(.white), h4:not(.white), h5:not(.white), h6:not(.white),
+    .heading-01, .heading-02, .heading-03, .heading-04, .heading-05, .heading-06, .heading-07,
+    .tagline, .product-name, .price, .variant-title, .product-price,
+    .p-02.caps, .home-cat-btn, a.card-title-link {
+      color: var(--primary) !important;
+    }
+
+    /* Keep footer and button text white */
+    .footer-inner .heading-01, .footer-inner .heading-02, .footer-inner .heading-03, 
+    .footer-inner .heading-04, .footer-inner .heading-05, .footer-inner .heading-06, 
+    .footer-inner .p-01, .footer-inner .p-02, .footer-inner .footer-link,
+    .btn-text, .submit-button, .btn-01, .btn-text-2, .btn-text-3 {
+      color: #ffffff !important;
+    }
+
+    /* iOS Safari Fix: Prevent absolute images from stretching proportionally */
+    .content-card {
+      height: 100% !important; /* Forces Safari to resolve height for absolute children */
+      display: flex !important;
+      flex-direction: column;
+    }
+    .content-float-img {
+      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      height: 100% !important;
+      width: 100% !important;
+      object-fit: cover !important;
+    }
+    .content-card-inner-float, .content-card-inner-float-02 {
+      inset: 0 !important;
+    }
+    
+    .footer-inner .heading-07, .footer-inner .tagline,
+    .btn-01-link .cta-text, .btn-02-link .cta-text, .submit-button-02 span, .load-more-btn, #loadMoreBtn, .add-to-card-02 .p-01,
+    .home-cat-btn.active, .home-cat-btn:hover, .modal-add-to-cart, .cart-checkout-btn, .place-order-btn, .toast:not(.error):not(.warning),
+    .badge-in-stock, .stock-high {
+      color: #ffffff !important;
+    }
+
+    /* -------------------------------------------------------------
+       Navbar Dynamic Styling
+       - White text/icons on the transparent hero banner
+       - Primary color text/icons when scrolled or on light pages
+       ------------------------------------------------------------- */
+    
+    /* 1. Transparent Hero Banner State (Home Page, Not Scrolled) */
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .navbar-link, 
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .navbar-link .p-01, 
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .nav-list-item .navbar-link .p-01,
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .navbar-link.w--current, 
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .navbar-link.w--current .p-01 {
+      color: #ffffff !important;
+    }
+    
+    body:not(.page-light-navbar) .navbar:not(.scrolled) [data-open-search] svg, 
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .wishlist-btn-wrap svg, 
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .nav-icon-btn svg,
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .cart-icon-svg {
+      color: #ffffff !important;
+      stroke: #ffffff !important;
+    }
+    body:not(.page-light-navbar) .navbar:not(.scrolled) [data-open-search] svg path, 
+    body:not(.page-light-navbar) .navbar:not(.scrolled) [data-open-search] svg circle,
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .wishlist-btn-wrap svg path, 
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .nav-icon-btn svg path, 
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .nav-icon-btn svg circle,
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .cart-icon-svg path,
+    body:not(.page-light-navbar) .navbar:not(.scrolled) .cart-icon-svg circle {
+      stroke: #ffffff !important;
+    }
+
+    /* 2. Scrolled State OR Light Pages (Needs Primary Color) */
+    .navbar.scrolled .navbar-link, 
+    .navbar.scrolled .navbar-link .p-01, 
+    .navbar.scrolled .nav-list-item .navbar-link .p-01,
+    .navbar.scrolled .navbar-link.w--current, 
+    .navbar.scrolled .navbar-link.w--current .p-01,
+    body.page-light-navbar .navbar-link, 
+    body.page-light-navbar .navbar-link .p-01, 
+    body.page-light-navbar .nav-list-item .navbar-link .p-01,
+    body.page-light-navbar .navbar-link.w--current, 
+    body.page-light-navbar .navbar-link.w--current .p-01 {
+      color: var(--primary) !important;
+    }
+
+    .navbar.scrolled [data-open-search] svg, 
+    .navbar.scrolled .wishlist-btn-wrap svg, 
+    .navbar.scrolled .nav-icon-btn svg,
+    .navbar.scrolled .cart-icon-svg,
+    body.page-light-navbar [data-open-search] svg, 
+    body.page-light-navbar .wishlist-btn-wrap svg, 
+    body.page-light-navbar .nav-icon-btn svg,
+    body.page-light-navbar .cart-icon-svg {
+      color: var(--primary) !important;
+      stroke: var(--primary) !important;
+    }
+    .navbar.scrolled [data-open-search] svg path, 
+    .navbar.scrolled [data-open-search] svg circle,
+    .navbar.scrolled .wishlist-btn-wrap svg path, 
+    .navbar.scrolled .nav-icon-btn svg path, 
+    .navbar.scrolled .nav-icon-btn svg circle,
+    .navbar.scrolled .cart-icon-svg path,
+    .navbar.scrolled .cart-icon-svg circle,
+    body.page-light-navbar [data-open-search] svg path, 
+    body.page-light-navbar [data-open-search] svg circle,
+    body.page-light-navbar .wishlist-btn-wrap svg path, 
+    body.page-light-navbar .nav-icon-btn svg path, 
+    body.page-light-navbar .nav-icon-btn svg circle,
+    body.page-light-navbar .cart-icon-svg path,
+    body.page-light-navbar .cart-icon-svg circle {
+      stroke: var(--primary) !important;
+    }
+
+    .footer-social-link-02, .footer-social-link-02:hover {
+      background-color: var(--primary) !important;
+      border-color: var(--primary) !important;
+    }
+
+    .btn-01-link, .btn-02-link, .submit-button-02, .w-button, .w-commerce-commercecartapplepaybutton, .w-commerce-commercecartquickcheckoutbutton,
+    .home-cat-btn.active, .btn-01-link:hover, .btn-02-link:hover, .submit-button-02:hover, .w-button:hover, 
+    .w-commerce-commercecartapplepaybutton:hover, .w-commerce-commercecartquickcheckoutbutton:hover, .home-cat-btn:hover,
+    .modal-add-to-cart, .modal-add-to-cart:hover, .cart-checkout-btn, .cart-checkout-btn:hover, .place-order-btn, .place-order-btn:hover,
+    .cart-badge, .cart-count-badge, .toast:not(.error):not(.warning), .badge-in-stock, .stock-high {
+      background-color: var(--primary) !important;
+      border-color: var(--primary) !important;
+    }
+
+    .load-more-btn, .load-more-btn:hover, #loadMoreBtn, #loadMoreBtn:hover {
+      background-color: var(--primary) !important;
+      border-color: var(--primary) !important;
+    }
+
+    .add-to-card-02, .add-to-card-02:hover {
+      background-color: var(--primary) !important;
+      border-color: var(--primary) !important;
+    }
+    
+    /* Slight darkening effect on hover for interactivity */
+    .footer-social-link-02:hover, .btn-01-link:hover, .btn-02-link:hover, .submit-button-02:hover, .w-button:hover, 
+    .w-commerce-commercecartapplepaybutton:hover, .w-commerce-commercecartquickcheckoutbutton:hover,
+    .home-cat-btn:hover, .load-more-btn:hover, #loadMoreBtn:hover, .add-to-card-02:hover,
+    .modal-add-to-cart:hover, .cart-checkout-btn:hover, .place-order-btn:hover {
+      filter: brightness(0.85) !important;
     }
     
     body {
@@ -95,7 +244,7 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
     
     /* Professional Contrast Enforcement — Must STAY White on Primary Buttons */
     .btn-02-link, .submit-button-02, .modal-add-to-cart, 
-    .v-badge, .add-to-card-02, .cart-checkout-btn, .cart-badge,
+    .v-badge, .add-to-card-02, .cart-checkout-btn, .cart-badge, .cart-count-badge,
     .btn-text-wrap .cta-text, .submit-button-02 span,
     .happy-client-card .heading-05, .product-card .add-to-card-02 .p-01,
     .nav-icon-btn span[style*='background:#16a34a'],
@@ -115,6 +264,34 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
     .add-to-card-02 img { 
       filter: brightness(0) invert(1) !important;
       stroke: #ffffff !important; 
+    }
+
+    /* ── Global Section Spacing Reduction ───────────────────────────────── */
+    .section-01 { padding-top: 80px !important; padding-bottom: 80px !important; }
+    .section-02 { padding-bottom: 80px !important; }
+    .section-120-120, .hero-section { 
+      padding-top: 60px !important; 
+      padding-bottom: 60px !important; 
+    }
+    .section-140-140 { 
+      padding-top: 70px !important; 
+      padding-bottom: 70px !important; 
+    }
+    .section-0-120, .testimonial.section-0-120 { 
+      padding-bottom: 60px !important; 
+    }
+    
+    @media screen and (max-width: 767px) {
+      .section-01 { padding-top: 40px !important; padding-bottom: 40px !important; }
+      .section-02 { padding-bottom: 40px !important; }
+      .section-120-120, .hero-section, .section-0-120 { 
+        padding-top: 40px !important; 
+        padding-bottom: 40px !important; 
+      }
+      .section-140-140 { 
+        padding-top: 50px !important; 
+        padding-bottom: 50px !important; 
+      }
     }
     
     /* Components */
@@ -226,8 +403,12 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
 
               <!-- Cart -->
               <div class="cart-btn-wrap" data-open-cart>
-                <a href="#" class="cart-button w-inline-block" aria-label="Open cart" data-open-cart>
-                  <img alt="Cart" class="cart-icon" src="/assets/img/icons/cart.svg">
+                <a href="#" class="cart-button w-inline-block" aria-label="Open cart" data-open-cart style="position:relative;display:flex;align-items:center;justify-content:center;padding:8px;color:inherit;text-decoration:none;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cart-icon-svg">
+                    <path d="M3 3h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96a2 2 0 0 0 2 2h12v-2H7.42a.25.25 0 0 1-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 20 4H5.21l-.94-2H1z"/>
+                    <circle cx="9" cy="21" r="1"/>
+                    <circle cx="20" cy="21" r="1"/>
+                  </svg>
                   <div class="cart-count-badge <?= $cartCount > 0 ? 'has-items' : '' ?>"
                        id="cartBadge"><?= $cartCount ?></div>
                 </a>
