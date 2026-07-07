@@ -104,24 +104,35 @@ $currentPath = rtrim(str_replace($baseUrl, '', $currentPath), '/') ?: '/';
       color: #ffffff !important;
     }
 
-    /* iOS Safari Fix: Prevent absolute images from stretching proportionally */
-    .content-card {
-      height: 100% !important; /* Forces Safari to resolve height for absolute children */
-      display: flex !important;
-      flex-direction: column;
+    /* iOS Safari Fixes */
+    .content-card, .happy-client-card {
+      position: relative !important;
+      overflow: hidden;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
     }
     .content-float-img {
-      inset: 0 !important;
+      position: absolute !important;
       top: 0 !important;
       left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      height: 100% !important;
       width: 100% !important;
+      height: 100% !important;
       object-fit: cover !important;
     }
-    .content-card-inner-float, .content-card-inner-float-02 {
-      inset: 0 !important;
+    @media screen and (max-width: 991px) {
+      .content-grid-wrap, .content-grid, .content-top, .content-bottom {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+      }
+      .content-card, .happy-client-card {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 294px !important;
+      }
+      .content-float-img {
+        height: 100% !important;
+      }
     }
     
     .footer-inner .heading-07, .footer-inner .tagline,
